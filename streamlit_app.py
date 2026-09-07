@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 
+from app.investment_groups import GROUP_META, GROUP_ORDER, evidence_status, investment_group
 from app.language_signals import period_sort_key
 
 load_dotenv(Path(__file__).with_name(".env"))
@@ -85,12 +86,6 @@ def short_comment(score):
 
 def build_signal_cube(rows):
     """Build the interactive three-coordinate research view."""
-    quadrant_colors = {
-        "Confirmed strength": "#35c48d",
-        "Potential turnaround": "#4fa3ff",
-        "Early warning": "#ffb347",
-        "High-risk screen": "#ef6262",
-    }
     figure = go.Figure()
     reference_planes = [
         go.Surface(x=[[50, 50], [50, 50]], y=[[0, 100], [0, 100]], z=[[0, 0], [100, 100]]),
@@ -105,35 +100,40 @@ def build_signal_cube(rows):
             hoverinfo="skip",
         )
         figure.add_trace(plane)
-    figure.add_trace(
-        go.Scatter3d(
-            x=[row["Language score"] for row in rows],
-            y=[row["Market confirmation"] for row in rows],
-            z=[row["Numeric score"] for row in rows],
+    for group_name in GROUP_ORDER:
+        group_rows = [row for row in rows if row["Investment group"] == group_name]
+        if not group_rows:
+            continue
+        figure.add_trace(
+            go.Scatter3d(
+            x=[row["Language score"] for row in group_rows],
+            y=[row["Market confirmation"] for row in group_rows],
+            z=[row["Numeric score"] for row in group_rows],
             mode="markers+text",
-            text=[row["Ticker"] for row in rows],
+            text=[row["Ticker"] for row in group_rows],
             textposition="top center",
             textfont={"size": 10, "color": "#f4f6fb"},
             marker={
                 "size": 10,
-                "color": [quadrant_colors.get(row["Research quadrant"], "#9fa8b8") for row in rows],
+                "color": GROUP_META[group_name]["color"],
                 "line": {"color": "#f4f6fb", "width": 1},
                 "opacity": 0.92,
             },
             customdata=[
-                [row["Bank"], row["Research quadrant"], row["Market regime"], row["Gap"]]
-                for row in rows
+                [row["Bank"], row["Investment group"], row["Market regime"], row["Gap"], row["Evidence status"]]
+                for row in group_rows
             ],
             hovertemplate=(
                 "<b>%{customdata[0]} (%{text})</b><br>"
                 "Fundamentals & valuation: %{z:.1f}<br>Language: %{x:.1f}<br>"
                 "Market confirmation: %{y:.1f}<br>"
                 "Numeric-language gap: %{customdata[3]:+.1f}<br>"
-                "%{customdata[1]} · %{customdata[2]}<extra></extra>"
+                "%{customdata[1]} · %{customdata[2]}<br>"
+                "Evidence: %{customdata[4]}<extra></extra>"
             ),
-            name="Banks",
+            name=group_name,
+            )
         )
-    )
     axis_style = {
         "range": [0, 100],
         "tickvals": [0, 25, 50, 75, 100],
@@ -146,7 +146,8 @@ def build_signal_cube(rows):
         height=900,
         margin={"l": 0, "r": 0, "t": 12, "b": 0},
         paper_bgcolor="rgba(0,0,0,0)",
-        showlegend=False,
+        showlegend=True,
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.01, "xanchor": "center", "x": 0.5},
         scene={
             "xaxis": {**axis_style, "title": "Management language — horizontal"},
             "yaxis": {**axis_style, "title": "Market confirmation — depth"},
@@ -198,6 +199,12 @@ plotted_rows = [
         "Research quadrant": row["quadrant"],
         "Market confirmation": market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
         "Market regime": market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
+        "Investment group": investment_group(
+            row.get("numeric_score"),
+            row.get("language_score"),
+            market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+        ),
+        "Evidence status": evidence_status(row.get("history_periods")),
     }
     for row in signal_rows
     if row.get("numeric_score") is not None
@@ -220,13 +227,54 @@ if plotted_rows:
         config={"displaylogo": False, "scrollZoom": False},
     )
     st.caption(
-        "Point colors preserve the fundamental-language diagnostic: green confirmed strength, blue potential turnaround, "
-        "amber early warning, and red high-risk screen. Hover for exact values."
+        "Ball colors show the six transparent investment-value research groups. Hover for the group, exact coordinates, "
+        "market regime and evidence status."
     )
     st.caption(
-        "Color codes: green #35C48D · blue #4FA3FF · amber #FFB347 · red #EF6262. "
+        "Green: Prism Leaders · blue: Re-rating Candidates · purple: Momentum Champions · "
+        "amber: Divergence & Watch · red: Structural Laggards · grey: Insufficient Evidence. "
         "A higher market-confirmation score means stronger relative price confirmation—not automatically a better bank or investment."
     )
+
+    st.subheader("Investment Groups")
+    st.caption(
+        "Groups use peer-relative gates (leader floor 55, high ≥67, low <33) and preserve all three coordinates; "
+        "they are not a blended score. "
+        "Language-history confidence is shown separately."
+    )
+    group_summary = []
+    for group_name in GROUP_ORDER:
+        members = sorted(row["Ticker"] for row in plotted_rows if row["Investment group"] == group_name)
+        group_summary.append({
+            "Group": group_name,
+            "Banks": ", ".join(members) if members else "—",
+            "Count": len(members),
+            "Why": GROUP_META[group_name]["meaning"],
+        })
+    st.dataframe(group_summary, width="stretch", hide_index=True)
+
+    with st.expander("Bank-level group assignments"):
+        st.dataframe(
+            [
+                {
+                    "Group": row["Investment group"],
+                    "Ticker": row["Ticker"],
+                    "Bank": row["Bank"],
+                    "Numeric": row["Numeric score"],
+                    "Language": row["Language score"],
+                    "Market": row["Market confirmation"],
+                    "Evidence": row["Evidence status"],
+                }
+                for row in sorted(plotted_rows, key=lambda item: (GROUP_ORDER.index(item["Investment group"]), item["Ticker"]))
+            ],
+            width="stretch",
+            hide_index=True,
+            column_config={
+                "Numeric": st.column_config.NumberColumn(format="%.1f"),
+                "Language": st.column_config.NumberColumn(format="%.1f"),
+                "Market": st.column_config.NumberColumn(format="%.1f"),
+            },
+        )
 else:
     st.info("Three-coordinate coverage is not yet available.")
 st.caption(
@@ -544,6 +592,7 @@ with methodology_tab:
     st.markdown("**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort to correct management-document optimism. The numeric and language axes are not combined.")
     st.markdown("**Language history gate:** four comparable reports of the same document type enable a preliminary drift observation; eight enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
     st.markdown("**Axis 1 market-confirmation overlay:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. It remains a separate cube coordinate so disagreement stays visible, but it is never blended into the fundamental score.")
+    st.markdown("**Investment-value groups:** deterministic gates classify the three visible coordinates without averaging them. Prism Leaders clear 55 on all axes; Re-rating Candidates combine fundamentals and language of at least 55 with mid-tier market confirmation; Momentum Champions require market confirmation of at least 67 with non-weak supporting axes; Structural Laggards require below-centre fundamentals plus confirming weakness. All remaining conflicts stay in Divergence & Watch, and missing coordinates are Insufficient Evidence.")
     st.markdown("**Controls:** common reporting dates, source evidence, freshness checks, sensitivity analysis, and publication gate.")
     st.markdown("**Scope:** this is a research screening tool, not personalized investment advice.")
     report_path = BASE_DIR / "pilot_report.md"

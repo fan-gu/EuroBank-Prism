@@ -111,6 +111,33 @@ class LanguageSignalTests(unittest.TestCase):
         self.assertGreater(summary["language_drift_score"], 0)
         self.assertTrue(summary["directional_reversal"])
 
+    def test_four_reporting_checkpoints_share_management_results_series(self):
+        periods = [
+            ("Q3 2025", "quarterly_results"),
+            ("FY2025", "full_year_results"),
+            ("Q1 2026", "quarterly_results"),
+            ("H1 2026", "half_year_results"),
+        ]
+        documents = [
+            {
+                "ticker": "TEST",
+                "period": period,
+                "document_type": document_type,
+                "document_series": "management_results",
+                "status": "provisional_single_period",
+                "features": {
+                    "weak_modal_per_1000_words": 1.0,
+                    "uncertainty_per_1000_words": 1.0,
+                    "caution_per_1000_words": 1.0,
+                    "confidence_per_1000_words": 5.0,
+                },
+            }
+            for period, document_type in periods
+        ]
+        summary = summarize_history(documents)
+        self.assertEqual(summary["history_periods"], 4)
+        self.assertEqual([row["period"] for row in summary["documents"]], [row[0] for row in periods])
+
     def test_quadrants_preserve_two_axes(self):
         self.assertEqual(quadrant(70, 70), "Confirmed strength")
         self.assertEqual(quadrant(30, 70), "Potential turnaround")

@@ -22,7 +22,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_REPORTS_DIR = BASE_DIR / "reports"
 DEFAULT_OUTPUT = BASE_DIR / "language_signals.json"
-RULE_VERSION = "management-language-v2.1"
+RULE_VERSION = "management-language-v2.2"
 
 LEXICONS = {
     "positive": {
@@ -301,8 +301,12 @@ def comparable_history(documents: list[dict]) -> list[dict]:
     if not eligible:
         return []
     ordered = sorted(eligible, key=lambda document: period_sort_key(document["period"]))
-    latest_type = ordered[-1]["document_type"]
-    return [document for document in ordered if document["document_type"] == latest_type]
+    latest_series = ordered[-1].get("document_series", "management_results")
+    return [
+        document
+        for document in ordered
+        if document.get("document_series", "management_results") == latest_series
+    ]
 
 
 def summarize_history(documents: list[dict]) -> dict:
@@ -346,6 +350,10 @@ def infer_document_metadata(path: Path) -> tuple[str, str]:
         return "annual_report", f"FY{year}"
     if "h1" in name or "half" in name:
         return "half_year_results", f"H1 {year}"
+    if "9m" in name or "nine_month" in name:
+        return "nine_month_results", f"9M {year}"
+    if "fy" in name or "full_year" in name:
+        return "full_year_results", f"FY{year}"
     if "q1" in name or "q2" in name or "q3" in name or "q4" in name:
         quarter = re.search(r"q[1-4]", name).group(0).upper()
         return "quarterly_results", f"{quarter} {year}"
@@ -358,7 +366,10 @@ def page_is_eligible(page_text: str, document_type: str) -> bool:
         # accounting and Pillar 3 language. Only management-facing sections
         # are admitted to the language sample in v1.
         return bool(ANNUAL_MANAGEMENT_SECTION.search(page_text[:700]))
-    return document_type in {"half_year_results", "quarterly_results"}
+    return document_type in {
+        "half_year_results", "quarterly_results", "nine_month_results",
+        "full_year_results", "results_material",
+    }
 
 
 def analyze_pdf(path: Path, source: dict) -> dict:
@@ -408,6 +419,7 @@ def analyze_pdf(path: Path, source: dict) -> dict:
         "bank_name": source.get("bank_name"),
         "document": path.name,
         "document_type": document_type,
+        "document_series": source.get("document_series", "management_results"),
         "period": period,
         "publication_date": None,
         "source_url": source.get("download_url"),

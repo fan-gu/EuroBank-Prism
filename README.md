@@ -17,6 +17,9 @@ data consistently; it is not personalized investment advice.
 - An almost full-screen, interactive front-page research cube: management
   language is horizontal, market confirmation is depth, and fundamentals are
   vertical.
+- Six transparent investment-value research groups shown by cube color, with
+  a bank-level assignment table and a separate language-history confidence
+  gate.
 - Evidence controls for reporting period, definition, unit, scope, and source.
 - Dark-mode dashboard with ranking, signals, bank details, evidence, and
   methodology views.
@@ -24,6 +27,14 @@ data consistently; it is not personalized investment advice.
 The current release has two research axes—fundamentals and management
 language—plus a market-positioning overlay within Axis 1. The front-page cube
 keeps all three coordinates visible; they are not blended into one opaque score.
+
+## Investment groups
+
+The cube assigns each bank to one mutually exclusive research group without
+averaging away disagreement: **Prism Leaders**, **Re-rating Candidates**,
+**Momentum Champions**, **Divergence & Watch**, **Structural Laggards**, or
+**Insufficient Evidence**. The rules use peer-relative gates; current-language
+groups remain provisional until four comparable reporting periods are available.
 
 ## Workflow
 
