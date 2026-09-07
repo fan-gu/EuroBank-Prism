@@ -22,7 +22,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_REPORTS_DIR = BASE_DIR / "reports"
 DEFAULT_OUTPUT = BASE_DIR / "language_signals.json"
-RULE_VERSION = "management-language-v2.0"
+RULE_VERSION = "management-language-v2.1"
 
 LEXICONS = {
     "positive": {
@@ -274,6 +274,70 @@ def language_drift(current: dict, previous: dict) -> dict:
     }
 
 
+def period_sort_key(period: str) -> tuple[int, int]:
+    """Return a stable chronological key for results-reporting periods."""
+    year_match = re.search(r"20\d{2}", period or "")
+    year = int(year_match.group(0)) if year_match else 0
+    label = (period or "").upper()
+    quarter_match = re.search(r"Q([1-4])", label)
+    if quarter_match:
+        return year, int(quarter_match.group(1))
+    if "H1" in label or "1H" in label or "HALF" in label:
+        return year, 2
+    if "9M" in label or "Q3" in label:
+        return year, 3
+    if "FY" in label or "ANNUAL" in label:
+        return year, 4
+    return year, 0
+
+
+def comparable_history(documents: list[dict]) -> list[dict]:
+    """Keep one consistent reporting genre, ending with the latest document.
+
+    A Q2 presentation and a full annual report can have very different writing
+    styles.  We therefore never create a drift series by mixing their genres.
+    """
+    eligible = [document for document in documents if document["status"] != "insufficient"]
+    if not eligible:
+        return []
+    ordered = sorted(eligible, key=lambda document: period_sort_key(document["period"]))
+    latest_type = ordered[-1]["document_type"]
+    return [document for document in ordered if document["document_type"] == latest_type]
+
+
+def summarize_history(documents: list[dict]) -> dict:
+    """Describe the latest comparable four-period language trend.
+
+    The output is deliberately a preliminary research observation, not an
+    investment signal. Eight periods and a backtest remain necessary before an
+    event alert is eligible for publication.
+    """
+    history = comparable_history(documents)
+    if len(history) < 4:
+        return {
+            "documents": history,
+            "history_periods": len(history),
+            "language_drift_score": None,
+            "directional_reversal": None,
+            "drift_observations": [],
+            "drift_status": "requires_four_comparable_periods",
+        }
+    history = history[-4:]
+    observations = [
+        {"from_period": previous["period"], "to_period": current["period"], **language_drift(current["features"], previous["features"])}
+        for previous, current in zip(history, history[1:])
+    ]
+    penalties = [observation["drift_penalty"] for observation in observations]
+    return {
+        "documents": history,
+        "history_periods": len(history),
+        "language_drift_score": round(sum(penalties) / len(penalties), 2),
+        "directional_reversal": any(observation["directional_reversal"] for observation in observations),
+        "drift_observations": observations,
+        "drift_status": "preliminary_four_period_trend",
+    }
+
+
 def infer_document_metadata(path: Path) -> tuple[str, str]:
     name = path.stem.lower()
     year_match = re.search(r"20\d{2}", name)
@@ -384,6 +448,7 @@ def load_language_manifest() -> list[dict]:
         record
         for record in json.loads(path.read_text(encoding="utf-8"))
         if record.get("status") == "downloaded"
+        and record.get("source_status", "curated") == "curated"
     ]
 
 
@@ -414,7 +479,7 @@ def quadrant(numeric_score: float, language_score: float) -> str:
 def build_archive(reports_dir: Path, output_path: Path) -> dict:
     manifest = load_language_manifest()
     numeric_scores = load_numeric_scores()
-    analyzed = {}
+    analyzed: dict[str, list[dict]] = {}
     for source in manifest:
         path = Path(source["path"])
         if not path.is_absolute():
@@ -422,13 +487,18 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
         if not path.exists():
             print(f"Skipping missing curated report: {path}", flush=True)
             continue
-        analyzed[source["ticker"]] = analyze_pdf(path, source)
-    calibration = calibrate_peer_language_scores(list(analyzed.values()))
+        analyzed.setdefault(source["ticker"], []).append(analyze_pdf(path, source))
+    latest_documents = {
+        ticker: max(documents, key=lambda document: period_sort_key(document["period"]))
+        for ticker, documents in analyzed.items()
+    }
+    calibration = calibrate_peer_language_scores(list(latest_documents.values()))
     signals = []
     for bank in load_universe():
         ticker = bank["ticker"]
         numeric_score = numeric_scores.get(ticker)
-        language = analyzed.get(ticker)
+        documents = analyzed.get(ticker, [])
+        language = latest_documents.get(ticker)
         if not language or language["status"] == "insufficient":
             signals.append(
                 {
@@ -447,6 +517,12 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                 }
             )
             continue
+        history = summarize_history(documents)
+        language["history_periods"] = history["history_periods"]
+        language["language_drift_score"] = history["language_drift_score"]
+        language["directional_reversal"] = history["directional_reversal"]
+        language["drift_status"] = history["drift_status"]
+        language["drift_observations"] = history["drift_observations"]
         language_score = language["features"]["language_score"]
         absolute_language_score = language["features"]["absolute_language_score"]
         negative_pressure_score = language["features"]["negative_pressure_score"]
@@ -461,6 +537,11 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                     "review_status": "pending_human_review",
                 }
             )
+        status = (
+            "provisional_four_period_trend"
+            if history["history_periods"] >= 4
+            else "provisional_single_period"
+        )
         signals.append(
             {
                 "ticker": ticker,
@@ -469,17 +550,19 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                 "language_score": language_score,
                 "absolute_language_score": absolute_language_score,
                 "negative_pressure_score": negative_pressure_score,
-                "language_drift_score": None,
+                "language_drift_score": history["language_drift_score"],
+                "directional_reversal": history["directional_reversal"],
+                "history_periods": history["history_periods"],
                 "divergence": divergence,
                 "quadrant": quadrant(numeric_score, language_score),
-                "status": "provisional_single_period",
+                "status": status,
                 "alerts": alerts,
                 "publication_eligible": False,
             }
         )
 
     archive = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "rule_version": RULE_VERSION,
         "generated_at": utc_now(),
         "methodology": {
@@ -503,10 +586,15 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
         },
         "coverage": {
             "universe_banks": len(signals),
-            "provisional_banks": sum(s["status"] == "provisional_single_period" for s in signals),
+            "provisional_banks": sum(s["status"].startswith("provisional") for s in signals),
+            "four_period_trends": sum(s["status"] == "provisional_four_period_trend" for s in signals),
             "insufficient_banks": sum(s["status"] == "insufficient_language_data" for s in signals),
         },
-        "documents": list(analyzed.values()),
+        "documents": [
+            document
+            for documents in analyzed.values()
+            for document in sorted(documents, key=lambda item: period_sort_key(item["period"]))
+        ],
         "signals": signals,
     }
     output_path.write_text(json.dumps(archive, indent=2, ensure_ascii=False), encoding="utf-8")

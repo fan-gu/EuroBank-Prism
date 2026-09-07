@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.0",
-  "rule_version": "management-language-v2.0",
-  "generated_at": "2026-09-04T20:39:19.427257+00:00",
+  "schema_version": "1.1",
+  "rule_version": "management-language-v2.1",
+  "generated_at": "2026-09-07T09:14:03.036352+00:00",
   "methodology": {
     "axes_are_independent": true,
     "language_model": "deterministic_financial_lexicon",
@@ -30,6 +30,7 @@
   "coverage": {
     "universe_banks": 23,
     "provisional_banks": 23,
+    "four_period_trends": 0,
     "insufficient_banks": 0
   },
   "documents": [
@@ -195,10 +196,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "SAN",
@@ -362,10 +364,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "INGA",
@@ -529,10 +532,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "BBVA",
@@ -696,10 +700,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "ISP",
@@ -863,10 +868,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "UCG",
@@ -1030,10 +1036,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "NDA-FI",
@@ -1197,10 +1204,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "DBK",
@@ -1364,10 +1372,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "GLE",
@@ -1531,10 +1540,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "KBC",
@@ -1698,10 +1708,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "CABK",
@@ -1865,10 +1876,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "ACA",
@@ -2032,10 +2044,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "CBK",
@@ -2199,10 +2212,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "EBS",
@@ -2366,10 +2380,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "BIRG",
@@ -2533,10 +2548,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "FBK",
@@ -2700,10 +2716,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "ABN",
@@ -2867,10 +2884,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "BAMI",
@@ -3034,10 +3052,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "SAB",
@@ -3201,10 +3220,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "AIBG",
@@ -3368,10 +3388,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "BKT",
@@ -3535,10 +3556,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "BG",
@@ -3702,10 +3724,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     },
     {
       "ticker": "BPE",
@@ -3869,10 +3892,11 @@
       "history_periods": 1,
       "language_drift_score": null,
       "directional_reversal": null,
-      "drift_status": "requires_comparable_history",
+      "drift_status": "requires_four_comparable_periods",
       "backtest_status": "not_run",
       "publication_eligible": false,
-      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal."
+      "comparability_warning": "Single-period and mixed document genres; do not interpret as a trading signal.",
+      "drift_observations": []
     }
   ],
   "signals": [
@@ -3884,6 +3908,8 @@
       "absolute_language_score": 50.1,
       "negative_pressure_score": 31.16,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -0.5,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
@@ -3898,6 +3924,8 @@
       "absolute_language_score": 49.1,
       "negative_pressure_score": 23.31,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -28.0,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
@@ -3919,6 +3947,8 @@
       "absolute_language_score": 23.1,
       "negative_pressure_score": 37.23,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 7.3,
       "quadrant": "Early warning",
       "status": "provisional_single_period",
@@ -3933,6 +3963,8 @@
       "absolute_language_score": 38.3,
       "negative_pressure_score": 31.44,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -2.3,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
@@ -3947,6 +3979,8 @@
       "absolute_language_score": 16.3,
       "negative_pressure_score": 39.1,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 14.7,
       "quadrant": "Early warning",
       "status": "provisional_single_period",
@@ -3961,6 +3995,8 @@
       "absolute_language_score": 19.9,
       "negative_pressure_score": 38.53,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 6.3,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
@@ -3975,6 +4011,8 @@
       "absolute_language_score": 22.2,
       "negative_pressure_score": 35.05,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 0.7,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
@@ -3989,6 +4027,8 @@
       "absolute_language_score": 27.4,
       "negative_pressure_score": 30.28,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 2.7,
       "quadrant": "Early warning",
       "status": "provisional_single_period",
@@ -4003,6 +4043,8 @@
       "absolute_language_score": 27.9,
       "negative_pressure_score": 45.12,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 5.1,
       "quadrant": "Early warning",
       "status": "provisional_single_period",
@@ -4017,6 +4059,8 @@
       "absolute_language_score": 52.8,
       "negative_pressure_score": 15.16,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -31.0,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
@@ -4038,6 +4082,8 @@
       "absolute_language_score": 69.9,
       "negative_pressure_score": 8.78,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -42.5,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
@@ -4059,6 +4105,8 @@
       "absolute_language_score": 37.3,
       "negative_pressure_score": 26.33,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -7.2,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
@@ -4073,6 +4121,8 @@
       "absolute_language_score": 42.4,
       "negative_pressure_score": 23.43,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -17.5,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
@@ -4087,6 +4137,8 @@
       "absolute_language_score": 32.5,
       "negative_pressure_score": 22.2,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -8.3,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
@@ -4101,6 +4153,8 @@
       "absolute_language_score": 42.9,
       "negative_pressure_score": 28.13,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -6.7,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
@@ -4115,6 +4169,8 @@
       "absolute_language_score": 28.2,
       "negative_pressure_score": 24.42,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -3.3,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
@@ -4129,6 +4185,8 @@
       "absolute_language_score": 57.6,
       "negative_pressure_score": 26.73,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -27.2,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
@@ -4150,6 +4208,8 @@
       "absolute_language_score": 27.8,
       "negative_pressure_score": 32.17,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -0.2,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
@@ -4164,6 +4224,8 @@
       "absolute_language_score": 18.2,
       "negative_pressure_score": 37.99,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": -5.5,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
@@ -4178,6 +4240,8 @@
       "absolute_language_score": 35.9,
       "negative_pressure_score": 37.97,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 2.7,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
@@ -4192,6 +4256,8 @@
       "absolute_language_score": 13.9,
       "negative_pressure_score": 43.37,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 10.9,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
@@ -4206,6 +4272,8 @@
       "absolute_language_score": 11.2,
       "negative_pressure_score": 54.06,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 8.7,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
@@ -4220,6 +4288,8 @@
       "absolute_language_score": 22.6,
       "negative_pressure_score": 45.77,
       "language_drift_score": null,
+      "directional_reversal": null,
+      "history_periods": 1,
       "divergence": 23.2,
       "quadrant": "Early warning",
       "status": "provisional_single_period",

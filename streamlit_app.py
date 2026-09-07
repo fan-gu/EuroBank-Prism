@@ -12,6 +12,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from app.dashboard_visuals import image_data_url, layout_signal_labels, padded_domain
+from app.language_signals import period_sort_key
 
 load_dotenv(Path(__file__).with_name(".env"))
 
@@ -52,7 +53,13 @@ def load_data():
             "signals": [],
         }
     )
-    return banks, scores, universe, report_pages, table_evidence, language_signals
+    market_path = BASE_DIR / "market_confirmation.json"
+    market_confirmation = (
+        json.loads(market_path.read_text(encoding="utf-8"))
+        if market_path.exists()
+        else {"records": [], "methodology": {}}
+    )
+    return banks, scores, universe, report_pages, table_evidence, language_signals, market_confirmation
 
 
 def percent(value):
@@ -83,21 +90,28 @@ st.caption(
     "Three independent signals. One clearer view. · "
     "EURO STOXX Banks research intelligence"
 )
-st.caption("Current release: fundamentals + management language live · market confirmation next")
+st.caption("Current release: fundamentals, management language, and independent market confirmation")
 
 if st.button("Refresh data"):
     with st.status("Refreshing all 23 banks...", expanded=False) as status:
-        result = subprocess.run([sys.executable, str(BASE_DIR / "build_full_universe.py")], cwd=BASE_DIR, capture_output=True, text=True)
-        if result.returncode == 0:
+        fundamental_result = subprocess.run([sys.executable, str(BASE_DIR / "build_full_universe.py")], cwd=BASE_DIR, capture_output=True, text=True)
+        market_result = subprocess.run([sys.executable, str(BASE_DIR / "build_market_confirmation.py")], cwd=BASE_DIR, capture_output=True, text=True)
+        if fundamental_result.returncode == 0 and market_result.returncode == 0:
             status.update(label="Refresh complete", state="complete")
             st.cache_data.clear()
             st.rerun()
-        status.update(label="Refresh failed", state="error")
-        st.code(result.stderr or result.stdout)
+        else:
+            status.update(label="Refresh failed", state="error")
+            st.code((fundamental_result.stderr or fundamental_result.stdout) + "\n" + (market_result.stderr or market_result.stdout))
 
-banks, scores, universe, report_pages, table_evidence, language_signals = load_data()
+banks, scores, universe, report_pages, table_evidence, language_signals, market_confirmation = load_data()
 scored_tickers = {row["ticker"] for row in scores if row["status"] == "ranked"}
 language_coverage = language_signals.get("coverage", {})
+market_by_ticker = {row["ticker"]: row for row in market_confirmation.get("records", [])}
+market_coverage = sum(
+    row.get("status") == "market_confirmation_available"
+    for row in market_by_ticker.values()
+)
 ranking_tab, signals_tab, details_tab, evidence_tab, methodology_tab = st.tabs(
     ["Relative ranking", "Signals", "Bank details", "Evidence", "Methodology"]
 )
@@ -154,15 +168,15 @@ with ranking_tab:
     st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
 
 with signals_tab:
-    st.subheader("Independent numeric and management-language signals")
+    st.subheader("Three independent research signals")
     st.warning(
-        "Research preview only: the language score is peer-calibrated to correct management-document optimism, "
-        "but document genres and reporting periods are not yet aligned. "
-        "No quadrant label is a buy or sell recommendation."
+        "Research preview only: neither the language nor market-confirmation axis changes the fundamental score. "
+        "No quadrant, momentum regime, or combination is a buy or sell recommendation."
     )
     with st.container(horizontal=True):
         st.metric("Bank universe", language_coverage.get("universe_banks", len(universe)), border=True)
         st.metric("Provisional language coverage", language_coverage.get("provisional_banks", 0), border=True)
+        st.metric("Market confirmation coverage", f"{market_coverage}/{len(universe)}", border=True)
         st.metric("Insufficient language data", language_coverage.get("insufficient_banks", len(universe)), border=True)
         st.metric("Backtested signals", 0, border=True)
 
@@ -176,6 +190,8 @@ with signals_tab:
             "Negative pressure": row.get("negative_pressure_score"),
             "Gap": row["divergence"],
             "Research quadrant": row["quadrant"],
+            "Market confirmation": market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+            "Market regime": market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
         }
         for row in signal_rows
         if row.get("numeric_score") is not None and row.get("language_score") is not None
@@ -218,13 +234,13 @@ with signals_tab:
                 ),
                 legend=alt.Legend(title=None, orient="bottom", columns=4),
             ),
-            tooltip=["Bank:N", "Ticker:N", "Numeric score:Q", "Language score:Q", "Negative pressure:Q", "Gap:Q", "Research quadrant:N"],
+            tooltip=["Bank:N", "Ticker:N", "Numeric score:Q", "Language score:Q", "Negative pressure:Q", "Gap:Q", "Market confirmation:Q", "Market regime:N", "Research quadrant:N"],
         )
         logos = alt.Chart(signal_frame).mark_image(width=28, height=28).encode(
             x=x_axis,
             y=y_axis,
             url=alt.Url("Logo:N"),
-            tooltip=["Bank:N", "Ticker:N", "Numeric score:Q", "Language score:Q", "Negative pressure:Q", "Gap:Q", "Research quadrant:N"],
+            tooltip=["Bank:N", "Ticker:N", "Numeric score:Q", "Language score:Q", "Negative pressure:Q", "Gap:Q", "Market confirmation:Q", "Market regime:N", "Research quadrant:N"],
         )
         connectors = alt.Chart(signal_frame).mark_rule(
             color="#aeb8c8", opacity=0.55, strokeWidth=1
@@ -253,6 +269,21 @@ with signals_tab:
             "lower-right: early warning · lower-left: high-risk screen. "
             "The horizontal 50 line is the robust peer center, not generic sentiment neutrality."
         )
+        market_frame = signal_frame.dropna(subset=["Market confirmation"]).sort_values("Market confirmation", ascending=True)
+        if not market_frame.empty:
+            st.markdown("#### Third axis: market confirmation")
+            market_chart = alt.Chart(market_frame).mark_bar().encode(
+                x=alt.X("Market confirmation:Q", title="Peer-relative market-confirmation score", scale=alt.Scale(domain=[0, 100])),
+                y=alt.Y("Ticker:N", sort="-x", title=None),
+                color=alt.Color(
+                    "Market regime:N",
+                    scale=alt.Scale(domain=["Confirming", "Neutral", "Unconfirmed"], range=["#35c48d", "#9fa8b8", "#ef6262"]),
+                    legend=alt.Legend(title=None, orient="bottom"),
+                ),
+                tooltip=["Bank:N", "Ticker:N", "Market confirmation:Q", "Market regime:N"],
+            ).properties(height=max(360, len(market_frame) * 24))
+            st.altair_chart(market_chart, width="stretch")
+            st.caption("This independent axis peer-ranks 1-, 3-, and 6-month returns plus price versus the 200-day average. It is market confirmation, not an analyst-expectations estimate.")
     else:
         st.info("No bank currently has sufficient language evidence for the matrix.")
 
@@ -264,6 +295,8 @@ with signals_tab:
             "Language": row.get("language_score"),
             "Negative pressure": row.get("negative_pressure_score"),
             "Gap": row.get("divergence"),
+            "Market confirmation": market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+            "Market regime": market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
             "Quadrant": row.get("quadrant") or "Not assigned",
             "Coverage status": row["status"],
         }
@@ -278,21 +311,23 @@ with signals_tab:
             "Language": st.column_config.NumberColumn(format="%.1f"),
             "Negative pressure": st.column_config.NumberColumn(format="%.1f"),
             "Gap": st.column_config.NumberColumn(format="%+.1f"),
+            "Market confirmation": st.column_config.NumberColumn(format="%.1f"),
         },
     )
 
     language_documents = language_signals.get("documents", [])
     if language_documents:
         st.markdown("#### Language evidence and review queue")
-        language_tickers = [document["ticker"] for document in language_documents]
+        language_tickers = sorted({document["ticker"] for document in language_documents})
         selected_language_ticker = st.pills(
             "View language evidence for",
             language_tickers,
             default=language_tickers[0],
             key="language_evidence_bank",
         )
-        language_document = next(
-            document for document in language_documents if document["ticker"] == selected_language_ticker
+        language_document = max(
+            (document for document in language_documents if document["ticker"] == selected_language_ticker),
+            key=lambda document: period_sort_key(document.get("period", "")),
         )
         language_signal = next(
             row for row in signal_rows if row["ticker"] == selected_language_ticker
@@ -304,8 +339,7 @@ with signals_tab:
             st.metric("History available", f"{language_document['history_periods']} period", border=True)
             st.metric("Review status", "Pending", border=True)
         st.caption(
-            "Weak-modal and uncertainty increases plus confidence-to-caution reversals "
-            "will add drift penalties once comparable history is available."
+            "Four comparable reports enable a preliminary drift observation; eight and a backtest are still required before an event alert can be validated."
         )
         st.caption(
             f"{language_document['document_type'].replace('_', ' ').title()} · "
@@ -338,13 +372,15 @@ with details_tab:
     st.write(f"Country: **{bank['country']}** · market ticker: **{bank['market_ticker']}**")
     metrics = bank.get("metrics", {})
     prudential = bank.get("prudential_metrics", {})
-    cols = st.columns(6)
+    market = market_by_ticker.get(selected, {})
+    cols = st.columns(7)
     cols[0].metric("Screening score", score["score"] if score["score"] is not None else "N/A")
     cols[1].metric("Share price", f"{metrics.get('price'):.2f}" if metrics.get("price") else "N/A")
     cols[2].metric("P/B", multiple(metrics.get("price_to_book")))
     cols[3].metric("P/E", multiple(metrics.get("price_to_earnings")))
     cols[4].metric("ROE", percent(metrics.get("return_on_equity")))
     cols[5].metric("Dividend yield", percent(metrics.get("dividend_yield")))
+    cols[6].metric("Market confirmation", market.get("market_confirmation_score") if market.get("market_confirmation_score") is not None else "N/A")
     st.markdown("#### Additional equity-research metrics")
     st.dataframe([
         {"Metric": "Forward P/E", "Value": multiple(metrics.get("forward_price_to_earnings"))},
@@ -367,6 +403,7 @@ with details_tab:
     bank_language_documents = [
         document for document in language_signals.get("documents", []) if document["ticker"] == selected
     ]
+    bank_language_documents.sort(key=lambda document: period_sort_key(document["period"]))
     st.markdown("#### Management-language history")
     if len(bank_language_documents) < 4:
         st.info(
@@ -377,10 +414,15 @@ with details_tab:
         history_frame = pd.DataFrame(
             {
                 "Period": [document["period"] for document in bank_language_documents],
-                "Language score": [document["features"]["language_score"] for document in bank_language_documents],
+                "Absolute language score": [document["features"]["absolute_language_score"] for document in bank_language_documents],
             }
         )
-        st.line_chart(history_frame, x="Period", y="Language score")
+        st.line_chart(history_frame, x="Period", y="Absolute language score")
+        signal = next((row for row in language_signals.get("signals", []) if row["ticker"] == selected), {})
+        st.caption(
+            f"Preliminary drift score: {signal.get('language_drift_score', 'N/A')} · "
+            f"status: {signal.get('status', 'N/A').replace('_', ' ')}."
+        )
 
 with evidence_tab:
     st.subheader("Official financial reports")
@@ -466,7 +508,8 @@ with methodology_tab:
     st.markdown("**Common 23-bank score:** P/B 25%, P/E 15%, ROE 20%, ROA 10%, dividend yield 10%, earnings growth 10%, and revenue growth 10%. Lower valuation multiples score higher; higher returns, yield, and growth score higher. Percentile ranking limits the influence of extreme values.")
     st.markdown("**Official-report overlay:** CET1, leverage, LCR, NSFR, NPL ratio, NPL coverage, cost of risk, NIM, cost/income, loan/deposit ratio, and IRRBB sensitivities are included only when period-aligned evidence is available.")
     st.markdown("**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort to correct management-document optimism. The numeric and language axes are not combined.")
-    st.markdown("**Language history gate:** four comparable periods enable a preliminary trend; eight enable drift alerts. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
+    st.markdown("**Language history gate:** four comparable reports of the same document type enable a preliminary drift observation; eight enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
+    st.markdown("**Independent market-confirmation axis:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. This axis is not a valuation metric and is never blended into the fundamental score.")
     st.markdown("**Controls:** common reporting dates, source evidence, freshness checks, sensitivity analysis, and publication gate.")
     st.markdown("**Scope:** this is a research screening tool, not personalized investment advice.")
     report_path = BASE_DIR / "pilot_report.md"

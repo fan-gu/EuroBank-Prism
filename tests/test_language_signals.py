@@ -17,6 +17,7 @@ from app.language_signals import (
     quadrant,
     score_features,
     split_sentences,
+    summarize_history,
 )
 
 
@@ -86,6 +87,29 @@ class LanguageSignalTests(unittest.TestCase):
         drift = language_drift(current, previous)
         self.assertTrue(drift["directional_reversal"])
         self.assertGreater(drift["drift_penalty"], 0)
+
+    def test_four_comparable_periods_create_preliminary_trend(self):
+        base = {
+            "ticker": "TEST", "document_type": "quarterly_results",
+            "status": "provisional_single_period",
+        }
+        documents = []
+        for quarter, (uncertainty, caution, confidence) in enumerate(((1, 1, 10), (2, 3, 8), (4, 5, 5), (6, 7, 2)), start=1):
+            documents.append({
+                **base,
+                "period": f"Q{quarter} 2025",
+                "features": {
+                    "weak_modal_per_1000_words": float(quarter),
+                    "uncertainty_per_1000_words": float(uncertainty),
+                    "caution_per_1000_words": float(caution),
+                    "confidence_per_1000_words": float(confidence),
+                },
+            })
+        summary = summarize_history(documents)
+        self.assertEqual(summary["history_periods"], 4)
+        self.assertEqual(summary["drift_status"], "preliminary_four_period_trend")
+        self.assertGreater(summary["language_drift_score"], 0)
+        self.assertTrue(summary["directional_reversal"])
 
     def test_quadrants_preserve_two_axes(self):
         self.assertEqual(quadrant(70, 70), "Confirmed strength")

@@ -10,21 +10,24 @@ data consistently; it is not personalized investment advice.
 
 - Relative peer ranking using P/B, P/E, ROE, ROA, dividend yield, and growth.
 - Price, country, ticker, index weight, and official-report links.
-- A separate management-language signal with cited passages and page numbers.
+- A separate management-language signal with cited passages, pages, and an
+  auditable four-period drift pipeline.
+- A separate market-confirmation axis based on peer-relative price behaviour.
 - Evidence controls for reporting period, definition, unit, scope, and source.
 - Dark-mode dashboard with ranking, signals, bank details, evidence, and
   methodology views.
 
-The current release has two live axes: fundamentals and management language.
-Market confirmation is the next independent signal; the axes are intentionally
-not blended into one opaque score.
+The current release has three live axes: fundamentals, management language,
+and market confirmation. They are intentionally not blended into one opaque
+score.
 
 ## Workflow
 
 ```text
 Official reports ──> PDF/page screening ──> cited evidence
-                                  └──────> management-language signal
+                                  └──────> management language + drift history
 Market data ──────> comparable metrics ──> weighted peer ranking
+              └──> price history ───────> market-confirmation axis
                     quality and freshness gates ──> dashboard/report
 ```
 
@@ -38,6 +41,9 @@ Market data ──────> comparable metrics ──> weighted peer ranking
 - Four comparable periods enable a preliminary language trend; eight enable
   drift-alert research. Human review and backtesting are required for validated
   publication.
+- Market confirmation peer-ranks 1-, 3-, and 6-month return with price versus
+  its 200-day average. It confirms or challenges market behaviour only; it does
+  not alter the fundamental score.
 
 ## Run locally
 
@@ -54,6 +60,7 @@ Useful maintenance commands:
 python coverage_report.py
 python download_language_reports.py
 python -m app.language_signals
+python build_market_confirmation.py
 python app/table_evidence.py
 ```
 

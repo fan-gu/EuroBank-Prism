@@ -20,7 +20,9 @@ USER_AGENT = "EuroBank-Prism/1.0 research-document-discovery"
 TIMEOUT = (15, 45)
 MAX_BYTES = 30 * 1024 * 1024
 CURRENT_YEAR = datetime.now(timezone.utc).year
-ACCEPTED_FULL_YEARS = {str(CURRENT_YEAR), str(CURRENT_YEAR - 1)}
+# Four quarters usually span two calendar years.  This is deliberately wider
+# than the current-report search, but discovery output remains review-only.
+ACCEPTED_FULL_YEARS = {str(CURRENT_YEAR - offset) for offset in range(3)}
 CORE_RESULT_TERMS = (
     "results", "result", "earnings", "quarter", "q1", "q2", "q3", "q4",
     "half year", "half yearly", "half-year", "interim", "h1", "1h",
@@ -209,14 +211,29 @@ def discover_one(bank: dict, pages: dict, download: bool) -> dict:
         return result
     try:
         candidates = discover_candidates(page_url)
-        result["alternatives"] = candidates[:5]
+        result["alternatives"] = candidates[:12]
         if not candidates:
             result["error"] = "no suitable PDF link discovered"
             return result
-        result["selected"] = candidates[0]
+        selected_periods = []
+        seen_periods = set()
+        for candidate in candidates:
+            document_type, period = period_from_candidate(candidate)
+            # Language drift compares interim/quarterly management material;
+            # annual reports are intentionally excluded from this candidate set.
+            if document_type not in {"quarterly_results", "half_year_results"}:
+                continue
+            if period in seen_periods:
+                continue
+            seen_periods.add(period)
+            selected_periods.append({**candidate, "document_type": document_type, "period": period, "source_status": "pending_human_review"})
+            if len(selected_periods) == 4:
+                break
+        result["selected_periods"] = selected_periods
+        result["selected"] = selected_periods[0] if selected_periods else candidates[0]
         result["status"] = "discovered"
         if download:
-            result.update(download_pdf(ticker, candidates[0]))
+            result.update(download_pdf(ticker, result["selected"]))
     except Exception as exc:
         result["error"] = str(exc)
     return result
@@ -245,7 +262,7 @@ def run(download: bool, workers: int = 6) -> list[dict]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--download", action="store_true", help="Download each top-ranked verified candidate.")
+    parser.add_argument("--download", action="store_true", help="Download each top-ranked candidate. Discovery is not automatic curation.")
     parser.add_argument("--workers", type=int, default=6)
     return parser.parse_args()
 
