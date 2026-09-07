@@ -4,40 +4,44 @@ The groups preserve disagreement between fundamentals, management language,
 and market confirmation.  They are research-screen labels, not advice.
 """
 
-HIGH = 67.0
-LOW = 33.0
 LEADER_FLOOR = 55.0
-WEAK_LANGUAGE = 45.0
+LANGUAGE_SUPPORT = 50.0
+MOMENTUM_FLOOR = 60.0
+PEER_MIDPOINT = 50.0
 
 GROUP_ORDER = (
-    "Prism Leaders",
+    "Conviction Leaders",
     "Re-rating Candidates",
-    "Momentum Champions",
-    "Divergence & Watch",
-    "Structural Laggards",
-    "Insufficient Evidence",
+    "Contrarian Value",
+    "Expectations-led Momentum",
+    "Downside Risk",
+    "No Clear Edge",
 )
 
 GROUP_META = {
-    "Prism Leaders": {
+    "Conviction Leaders": {
         "color": "#35C48D",
-        "meaning": "Fundamentals, management language and price action all rank in the top peer tier.",
+        "meaning": "All three signals agree: strong fundamentals, supportive language and confirming price action.",
     },
     "Re-rating Candidates": {
         "color": "#4FA3FF",
-        "meaning": "Strong fundamentals and language, while market confirmation remains mid-tier.",
+        "meaning": "Fundamentals and language are supportive, but price action has not yet confirmed the thesis.",
     },
-    "Momentum Champions": {
+    "Contrarian Value": {
+        "color": "#32C6D4",
+        "meaning": "Fundamentals screen strongly while management language is cautious; verify whether the discount is justified.",
+    },
+    "Expectations-led Momentum": {
         "color": "#9B7BFF",
-        "meaning": "Strong market confirmation with at least mid-tier fundamentals and language.",
+        "meaning": "Price momentum is ahead of the fundamental score; upside may depend on future delivery.",
     },
-    "Divergence & Watch": {
-        "color": "#FFB347",
-        "meaning": "The three signals disagree materially, or the bank remains in the peer middle.",
-    },
-    "Structural Laggards": {
+    "Downside Risk": {
         "color": "#EF6262",
-        "meaning": "Weak fundamentals are confirmed by weak language or weak price action.",
+        "meaning": "Below-midpoint fundamentals have at least one confirming warning from language or price action.",
+    },
+    "No Clear Edge": {
+        "color": "#FFB347",
+        "meaning": "Signals are clustered near the peer middle; the screen does not reveal a differentiated thesis.",
     },
     "Insufficient Evidence": {
         "color": "#9FA8B8",
@@ -56,22 +60,21 @@ def investment_group(numeric_score, language_score, market_score) -> str:
     language = float(language_score)
     market = float(market_score)
 
-    # A three-way intersection of top-tertile scores is usually empty in a
-    # 23-name universe.  Leaders therefore require every independent axis to
-    # clear a deliberately demanding 55-point floor.
+    # Six directional research outcomes. Missing evidence remains a separate
+    # publication gate and is not counted as an investment group.
     if min(numeric, language, market) >= LEADER_FLOOR:
-        return "Prism Leaders"
-    # Fundamentals below the peer centre need confirmation from either weak
-    # language or bottom-tertile price action before the laggard label applies.
-    if numeric < 50 and (
-        (language < WEAK_LANGUAGE and market < HIGH) or market < LOW
-    ):
-        return "Structural Laggards"
-    if numeric >= LEADER_FLOOR and language >= LEADER_FLOOR and LOW <= market < LEADER_FLOOR:
+        return "Conviction Leaders"
+    if numeric >= LEADER_FLOOR and language >= LANGUAGE_SUPPORT and market < LEADER_FLOOR:
         return "Re-rating Candidates"
-    if market >= HIGH and numeric >= 40 and language >= 40:
-        return "Momentum Champions"
-    return "Divergence & Watch"
+    if market >= MOMENTUM_FLOOR and numeric < LEADER_FLOOR:
+        return "Expectations-led Momentum"
+    if numeric >= PEER_MIDPOINT and language < LANGUAGE_SUPPORT:
+        return "Contrarian Value"
+    if numeric < PEER_MIDPOINT and (
+        language < LANGUAGE_SUPPORT or market < LANGUAGE_SUPPORT
+    ):
+        return "Downside Risk"
+    return "No Clear Edge"
 
 
 def evidence_status(history_periods: int | None) -> str:

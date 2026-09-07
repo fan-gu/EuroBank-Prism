@@ -11,17 +11,20 @@ from app.investment_groups import GROUP_META, GROUP_ORDER, evidence_status, inve
 
 class InvestmentGroupTests(unittest.TestCase):
     def test_all_primary_group_patterns(self):
-        self.assertEqual(investment_group(80, 75, 90), "Prism Leaders")
+        self.assertEqual(investment_group(80, 75, 90), "Conviction Leaders")
         self.assertEqual(investment_group(80, 75, 50), "Re-rating Candidates")
-        self.assertEqual(investment_group(55, 50, 80), "Momentum Champions")
-        self.assertEqual(investment_group(75, 70, 20), "Divergence & Watch")
-        self.assertEqual(investment_group(40, 44, 55), "Structural Laggards")
+        self.assertEqual(investment_group(75, 45, 40), "Contrarian Value")
+        self.assertEqual(investment_group(50, 55, 80), "Expectations-led Momentum")
+        self.assertEqual(investment_group(40, 44, 45), "Downside Risk")
+        self.assertEqual(investment_group(50, 52, 50), "No Clear Edge")
         self.assertEqual(investment_group(None, 60, 70), "Insufficient Evidence")
 
     def test_boundary_values_are_deterministic(self):
-        self.assertEqual(investment_group(55, 55, 55), "Prism Leaders")
-        self.assertEqual(investment_group(55, 55, 33), "Re-rating Candidates")
-        self.assertEqual(investment_group(40, 40, 67), "Momentum Champions")
+        self.assertEqual(investment_group(55, 55, 55), "Conviction Leaders")
+        self.assertEqual(investment_group(55, 50, 54.9), "Re-rating Candidates")
+        self.assertEqual(investment_group(50, 49.9, 55), "Contrarian Value")
+        self.assertEqual(investment_group(54.9, 50, 60), "Expectations-led Momentum")
+        self.assertEqual(investment_group(49.9, 50, 49.9), "Downside Risk")
 
     def test_language_history_gate_is_separate(self):
         self.assertEqual(evidence_status(1), "provisional")

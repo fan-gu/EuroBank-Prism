@@ -14,11 +14,13 @@ data consistently; it is not personalized investment advice.
   auditable four-period drift pipeline.
 - Market confirmation encoded independently by bubble size, so price
   disagreement remains visible without adding a third spatial axis.
-- An almost full-screen, interactive front-page signal map: management
-  language is horizontal and fundamentals are vertical.
-- A waterfall-style homepage that moves from executive snapshot to signal map,
+- A compact, interactive first-screen signal map: management language is
+  horizontal, fundamentals are vertical, and market confirmation sets bubble
+  size. Its investment-group legend is horizontal.
+- A waterfall-style homepage that moves from the signal map to
   investment groups, research triage, the full peer ranking, a one-bank
   diagnostic, and the evidence-readiness gate without requiring tab hopping.
+- A persistent left navigation rail and a top-right refresh/freshness control.
 - Six transparent investment-value research groups shown by bubble color, with
   a bank-level assignment table and a separate language-history confidence
   gate.
@@ -32,11 +34,13 @@ remain visible and are not blended into one opaque score.
 
 ## Investment groups
 
-The signal map assigns each bank to one mutually exclusive research group without
-averaging away disagreement: **Prism Leaders**, **Re-rating Candidates**,
-**Momentum Champions**, **Divergence & Watch**, **Structural Laggards**, or
-**Insufficient Evidence**. The rules use peer-relative gates; current-language
-groups remain provisional until four comparable reporting periods are available.
+The signal map assigns each bank to one of six directional research groups
+without averaging away disagreement: **Conviction Leaders**, **Re-rating
+Candidates**, **Contrarian Value**, **Expectations-led Momentum**, **Downside
+Risk**, or **No Clear Edge**. Missing coordinates are handled separately as
+**Insufficient Evidence**, not forced into an investment group. The rules use
+peer-relative gates; current-language groups remain provisional until four
+comparable reporting periods are available.
 
 ## Workflow
 

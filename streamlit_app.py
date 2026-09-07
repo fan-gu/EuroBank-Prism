@@ -146,7 +146,7 @@ def build_signal_map(rows):
         x_domain,
         y_domain,
         width=1_150,
-        height=760,
+        height=330,
         x_key="Language score",
         y_key="Numeric score",
     )
@@ -190,13 +190,13 @@ def build_signal_map(rows):
         )
         figure.add_annotation(
             x=row["Label x"], y=row["Label y"], text=f"<b>{row['Ticker']}</b>",
-            showarrow=False, font={"size": 12, "color": "#f4f6fb"},
+            showarrow=False, font={"size": 10, "color": "#f4f6fb"},
             bgcolor="rgba(14,18,27,0.78)", borderpad=3,
         )
     figure.add_vline(x=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
     figure.add_hline(y=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
     figure.update_layout(
-        height=900,
+        height=380,
         margin={"l": 20, "r": 15, "t": 20, "b": 20},
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(14,18,27,0.60)",
@@ -218,22 +218,12 @@ def build_signal_map(rows):
     return figure
 
 
-st.set_page_config(page_title="EuroBank Prism", page_icon="🏦", layout="wide")
-st.title("EuroBank Prism")
-st.caption("Three signals. One clearer view. · EURO STOXX Banks research intelligence")
-st.caption("Current release: fundamentals and management language, with an independent market-positioning overlay")
-
-if st.button("Refresh data"):
-    with st.status("Refreshing all 23 banks...", expanded=False) as status:
-        fundamental_result = subprocess.run([sys.executable, str(BASE_DIR / "build_full_universe.py")], cwd=BASE_DIR, capture_output=True, text=True)
-        market_result = subprocess.run([sys.executable, str(BASE_DIR / "build_market_confirmation.py")], cwd=BASE_DIR, capture_output=True, text=True)
-        if fundamental_result.returncode == 0 and market_result.returncode == 0:
-            status.update(label="Refresh complete", state="complete")
-            st.cache_data.clear()
-            st.rerun()
-        else:
-            status.update(label="Refresh failed", state="error")
-            st.code((fundamental_result.stderr or fundamental_result.stdout) + "\n" + (market_result.stderr or market_result.stdout))
+st.set_page_config(
+    page_title="EuroBank Prism",
+    page_icon="🏦",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 banks, scores, universe, report_pages, table_evidence, language_signals, market_confirmation = load_data()
 scored_tickers = {row["ticker"] for row in scores if row["status"] == "ranked"}
@@ -283,85 +273,94 @@ group_counts = {
 st.markdown(
     """
     <style>
-    .block-container {padding-top: 2.2rem; padding-bottom: 4rem;}
+    .block-container {padding-top: 1.2rem; padding-bottom: 4rem;}
     .prism-kicker {color:#8fa6c7;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:1.2rem;}
     .prism-rule {height:1px;background:linear-gradient(90deg,#4fa3ff55,transparent);margin:.35rem 0 1.2rem;}
     .prism-group {border-left:4px solid var(--group-color);padding:.1rem 0 .1rem .8rem;min-height:5.4rem;}
     .prism-group-name {font-weight:750;font-size:1rem;}
     .prism-group-count {font-size:1.8rem;font-weight:750;line-height:1.15;}
     .prism-muted {color:#aeb8c7;font-size:.82rem;line-height:1.35;}
+    .prism-nav a {display:block;color:#aeb8c7;text-decoration:none;padding:.42rem .2rem;border-left:2px solid #28364b;padding-left:.75rem;}
+    .prism-nav a:hover {color:#f4f6fb;border-left-color:#4fa3ff;}
+    .prism-legend {display:flex;gap:.3rem;align-items:center;flex-wrap:nowrap;overflow-x:auto;margin:.2rem 0 .42rem;padding-bottom:.1rem;}
+    .prism-chip {display:inline-flex;align-items:center;gap:.3rem;border:1px solid #2c3545;border-radius:999px;padding:.2rem .42rem;color:#dce3ee;font-size:.70rem;white-space:nowrap;}
+    .prism-dot {width:.62rem;height:.62rem;border-radius:50%;display:inline-block;}
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.markdown("<div class='prism-kicker'>01 · Executive snapshot</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-snapshot_cols = st.columns(5)
-snapshot_cols[0].metric("EURO STOXX banks", len(universe), border=True)
-snapshot_cols[1].metric("Ranked", f"{len(scored_tickers)}/{len(universe)}", border=True)
-snapshot_cols[2].metric("Prism leaders", group_counts.get("Prism Leaders", 0), border=True)
-snapshot_cols[3].metric(
-    "Risk / watch queue",
-    group_counts.get("Divergence & Watch", 0) + group_counts.get("Structural Laggards", 0),
-    border=True,
-)
-snapshot_cols[4].metric(
-    "Provider snapshot",
-    observed.isoformat() if observed else "Unknown",
-    f"{data_age} day(s) old" if data_age is not None else None,
-    delta_color="off",
-    border=True,
-)
-if data_age is not None and data_age > 3:
-    st.warning("Market-provider data is stale. Refresh before using the screen for current research.")
+with st.sidebar:
+    st.markdown("### EuroBank Prism")
+    st.caption(f"{len(scored_tickers)}/{len(universe)} banks ranked · 3 independent signals")
+    st.markdown(
+        """
+        <div class="prism-nav">
+          <a href="#core-signal-map">Signal map</a>
+          <a href="#investment-groups">Investment groups</a>
+          <a href="#research-triage">Research triage</a>
+          <a href="#full-peer-ranking">Peer ranking</a>
+          <a href="#quick-diagnostic">Quick diagnostic</a>
+          <a href="#evidence-readiness">Evidence readiness</a>
+          <a href="#research-workbench">Research workbench</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.divider()
+    st.caption("Scores are peer-relative research signals, not investment advice.")
 
-st.markdown("<div class='prism-kicker'>02 · Core signal map</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-st.subheader("Numerical × Linguistic signal map")
+brand_col, action_col = st.columns([5.2, 1.45], vertical_alignment="top")
+with brand_col:
+    st.title("EuroBank Prism")
+    st.caption("Three signals. One clearer view. · EURO STOXX Banks research intelligence")
+with action_col:
+    refresh_clicked = st.button("Refresh data", width="stretch", icon=":material/refresh:")
+    if data_age is None:
+        st.caption("Data date unavailable")
+    elif data_age > 3:
+        st.caption(f"⚠ Provider snapshot {observed} · {data_age} days old")
+    else:
+        st.caption(f"Provider snapshot {observed} · current")
+
+if refresh_clicked:
+    with st.status("Refreshing all 23 banks...", expanded=False) as status:
+        fundamental_result = subprocess.run([sys.executable, str(BASE_DIR / "build_full_universe.py")], cwd=BASE_DIR, capture_output=True, text=True)
+        market_result = subprocess.run([sys.executable, str(BASE_DIR / "build_market_confirmation.py")], cwd=BASE_DIR, capture_output=True, text=True)
+        if fundamental_result.returncode == 0 and market_result.returncode == 0:
+            status.update(label="Refresh complete", state="complete")
+            st.cache_data.clear()
+            st.rerun()
+        else:
+            status.update(label="Refresh failed", state="error")
+            st.code((fundamental_result.stderr or fundamental_result.stdout) + "\n" + (market_result.stderr or market_result.stdout))
+
+st.markdown("<div id='core-signal-map'></div>", unsafe_allow_html=True)
+st.header("Core signal map")
 st.caption(
-    "Management language runs horizontally and fundamentals & valuation vertically. "
+    "Numerical × linguistic: management language runs horizontally and fundamentals & valuation vertically. "
     "Bubble size is market confirmation: larger means stronger relative price confirmation."
 )
 if plotted_rows:
-    chart_col, legend_col = st.columns([5.4, 1.35], gap="large")
-    with chart_col:
-        st.plotly_chart(
-            build_signal_map(plotted_rows),
-            width="stretch",
-            height=900,
-            key="front_page_signal_map",
-            config={"displaylogo": False, "scrollZoom": True},
-        )
-    with legend_col:
-        st.markdown("#### How to read it")
-        st.write("**Position**")
-        st.caption("Right = stronger management language. Up = stronger fundamentals and valuation.")
-        st.write("**Bubble size**")
-        st.caption("Larger = higher market-confirmation score. Size never changes a bank’s color group.")
-        st.markdown(
-            "<div style='display:flex;align-items:flex-end;gap:14px;height:58px;margin:4px 0 14px'>"
-            "<span style='width:16px;height:16px;border-radius:50%;background:#9FA8B8;display:inline-block'></span>"
-            "<span style='width:30px;height:30px;border-radius:50%;background:#9FA8B8;display:inline-block'></span>"
-            "<span style='width:48px;height:48px;border-radius:50%;background:#9FA8B8;display:inline-block'></span>"
-            "</div><div style='color:#9FA8B8;font-size:0.78rem;margin-top:-10px'>Low · Medium · High confirmation</div>",
-            unsafe_allow_html=True,
-        )
-        st.write("**Color = investment group**")
-        for group_name in GROUP_ORDER:
-            meta = GROUP_META[group_name]
-            st.markdown(
-                f"<div style='display:flex;gap:9px;align-items:flex-start;margin:10px 0'>"
-                f"<span style='width:13px;height:13px;min-width:13px;border-radius:50%;background:{meta['color']};margin-top:4px'></span>"
-                f"<span><b>{group_name}</b><br><span style='color:#AEB8C7;font-size:0.78rem'>{meta['meaning']}</span></span>"
-                "</div>",
-                unsafe_allow_html=True,
-            )
-        st.caption("Colors and this legend are generated from the same code dictionary.")
+    legend_chips = "".join(
+        f"<span class='prism-chip' title=\"{GROUP_META[group]['meaning']}\">"
+        f"<span class='prism-dot' style='background:{GROUP_META[group]['color']}'></span>{group}</span>"
+        for group in GROUP_ORDER
+    )
+    st.markdown(f"<div class='prism-legend'>{legend_chips}</div>", unsafe_allow_html=True)
+    st.plotly_chart(
+        build_signal_map(plotted_rows),
+        width="stretch",
+        height=380,
+        key="front_page_signal_map",
+        config={"displaylogo": False, "scrollZoom": True},
+    )
 
-    st.markdown("<div class='prism-kicker'>03 · Investment groups</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+    st.markdown("<div id='investment-groups' class='prism-kicker'>02 · Investment groups</div><div class='prism-rule'></div>", unsafe_allow_html=True)
     st.subheader("Investment Groups")
     st.caption(
-        "Groups use peer-relative gates (leader floor 55, high ≥67, low <33) and preserve all three signals; "
-        "they are not a blended score. "
+        "Six directional outcomes use explicit peer-relative gates and preserve all three signals; "
+        "they are not a blended score. Missing evidence remains a separate publication gate. "
         "Language-history confidence is shown separately."
     )
     group_columns = st.columns(3, gap="medium")
@@ -408,20 +407,20 @@ st.caption(
     "A future market-expectations axis will require consistent consensus-estimate data."
 )
 
-st.markdown("<div class='prism-kicker'>04 · Research triage</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.markdown("<div id='research-triage' class='prism-kicker'>03 · Research triage</div><div class='prism-rule'></div>", unsafe_allow_html=True)
 st.subheader("Opportunities and risk queue")
 st.caption("A prioritisation view for deeper research—not an investment recommendation.")
-opportunity_groups = {"Prism Leaders", "Re-rating Candidates"}
+opportunity_groups = {"Conviction Leaders", "Re-rating Candidates", "Contrarian Value"}
 opportunities = sorted(
     (row for row in plotted_rows if row["Investment group"] in opportunity_groups),
     key=lambda row: (row["Numeric score"] + row["Language score"], row["Market confirmation"]),
     reverse=True,
 )
-risk_groups = {"Structural Laggards", "Divergence & Watch"}
+risk_groups = {"Downside Risk", "Expectations-led Momentum"}
 risks = sorted(
     (row for row in plotted_rows if row["Investment group"] in risk_groups),
     key=lambda row: (
-        row["Investment group"] == "Structural Laggards",
+        row["Investment group"] == "Downside Risk",
         100 - row["Numeric score"],
         abs(row["Gap"]),
     ),
@@ -452,7 +451,7 @@ with right_queue:
             )
             st.write(GROUP_META[row["Investment group"]]["meaning"])
 
-st.markdown("<div class='prism-kicker'>05 · Full peer ranking</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.markdown("<div id='full-peer-ranking' class='prism-kicker'>04 · Full peer ranking</div><div class='prism-rule'></div>", unsafe_allow_html=True)
 st.subheader("Relative ranking")
 st.caption(
     f"Coverage: {len(scored_tickers)}/{len(universe)} banks · all rows are shown · "
@@ -461,7 +460,7 @@ st.caption(
 render_ranking_table(ranking_rows, key="homepage_ranking")
 st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
 
-st.markdown("<div class='prism-kicker'>06 · Quick diagnostic</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.markdown("<div id='quick-diagnostic' class='prism-kicker'>05 · Quick diagnostic</div><div class='prism-rule'></div>", unsafe_allow_html=True)
 st.subheader("One-bank research snapshot")
 quick_ticker = st.selectbox(
     "Select a bank",
@@ -487,7 +486,7 @@ if quick_signal:
         f"Evidence status: {quick_signal['Evidence status']}."
     )
 
-st.markdown("<div class='prism-kicker'>07 · Evidence readiness</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.markdown("<div id='evidence-readiness' class='prism-kicker'>06 · Evidence readiness</div><div class='prism-rule'></div>", unsafe_allow_html=True)
 st.subheader("Language drift and governance gate")
 evidence_cols = st.columns(5)
 evidence_cols[0].metric("Language coverage", f"{language_coverage.get('provisional_banks', 0)}/{len(universe)}", border=True)
@@ -500,7 +499,7 @@ st.warning(
     "Signals remain provisional until citations are reviewed and predictive value is backtested."
 )
 
-st.markdown("<div class='prism-kicker'>08 · Research workbench</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.markdown("<div id='research-workbench' class='prism-kicker'>07 · Research workbench</div><div class='prism-rule'></div>", unsafe_allow_html=True)
 st.caption("Use the tabs below for detailed diagnostics, source links, and methodology.")
 
 ranking_tab, signals_tab, details_tab, evidence_tab, methodology_tab = st.tabs(
@@ -776,7 +775,13 @@ with methodology_tab:
     st.markdown("**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort to correct management-document optimism. The numeric and language axes are not combined.")
     st.markdown("**Language history gate:** four comparable reports of the same document type enable a preliminary drift observation; eight enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
     st.markdown("**Market-confirmation bubble size:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. The result controls only bubble size, so disagreement stays visible and never alters either axis or the fundamental score.")
-    st.markdown("**Investment-value groups:** deterministic gates classify the three visible signals without averaging them. Prism Leaders clear 55 on all signals; Re-rating Candidates combine fundamentals and language of at least 55 with mid-tier market confirmation; Momentum Champions require market confirmation of at least 67 with non-weak supporting signals; Structural Laggards require below-centre fundamentals plus confirming weakness. All remaining conflicts stay in Divergence & Watch, and missing signals are Insufficient Evidence.")
+    st.markdown(
+        "**Investment-value groups:** deterministic gates classify the three visible signals without averaging them. "
+        "Conviction Leaders clear 55 on every axis. Re-rating Candidates have fundamentals ≥55 and language ≥50 while market confirmation remains below 55. "
+        "Contrarian Value combines fundamentals ≥50 with language below 50. Expectations-led Momentum requires market confirmation ≥60 while fundamentals remain below 55. "
+        "Downside Risk combines fundamentals below 50 with at least one confirming warning from language or market confirmation below 50. Remaining mid-pack combinations are No Clear Edge. "
+        "Missing signals are handled by the separate Insufficient Evidence gate."
+    )
     st.markdown("**Controls:** common reporting dates, source evidence, freshness checks, sensitivity analysis, and publication gate.")
     st.markdown("**Scope:** this is a research screening tool, not personalized investment advice.")
     report_path = BASE_DIR / "pilot_report.md"

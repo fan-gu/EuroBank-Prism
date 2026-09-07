@@ -11,16 +11,16 @@ class StreamlitAppTests(unittest.TestCase):
         app_path = Path(__file__).resolve().parent.parent / "streamlit_app.py"
         app = AppTest.from_file(str(app_path), default_timeout=30).run()
         self.assertEqual(app.exception, [])
-        subheaders = [item.value for item in app.subheader]
+        headings = [item.value for item in app.header] + [item.value for item in app.subheader]
         for expected in (
-            "Numerical × Linguistic signal map",
+            "Core signal map",
             "Investment Groups",
             "Opportunities and risk queue",
             "Relative ranking",
             "One-bank research snapshot",
             "Language drift and governance gate",
         ):
-            self.assertIn(expected, subheaders)
+            self.assertIn(expected, headings)
         self.assertGreaterEqual(len(app.dataframe), 2)
 
 
