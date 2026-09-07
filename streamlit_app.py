@@ -8,16 +8,15 @@ import sys
 
 import altair as alt
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 
-from app.dashboard_visuals import image_data_url, layout_signal_labels, padded_domain
 from app.language_signals import period_sort_key
 
 load_dotenv(Path(__file__).with_name(".env"))
 
 BASE_DIR = Path(__file__).resolve().parent
-LOGO_DIR = BASE_DIR / "assets" / "bank_logos"
 COUNTRY_INFO = {
     "Austria": ("AT", "at"), "Belgium": ("BE", "be"),
     "Finland": ("FI", "fi"), "France": ("FR", "fr"),
@@ -84,13 +83,88 @@ def short_comment(score):
     return "Weak relative screen"
 
 
+def build_signal_cube(rows):
+    """Build the interactive three-coordinate research view."""
+    quadrant_colors = {
+        "Confirmed strength": "#35c48d",
+        "Potential turnaround": "#4fa3ff",
+        "Early warning": "#ffb347",
+        "High-risk screen": "#ef6262",
+    }
+    figure = go.Figure()
+    reference_planes = [
+        go.Surface(x=[[50, 50], [50, 50]], y=[[0, 100], [0, 100]], z=[[0, 0], [100, 100]]),
+        go.Surface(x=[[0, 100], [0, 100]], y=[[50, 50], [50, 50]], z=[[0, 0], [100, 100]]),
+        go.Surface(x=[[0, 100], [0, 100]], y=[[0, 0], [100, 100]], z=[[50, 50], [50, 50]]),
+    ]
+    for plane in reference_planes:
+        plane.update(
+            showscale=False,
+            opacity=0.055,
+            colorscale=[[0, "#8fa1bd"], [1, "#8fa1bd"]],
+            hoverinfo="skip",
+        )
+        figure.add_trace(plane)
+    figure.add_trace(
+        go.Scatter3d(
+            x=[row["Numeric score"] for row in rows],
+            y=[row["Language score"] for row in rows],
+            z=[row["Market confirmation"] for row in rows],
+            mode="markers+text",
+            text=[row["Ticker"] for row in rows],
+            textposition="top center",
+            textfont={"size": 10, "color": "#f4f6fb"},
+            marker={
+                "size": 9,
+                "color": [quadrant_colors.get(row["Research quadrant"], "#9fa8b8") for row in rows],
+                "line": {"color": "#f4f6fb", "width": 1},
+                "opacity": 0.92,
+            },
+            customdata=[
+                [row["Bank"], row["Research quadrant"], row["Market regime"], row["Gap"]]
+                for row in rows
+            ],
+            hovertemplate=(
+                "<b>%{customdata[0]} (%{text})</b><br>"
+                "Fundamental: %{x:.1f}<br>Language: %{y:.1f}<br>"
+                "Market confirmation: %{z:.1f}<br>"
+                "Numeric-language gap: %{customdata[3]:+.1f}<br>"
+                "%{customdata[1]} · %{customdata[2]}<extra></extra>"
+            ),
+            name="Banks",
+        )
+    )
+    axis_style = {
+        "range": [0, 100],
+        "tickvals": [0, 25, 50, 75, 100],
+        "gridcolor": "rgba(160,175,200,0.18)",
+        "zerolinecolor": "rgba(160,175,200,0.35)",
+        "backgroundcolor": "rgba(14,18,27,0.60)",
+        "showbackground": True,
+    }
+    figure.update_layout(
+        height=720,
+        margin={"l": 0, "r": 0, "t": 12, "b": 0},
+        paper_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+        scene={
+            "xaxis": {**axis_style, "title": "Fundamentals & valuation"},
+            "yaxis": {**axis_style, "title": "Management language"},
+            "zaxis": {**axis_style, "title": "Market confirmation"},
+            "aspectmode": "cube",
+            "camera": {"eye": {"x": 1.45, "y": 1.45, "z": 1.15}},
+        },
+    )
+    return figure
+
+
 st.set_page_config(page_title="EuroBank Prism", page_icon="🏦", layout="wide")
 st.title("EuroBank Prism")
 st.caption(
-    "Three independent signals. One clearer view. · "
+    "Three visible coordinates. One clearer view. · "
     "EURO STOXX Banks research intelligence"
 )
-st.caption("Current release: fundamentals, management language, and independent market confirmation")
+st.caption("Current release: fundamentals and management language, with an independent market-positioning overlay")
 
 if st.button("Refresh data"):
     with st.status("Refreshing all 23 banks...", expanded=False) as status:
@@ -112,6 +186,49 @@ market_coverage = sum(
     row.get("status") == "market_confirmation_available"
     for row in market_by_ticker.values()
 )
+signal_rows = language_signals.get("signals", [])
+plotted_rows = [
+    {
+        "Ticker": row["ticker"],
+        "Bank": row["bank_name"],
+        "Numeric score": row["numeric_score"],
+        "Language score": row["language_score"],
+        "Negative pressure": row.get("negative_pressure_score"),
+        "Gap": row["divergence"],
+        "Research quadrant": row["quadrant"],
+        "Market confirmation": market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+        "Market regime": market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
+    }
+    for row in signal_rows
+    if row.get("numeric_score") is not None
+    and row.get("language_score") is not None
+    and market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score") is not None
+]
+
+st.subheader("Three-signal research cube")
+st.caption(
+    "Rotate and zoom to inspect each bank across fundamentals and valuation, "
+    "management language, and market confirmation. The translucent planes mark the peer center at 50."
+)
+if plotted_rows:
+    st.plotly_chart(
+        build_signal_cube(plotted_rows),
+        width="stretch",
+        height=720,
+        key="front_page_signal_cube",
+        config={"displaylogo": False, "scrollZoom": False},
+    )
+    st.caption(
+        "Point colors preserve the fundamental-language diagnostic: green confirmed strength, blue potential turnaround, "
+        "amber early warning, and red high-risk screen. Hover for exact values."
+    )
+else:
+    st.info("Three-coordinate coverage is not yet available.")
+st.caption(
+    "Market confirmation is the price-action overlay within Axis 1; it remains a separate coordinate so disagreement is visible. "
+    "A future market-expectations axis will require consistent consensus-estimate data."
+)
+
 ranking_tab, signals_tab, details_tab, evidence_tab, methodology_tab = st.tabs(
     ["Relative ranking", "Signals", "Bank details", "Evidence", "Methodology"]
 )
@@ -168,9 +285,9 @@ with ranking_tab:
     st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
 
 with signals_tab:
-    st.subheader("Three independent research signals")
+    st.subheader("Signal diagnostics")
     st.warning(
-        "Research preview only: neither the language nor market-confirmation axis changes the fundamental score. "
+        "Research preview only: neither the language signal nor market-confirmation overlay changes the fundamental score. "
         "No quadrant, momentum regime, or combination is a buy or sell recommendation."
     )
     with st.container(horizontal=True):
@@ -180,98 +297,10 @@ with signals_tab:
         st.metric("Insufficient language data", language_coverage.get("insufficient_banks", len(universe)), border=True)
         st.metric("Backtested signals", 0, border=True)
 
-    signal_rows = language_signals.get("signals", [])
-    plotted_rows = [
-        {
-            "Ticker": row["ticker"],
-            "Bank": row["bank_name"],
-            "Numeric score": row["numeric_score"],
-            "Language score": row["language_score"],
-            "Negative pressure": row.get("negative_pressure_score"),
-            "Gap": row["divergence"],
-            "Research quadrant": row["quadrant"],
-            "Market confirmation": market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
-            "Market regime": market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
-        }
-        for row in signal_rows
-        if row.get("numeric_score") is not None and row.get("language_score") is not None
-    ]
     if plotted_rows:
-        for row in plotted_rows:
-            logo_path = LOGO_DIR / f"{row['Ticker']}.png"
-            row["Logo"] = image_data_url(logo_path) if logo_path.exists() else ""
-        x_domain = padded_domain([row["Numeric score"] for row in plotted_rows])
-        y_domain = padded_domain([row["Language score"] for row in plotted_rows])
-        signal_frame = pd.DataFrame(
-            layout_signal_labels(plotted_rows, x_domain, y_domain)
-        )
-        x_axis = alt.X(
-            "Numeric score:Q",
-            title="Numeric relative-value score",
-            scale=alt.Scale(domain=x_domain, nice=False, zero=False),
-        )
-        y_axis = alt.Y(
-            "Language score:Q",
-            title="Peer-calibrated management-language score",
-            scale=alt.Scale(domain=y_domain, nice=False, zero=False),
-        )
-        vertical = alt.Chart(pd.DataFrame({"cut": [50]})).mark_rule(
-            color="#7a8599", strokeDash=[6, 6]
-        ).encode(x=alt.X("cut:Q", scale=alt.Scale(domain=x_domain, nice=False, zero=False)))
-        horizontal = alt.Chart(pd.DataFrame({"cut": [50]})).mark_rule(
-            color="#7a8599", strokeDash=[6, 6]
-        ).encode(y=alt.Y("cut:Q", scale=alt.Scale(domain=y_domain, nice=False, zero=False)))
-        halos = alt.Chart(signal_frame).mark_circle(
-            size=980, opacity=0.28, strokeWidth=2
-        ).encode(
-            x=x_axis,
-            y=y_axis,
-            color=alt.Color(
-                "Research quadrant:N",
-                scale=alt.Scale(
-                    domain=["Confirmed strength", "Potential turnaround", "Early warning", "High-risk screen"],
-                    range=["#35c48d", "#4fa3ff", "#ffb347", "#ef6262"],
-                ),
-                legend=alt.Legend(title=None, orient="bottom", columns=4),
-            ),
-            tooltip=["Bank:N", "Ticker:N", "Numeric score:Q", "Language score:Q", "Negative pressure:Q", "Gap:Q", "Market confirmation:Q", "Market regime:N", "Research quadrant:N"],
-        )
-        logos = alt.Chart(signal_frame).mark_image(width=28, height=28).encode(
-            x=x_axis,
-            y=y_axis,
-            url=alt.Url("Logo:N"),
-            tooltip=["Bank:N", "Ticker:N", "Numeric score:Q", "Language score:Q", "Negative pressure:Q", "Gap:Q", "Market confirmation:Q", "Market regime:N", "Research quadrant:N"],
-        )
-        connectors = alt.Chart(signal_frame).mark_rule(
-            color="#aeb8c8", opacity=0.55, strokeWidth=1
-        ).encode(
-            x=x_axis,
-            y=y_axis,
-            x2=alt.X2("Label x:Q"),
-            y2=alt.Y2("Label y:Q"),
-        )
-        label_outline = alt.Chart(signal_frame).mark_text(
-            color="#10131a", fontWeight="bold", fontSize=12,
-            stroke="#10131a", strokeWidth=4,
-        ).encode(x="Label x:Q", y="Label y:Q", text="Ticker:N")
-        labels = alt.Chart(signal_frame).mark_text(
-            color="#f4f6fb", fontWeight="bold", fontSize=12,
-        ).encode(x="Label x:Q", y="Label y:Q", text="Ticker:N")
-        st.altair_chart(
-            (
-                vertical + horizontal + connectors + halos + logos
-                + label_outline + labels
-            ).properties(height=600, padding={"left": 4, "right": 4, "top": 8, "bottom": 4}),
-            width="stretch",
-        )
-        st.caption(
-            "Upper-right: confirmed strength · upper-left: potential turnaround · "
-            "lower-right: early warning · lower-left: high-risk screen. "
-            "The horizontal 50 line is the robust peer center, not generic sentiment neutrality."
-        )
-        market_frame = signal_frame.dropna(subset=["Market confirmation"]).sort_values("Market confirmation", ascending=True)
+        market_frame = pd.DataFrame(plotted_rows).sort_values("Market confirmation", ascending=True)
         if not market_frame.empty:
-            st.markdown("#### Third axis: market confirmation")
+            st.markdown("#### Axis 1 market-positioning overlay")
             market_chart = alt.Chart(market_frame).mark_bar().encode(
                 x=alt.X("Market confirmation:Q", title="Peer-relative market-confirmation score", scale=alt.Scale(domain=[0, 100])),
                 y=alt.Y("Ticker:N", sort="-x", title=None),
@@ -283,9 +312,9 @@ with signals_tab:
                 tooltip=["Bank:N", "Ticker:N", "Market confirmation:Q", "Market regime:N"],
             ).properties(height=max(360, len(market_frame) * 24))
             st.altair_chart(market_chart, width="stretch")
-            st.caption("This independent axis peer-ranks 1-, 3-, and 6-month returns plus price versus the 200-day average. It is market confirmation, not an analyst-expectations estimate.")
+            st.caption("This overlay peer-ranks 1-, 3-, and 6-month returns plus price versus the 200-day average. It qualifies Axis 1 but does not change the fundamental ranking score.")
     else:
-        st.info("No bank currently has sufficient language evidence for the matrix.")
+        st.info("No bank currently has complete three-coordinate evidence.")
 
     matrix_rows = [
         {
@@ -509,7 +538,7 @@ with methodology_tab:
     st.markdown("**Official-report overlay:** CET1, leverage, LCR, NSFR, NPL ratio, NPL coverage, cost of risk, NIM, cost/income, loan/deposit ratio, and IRRBB sensitivities are included only when period-aligned evidence is available.")
     st.markdown("**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort to correct management-document optimism. The numeric and language axes are not combined.")
     st.markdown("**Language history gate:** four comparable reports of the same document type enable a preliminary drift observation; eight enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
-    st.markdown("**Independent market-confirmation axis:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. This axis is not a valuation metric and is never blended into the fundamental score.")
+    st.markdown("**Axis 1 market-confirmation overlay:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. It remains a separate cube coordinate so disagreement stays visible, but it is never blended into the fundamental score.")
     st.markdown("**Controls:** common reporting dates, source evidence, freshness checks, sensitivity analysis, and publication gate.")
     st.markdown("**Scope:** this is a research screening tool, not personalized investment advice.")
     report_path = BASE_DIR / "pilot_report.md"

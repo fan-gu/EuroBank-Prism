@@ -1,6 +1,6 @@
 # EuroBank Prism
 
-**Three independent signals. One clearer view.**
+**Three visible coordinates. One clearer view.**
 
 EuroBank Prism is a research screening dashboard for the 23 constituents of
 the EURO STOXX Banks index. It compares public bank disclosures and market
@@ -12,14 +12,16 @@ data consistently; it is not personalized investment advice.
 - Price, country, ticker, index weight, and official-report links.
 - A separate management-language signal with cited passages, pages, and an
   auditable four-period drift pipeline.
-- A separate market-confirmation axis based on peer-relative price behaviour.
+- A market-confirmation overlay within Axis 1, kept as a separate visual
+  coordinate so price disagreement remains visible.
+- An interactive front-page research cube for all three live coordinates.
 - Evidence controls for reporting period, definition, unit, scope, and source.
 - Dark-mode dashboard with ranking, signals, bank details, evidence, and
   methodology views.
 
-The current release has three live axes: fundamentals, management language,
-and market confirmation. They are intentionally not blended into one opaque
-score.
+The current release has two research axes—fundamentals and management
+language—plus a market-positioning overlay within Axis 1. The front-page cube
+keeps all three coordinates visible; they are not blended into one opaque score.
 
 ## Workflow
 
@@ -27,7 +29,7 @@ score.
 Official reports ──> PDF/page screening ──> cited evidence
                                   └──────> management language + drift history
 Market data ──────> comparable metrics ──> weighted peer ranking
-              └──> price history ───────> market-confirmation axis
+              └──> price history ───────> Axis 1 market-confirmation overlay
                     quality and freshness gates ──> dashboard/report
 ```
 

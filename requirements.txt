@@ -2,6 +2,7 @@ python-dotenv
 altair
 beautifulsoup4
 pandas
+plotly
 pypdf
 pdfplumber
 pypdfium2
