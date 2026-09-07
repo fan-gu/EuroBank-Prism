@@ -23,6 +23,12 @@ def padded_domain(values: list[float], reference: float = 50.0) -> list[float]:
     return [round(max(0.0, lower - padding), 1), round(min(100.0, upper + padding), 1)]
 
 
+def market_bubble_diameter(score: float) -> float:
+    """Map a 0–100 confirmation score to a readable 16–58 px diameter."""
+    bounded = min(100.0, max(0.0, float(score)))
+    return round(16.0 + bounded * 0.42, 2)
+
+
 def _overlap_area(first: tuple[float, ...], second: tuple[float, ...]) -> float:
     width = max(0.0, min(first[2], second[2]) - max(first[0], second[0]))
     height = max(0.0, min(first[3], second[3]) - max(first[1], second[1]))
@@ -35,6 +41,8 @@ def layout_signal_labels(
     y_domain: list[float],
     width: int = 1_000,
     height: int = 520,
+    x_key: str = "Numeric score",
+    y_key: str = "Language score",
 ) -> list[dict]:
     """Place ticker labels around logos with collision-aware leader lines.
 
@@ -49,8 +57,8 @@ def layout_signal_labels(
     y_span = y_domain[1] - y_domain[0]
 
     def to_pixel(row: dict) -> tuple[float, float]:
-        x = (row["Numeric score"] - x_domain[0]) / x_span * width
-        y = height - (row["Language score"] - y_domain[0]) / y_span * height
+        x = (row[x_key] - x_domain[0]) / x_span * width
+        y = height - (row[y_key] - y_domain[0]) / y_span * height
         return x, y
 
     def to_score(x: float, y: float) -> tuple[float, float]:

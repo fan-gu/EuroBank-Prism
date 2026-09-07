@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.investment_groups import evidence_status, investment_group
+from app.investment_groups import GROUP_META, GROUP_ORDER, evidence_status, investment_group
 
 
 class InvestmentGroupTests(unittest.TestCase):
@@ -27,6 +27,10 @@ class InvestmentGroupTests(unittest.TestCase):
         self.assertEqual(evidence_status(1), "provisional")
         self.assertEqual(evidence_status(4), "four-period trend available")
         self.assertEqual(evidence_status(None), "insufficient")
+
+    def test_each_legend_group_has_one_unique_color(self):
+        colors = [GROUP_META[group]["color"] for group in GROUP_ORDER]
+        self.assertEqual(len(colors), len(set(colors)))
 
 
 if __name__ == "__main__":

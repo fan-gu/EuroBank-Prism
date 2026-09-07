@@ -1,6 +1,6 @@
 # EuroBank Prism
 
-**Three visible coordinates. One clearer view.**
+**Three signals. One clearer view.**
 
 EuroBank Prism is a research screening dashboard for the 23 constituents of
 the EURO STOXX Banks index. It compares public bank disclosures and market
@@ -12,25 +12,24 @@ data consistently; it is not personalized investment advice.
 - Price, country, ticker, index weight, and official-report links.
 - A separate management-language signal with cited passages, pages, and an
   auditable four-period drift pipeline.
-- A market-confirmation overlay within Axis 1, kept as a separate visual
-  coordinate so price disagreement remains visible.
-- An almost full-screen, interactive front-page research cube: management
-  language is horizontal, market confirmation is depth, and fundamentals are
-  vertical.
-- Six transparent investment-value research groups shown by cube color, with
+- Market confirmation encoded independently by bubble size, so price
+  disagreement remains visible without adding a third spatial axis.
+- An almost full-screen, interactive front-page signal map: management
+  language is horizontal and fundamentals are vertical.
+- Six transparent investment-value research groups shown by bubble color, with
   a bank-level assignment table and a separate language-history confidence
   gate.
 - Evidence controls for reporting period, definition, unit, scope, and source.
 - Dark-mode dashboard with ranking, signals, bank details, evidence, and
   methodology views.
 
-The current release has two research axes—fundamentals and management
-language—plus a market-positioning overlay within Axis 1. The front-page cube
-keeps all three coordinates visible; they are not blended into one opaque score.
+The current release has two spatial axes—fundamentals and management
+language—plus market confirmation encoded by bubble size. The three signals
+remain visible and are not blended into one opaque score.
 
 ## Investment groups
 
-The cube assigns each bank to one mutually exclusive research group without
+The signal map assigns each bank to one mutually exclusive research group without
 averaging away disagreement: **Prism Leaders**, **Re-rating Candidates**,
 **Momentum Champions**, **Divergence & Watch**, **Structural Laggards**, or
 **Insufficient Evidence**. The rules use peer-relative gates; current-language

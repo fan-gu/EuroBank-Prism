@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.dashboard_visuals import layout_signal_labels, padded_domain
+from app.dashboard_visuals import layout_signal_labels, market_bubble_diameter, padded_domain
 
 
 class DashboardVisualTests(unittest.TestCase):
@@ -36,6 +36,13 @@ class DashboardVisualTests(unittest.TestCase):
         positioned = layout_signal_labels(rows, [45, 55], [65, 75])
         positions = {(row["Label x"], row["Label y"]) for row in positioned}
         self.assertEqual(len(positions), len(rows))
+
+    def test_market_confirmation_always_increases_bubble_size(self):
+        sizes = [market_bubble_diameter(score) for score in (0, 25, 50, 75, 100)]
+        self.assertEqual(sizes, sorted(sizes))
+        self.assertEqual(len(set(sizes)), len(sizes))
+        self.assertEqual(market_bubble_diameter(-20), sizes[0])
+        self.assertEqual(market_bubble_diameter(120), sizes[-1])
 
 
 if __name__ == "__main__":

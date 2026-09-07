@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 
+from app.dashboard_visuals import layout_signal_labels, market_bubble_diameter, padded_domain
 from app.investment_groups import GROUP_META, GROUP_ORDER, evidence_status, investment_group
 from app.language_signals import period_sort_key
 
@@ -84,87 +85,91 @@ def short_comment(score):
     return "Weak relative screen"
 
 
-def build_signal_cube(rows):
-    """Build the interactive three-coordinate research view."""
+def build_signal_map(rows):
+    """Build the two-dimensional signal map with market-sized bubbles."""
     figure = go.Figure()
-    reference_planes = [
-        go.Surface(x=[[50, 50], [50, 50]], y=[[0, 100], [0, 100]], z=[[0, 0], [100, 100]]),
-        go.Surface(x=[[0, 100], [0, 100]], y=[[50, 50], [50, 50]], z=[[0, 0], [100, 100]]),
-        go.Surface(x=[[0, 100], [0, 100]], y=[[0, 0], [100, 100]], z=[[50, 50], [50, 50]]),
-    ]
-    for plane in reference_planes:
-        plane.update(
-            showscale=False,
-            opacity=0.055,
-            colorscale=[[0, "#8fa1bd"], [1, "#8fa1bd"]],
-            hoverinfo="skip",
-        )
-        figure.add_trace(plane)
+    x_domain = padded_domain([row["Language score"] for row in rows])
+    y_domain = padded_domain([row["Numeric score"] for row in rows])
+    positioned = layout_signal_labels(
+        rows,
+        x_domain,
+        y_domain,
+        width=1_150,
+        height=760,
+        x_key="Language score",
+        y_key="Numeric score",
+    )
     for group_name in GROUP_ORDER:
-        group_rows = [row for row in rows if row["Investment group"] == group_name]
+        group_rows = [row for row in positioned if row["Investment group"] == group_name]
         if not group_rows:
             continue
         figure.add_trace(
-            go.Scatter3d(
+            go.Scatter(
             x=[row["Language score"] for row in group_rows],
-            y=[row["Market confirmation"] for row in group_rows],
-            z=[row["Numeric score"] for row in group_rows],
-            mode="markers+text",
-            text=[row["Ticker"] for row in group_rows],
-            textposition="top center",
-            textfont={"size": 10, "color": "#f4f6fb"},
+            y=[row["Numeric score"] for row in group_rows],
+            mode="markers",
             marker={
-                "size": 10,
+                "size": [market_bubble_diameter(row["Market confirmation"]) for row in group_rows],
+                "sizemode": "diameter",
                 "color": GROUP_META[group_name]["color"],
-                "line": {"color": "#f4f6fb", "width": 1},
-                "opacity": 0.92,
+                "line": {"color": "#f4f6fb", "width": 1.4},
+                "opacity": 0.86,
             },
             customdata=[
-                [row["Bank"], row["Investment group"], row["Market regime"], row["Gap"], row["Evidence status"]]
+                [row["Bank"], row["Ticker"], row["Investment group"], row["Market regime"], row["Gap"], row["Evidence status"], row["Market confirmation"]]
                 for row in group_rows
             ],
             hovertemplate=(
-                "<b>%{customdata[0]} (%{text})</b><br>"
-                "Fundamentals & valuation: %{z:.1f}<br>Language: %{x:.1f}<br>"
-                "Market confirmation: %{y:.1f}<br>"
-                "Numeric-language gap: %{customdata[3]:+.1f}<br>"
-                "%{customdata[1]} · %{customdata[2]}<br>"
-                "Evidence: %{customdata[4]}<extra></extra>"
+                "<b>%{customdata[0]} (%{customdata[1]})</b><br>"
+                "Fundamentals & valuation: %{y:.1f}<br>Language: %{x:.1f}<br>"
+                "Market confirmation: %{customdata[6]:.1f}<br>"
+                "Numeric-language gap: %{customdata[4]:+.1f}<br>"
+                "%{customdata[2]} · %{customdata[3]}<br>"
+                "Evidence: %{customdata[5]}<extra></extra>"
             ),
             name=group_name,
             )
         )
-    axis_style = {
-        "range": [0, 100],
-        "tickvals": [0, 25, 50, 75, 100],
-        "gridcolor": "rgba(160,175,200,0.18)",
-        "zerolinecolor": "rgba(160,175,200,0.35)",
-        "backgroundcolor": "rgba(14,18,27,0.60)",
-        "showbackground": True,
-    }
+    for row in positioned:
+        figure.add_shape(
+            type="line",
+            x0=row["Language score"], y0=row["Numeric score"],
+            x1=row["Label x"], y1=row["Label y"],
+            line={"color": "rgba(210,220,235,0.38)", "width": 1},
+        )
+        figure.add_annotation(
+            x=row["Label x"], y=row["Label y"], text=f"<b>{row['Ticker']}</b>",
+            showarrow=False, font={"size": 12, "color": "#f4f6fb"},
+            bgcolor="rgba(14,18,27,0.78)", borderpad=3,
+        )
+    figure.add_vline(x=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
+    figure.add_hline(y=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
     figure.update_layout(
         height=900,
-        margin={"l": 0, "r": 0, "t": 12, "b": 0},
+        margin={"l": 20, "r": 15, "t": 20, "b": 20},
         paper_bgcolor="rgba(0,0,0,0)",
-        showlegend=True,
-        legend={"orientation": "h", "yanchor": "bottom", "y": 1.01, "xanchor": "center", "x": 0.5},
-        scene={
-            "xaxis": {**axis_style, "title": "Management language — horizontal"},
-            "yaxis": {**axis_style, "title": "Market confirmation — depth"},
-            "zaxis": {**axis_style, "title": "Fundamentals & valuation — vertical"},
-            "aspectmode": "cube",
-            "camera": {"eye": {"x": 1.50, "y": 1.75, "z": 1.20}},
+        plot_bgcolor="rgba(14,18,27,0.60)",
+        showlegend=False,
+        xaxis={
+            "title": "Management language → stronger",
+            "range": x_domain,
+            "gridcolor": "rgba(160,175,200,0.16)",
+            "zeroline": False,
         },
+        yaxis={
+            "title": "Fundamentals & valuation → stronger",
+            "range": y_domain,
+            "gridcolor": "rgba(160,175,200,0.16)",
+            "zeroline": False,
+        },
+        hovermode="closest",
     )
     return figure
 
 
 st.set_page_config(page_title="EuroBank Prism", page_icon="🏦", layout="wide")
 st.title("EuroBank Prism")
-st.caption(
-    "Three visible coordinates. One clearer view. · "
-    "EURO STOXX Banks research intelligence"
-)
+st.caption("Three signals. One clearer view. · EURO STOXX Banks research intelligence")
 st.caption("Current release: fundamentals and management language, with an independent market-positioning overlay")
 
 if st.button("Refresh data"):
@@ -212,33 +217,50 @@ plotted_rows = [
     and market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score") is not None
 ]
 
-st.subheader("Three-signal research cube")
+st.subheader("Numerical × Linguistic signal map")
 st.caption(
-    "Rotate and zoom to inspect each bank across fundamentals and valuation, "
-    "management language, and market confirmation. Language runs horizontally, market confirmation runs into depth, "
-    "and fundamentals run vertically. The translucent planes mark the peer center at 50."
+    "Management language runs horizontally and fundamentals & valuation vertically. "
+    "Bubble size is market confirmation: larger means stronger relative price confirmation."
 )
 if plotted_rows:
-    st.plotly_chart(
-        build_signal_cube(plotted_rows),
-        width="stretch",
-        height=900,
-        key="front_page_signal_cube",
-        config={"displaylogo": False, "scrollZoom": False},
-    )
-    st.caption(
-        "Ball colors show the six transparent investment-value research groups. Hover for the group, exact coordinates, "
-        "market regime and evidence status."
-    )
-    st.caption(
-        "Green: Prism Leaders · blue: Re-rating Candidates · purple: Momentum Champions · "
-        "amber: Divergence & Watch · red: Structural Laggards · grey: Insufficient Evidence. "
-        "A higher market-confirmation score means stronger relative price confirmation—not automatically a better bank or investment."
-    )
+    chart_col, legend_col = st.columns([5.4, 1.35], gap="large")
+    with chart_col:
+        st.plotly_chart(
+            build_signal_map(plotted_rows),
+            width="stretch",
+            height=900,
+            key="front_page_signal_map",
+            config={"displaylogo": False, "scrollZoom": True},
+        )
+    with legend_col:
+        st.markdown("#### How to read it")
+        st.write("**Position**")
+        st.caption("Right = stronger management language. Up = stronger fundamentals and valuation.")
+        st.write("**Bubble size**")
+        st.caption("Larger = higher market-confirmation score. Size never changes a bank’s color group.")
+        st.markdown(
+            "<div style='display:flex;align-items:flex-end;gap:14px;height:58px;margin:4px 0 14px'>"
+            "<span style='width:16px;height:16px;border-radius:50%;background:#9FA8B8;display:inline-block'></span>"
+            "<span style='width:30px;height:30px;border-radius:50%;background:#9FA8B8;display:inline-block'></span>"
+            "<span style='width:48px;height:48px;border-radius:50%;background:#9FA8B8;display:inline-block'></span>"
+            "</div><div style='color:#9FA8B8;font-size:0.78rem;margin-top:-10px'>Low · Medium · High confirmation</div>",
+            unsafe_allow_html=True,
+        )
+        st.write("**Color = investment group**")
+        for group_name in GROUP_ORDER:
+            meta = GROUP_META[group_name]
+            st.markdown(
+                f"<div style='display:flex;gap:9px;align-items:flex-start;margin:10px 0'>"
+                f"<span style='width:13px;height:13px;min-width:13px;border-radius:50%;background:{meta['color']};margin-top:4px'></span>"
+                f"<span><b>{group_name}</b><br><span style='color:#AEB8C7;font-size:0.78rem'>{meta['meaning']}</span></span>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+        st.caption("Colors and this legend are generated from the same code dictionary.")
 
     st.subheader("Investment Groups")
     st.caption(
-        "Groups use peer-relative gates (leader floor 55, high ≥67, low <33) and preserve all three coordinates; "
+        "Groups use peer-relative gates (leader floor 55, high ≥67, low <33) and preserve all three signals; "
         "they are not a blended score. "
         "Language-history confidence is shown separately."
     )
@@ -276,9 +298,9 @@ if plotted_rows:
             },
         )
 else:
-    st.info("Three-coordinate coverage is not yet available.")
+    st.info("Complete three-signal coverage is not yet available.")
 st.caption(
-    "Market confirmation is the price-action overlay within Axis 1; it remains a separate coordinate so disagreement is visible. "
+    "Market confirmation is encoded only by bubble size, so disagreement remains visible without distorting either axis. "
     "A future market-expectations axis will require consistent consensus-estimate data."
 )
 
@@ -367,7 +389,7 @@ with signals_tab:
             st.altair_chart(market_chart, width="stretch")
             st.caption("This overlay peer-ranks 1-, 3-, and 6-month returns plus price versus the 200-day average. It qualifies Axis 1 but does not change the fundamental ranking score.")
     else:
-        st.info("No bank currently has complete three-coordinate evidence.")
+        st.info("No bank currently has complete three-signal evidence.")
 
     matrix_rows = [
         {
@@ -591,8 +613,8 @@ with methodology_tab:
     st.markdown("**Official-report overlay:** CET1, leverage, LCR, NSFR, NPL ratio, NPL coverage, cost of risk, NIM, cost/income, loan/deposit ratio, and IRRBB sensitivities are included only when period-aligned evidence is available.")
     st.markdown("**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort to correct management-document optimism. The numeric and language axes are not combined.")
     st.markdown("**Language history gate:** four comparable reports of the same document type enable a preliminary drift observation; eight enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
-    st.markdown("**Axis 1 market-confirmation overlay:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. It remains a separate cube coordinate so disagreement stays visible, but it is never blended into the fundamental score.")
-    st.markdown("**Investment-value groups:** deterministic gates classify the three visible coordinates without averaging them. Prism Leaders clear 55 on all axes; Re-rating Candidates combine fundamentals and language of at least 55 with mid-tier market confirmation; Momentum Champions require market confirmation of at least 67 with non-weak supporting axes; Structural Laggards require below-centre fundamentals plus confirming weakness. All remaining conflicts stay in Divergence & Watch, and missing coordinates are Insufficient Evidence.")
+    st.markdown("**Market-confirmation bubble size:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. The result controls only bubble size, so disagreement stays visible and never alters either axis or the fundamental score.")
+    st.markdown("**Investment-value groups:** deterministic gates classify the three visible signals without averaging them. Prism Leaders clear 55 on all signals; Re-rating Candidates combine fundamentals and language of at least 55 with mid-tier market confirmation; Momentum Champions require market confirmation of at least 67 with non-weak supporting signals; Structural Laggards require below-centre fundamentals plus confirming weakness. All remaining conflicts stay in Divergence & Watch, and missing signals are Insufficient Evidence.")
     st.markdown("**Controls:** common reporting dates, source evidence, freshness checks, sensitivity analysis, and publication gate.")
     st.markdown("**Scope:** this is a research screening tool, not personalized investment advice.")
     report_path = BASE_DIR / "pilot_report.md"
