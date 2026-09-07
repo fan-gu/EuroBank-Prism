@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from datetime import date, datetime
+import importlib
 import json
 import subprocess
 import sys
@@ -13,8 +14,17 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from app.dashboard_visuals import layout_signal_labels, market_bubble_diameter, padded_domain
-from app.investment_groups import GROUP_META, GROUP_ORDER, evidence_status, investment_group
+from app import investment_groups as investment_groups_module
 from app.language_signals import period_sort_key
+
+# Streamlit Cloud can hot-rerun this entry point without restarting imported
+# modules. Reload the tiny deterministic rule module so deployed group labels
+# and gates always match the current commit.
+investment_groups_module = importlib.reload(investment_groups_module)
+GROUP_META = investment_groups_module.GROUP_META
+GROUP_ORDER = investment_groups_module.GROUP_ORDER
+evidence_status = investment_groups_module.evidence_status
+investment_group = investment_groups_module.investment_group
 
 load_dotenv(Path(__file__).with_name(".env"))
 
