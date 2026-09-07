@@ -14,7 +14,9 @@ data consistently; it is not personalized investment advice.
   auditable four-period drift pipeline.
 - A market-confirmation overlay within Axis 1, kept as a separate visual
   coordinate so price disagreement remains visible.
-- An interactive front-page research cube for all three live coordinates.
+- An almost full-screen, interactive front-page research cube: management
+  language is horizontal, market confirmation is depth, and fundamentals are
+  vertical.
 - Evidence controls for reporting period, definition, unit, scope, and source.
 - Dark-mode dashboard with ranking, signals, bank details, evidence, and
   methodology views.

@@ -107,15 +107,15 @@ def build_signal_cube(rows):
         figure.add_trace(plane)
     figure.add_trace(
         go.Scatter3d(
-            x=[row["Numeric score"] for row in rows],
-            y=[row["Language score"] for row in rows],
-            z=[row["Market confirmation"] for row in rows],
+            x=[row["Language score"] for row in rows],
+            y=[row["Market confirmation"] for row in rows],
+            z=[row["Numeric score"] for row in rows],
             mode="markers+text",
             text=[row["Ticker"] for row in rows],
             textposition="top center",
             textfont={"size": 10, "color": "#f4f6fb"},
             marker={
-                "size": 9,
+                "size": 10,
                 "color": [quadrant_colors.get(row["Research quadrant"], "#9fa8b8") for row in rows],
                 "line": {"color": "#f4f6fb", "width": 1},
                 "opacity": 0.92,
@@ -126,8 +126,8 @@ def build_signal_cube(rows):
             ],
             hovertemplate=(
                 "<b>%{customdata[0]} (%{text})</b><br>"
-                "Fundamental: %{x:.1f}<br>Language: %{y:.1f}<br>"
-                "Market confirmation: %{z:.1f}<br>"
+                "Fundamentals & valuation: %{z:.1f}<br>Language: %{x:.1f}<br>"
+                "Market confirmation: %{y:.1f}<br>"
                 "Numeric-language gap: %{customdata[3]:+.1f}<br>"
                 "%{customdata[1]} · %{customdata[2]}<extra></extra>"
             ),
@@ -143,16 +143,16 @@ def build_signal_cube(rows):
         "showbackground": True,
     }
     figure.update_layout(
-        height=720,
+        height=900,
         margin={"l": 0, "r": 0, "t": 12, "b": 0},
         paper_bgcolor="rgba(0,0,0,0)",
         showlegend=False,
         scene={
-            "xaxis": {**axis_style, "title": "Fundamentals & valuation"},
-            "yaxis": {**axis_style, "title": "Management language"},
-            "zaxis": {**axis_style, "title": "Market confirmation"},
+            "xaxis": {**axis_style, "title": "Management language — horizontal"},
+            "yaxis": {**axis_style, "title": "Market confirmation — depth"},
+            "zaxis": {**axis_style, "title": "Fundamentals & valuation — vertical"},
             "aspectmode": "cube",
-            "camera": {"eye": {"x": 1.45, "y": 1.45, "z": 1.15}},
+            "camera": {"eye": {"x": 1.50, "y": 1.75, "z": 1.20}},
         },
     )
     return figure
@@ -208,19 +208,24 @@ plotted_rows = [
 st.subheader("Three-signal research cube")
 st.caption(
     "Rotate and zoom to inspect each bank across fundamentals and valuation, "
-    "management language, and market confirmation. The translucent planes mark the peer center at 50."
+    "management language, and market confirmation. Language runs horizontally, market confirmation runs into depth, "
+    "and fundamentals run vertically. The translucent planes mark the peer center at 50."
 )
 if plotted_rows:
     st.plotly_chart(
         build_signal_cube(plotted_rows),
         width="stretch",
-        height=720,
+        height=900,
         key="front_page_signal_cube",
         config={"displaylogo": False, "scrollZoom": False},
     )
     st.caption(
         "Point colors preserve the fundamental-language diagnostic: green confirmed strength, blue potential turnaround, "
         "amber early warning, and red high-risk screen. Hover for exact values."
+    )
+    st.caption(
+        "Color codes: green #35C48D · blue #4FA3FF · amber #FFB347 · red #EF6262. "
+        "A higher market-confirmation score means stronger relative price confirmation—not automatically a better bank or investment."
     )
 else:
     st.info("Three-coordinate coverage is not yet available.")
