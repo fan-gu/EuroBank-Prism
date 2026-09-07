@@ -16,12 +16,15 @@ data consistently; it is not personalized investment advice.
   disagreement remains visible without adding a third spatial axis.
 - An almost full-screen, interactive front-page signal map: management
   language is horizontal and fundamentals are vertical.
+- A waterfall-style homepage that moves from executive snapshot to signal map,
+  investment groups, research triage, the full peer ranking, a one-bank
+  diagnostic, and the evidence-readiness gate without requiring tab hopping.
 - Six transparent investment-value research groups shown by bubble color, with
   a bank-level assignment table and a separate language-history confidence
   gate.
 - Evidence controls for reporting period, definition, unit, scope, and source.
-- Dark-mode dashboard with ranking, signals, bank details, evidence, and
-  methodology views.
+- Dark-mode dashboard with a continuous research narrative and a detailed
+  signals, ranking, bank, evidence, and methodology workbench at the bottom.
 
 The current release has two spatial axes—fundamentals and management
 language—plus market confirmation encoded by bubble size. The three signals

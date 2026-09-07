@@ -85,6 +85,57 @@ def short_comment(score):
     return "Weak relative screen"
 
 
+def build_ranking_rows(scores, banks):
+    """Create one canonical ranking table for the homepage and workbench."""
+    rows = []
+    for rank, score_row in enumerate(
+        (item for item in scores if item["status"] == "ranked"), 1
+    ):
+        bank = banks[score_row["ticker"]]
+        metrics = bank.get("metrics", {})
+        country_code, flag_code = COUNTRY_INFO.get(
+            bank["country"], (bank["country"], "")
+        )
+        rows.append({
+            "Rank": rank,
+            "Flag": f"https://flagcdn.com/20x15/{flag_code}.png" if flag_code else "",
+            "Country": country_code,
+            "Bank": score_row["bank_name"],
+            "Ticker": score_row["ticker"],
+            "Index weight": bank.get("weight_percent"),
+            "Current price": metrics.get("price"),
+            "P/E": metrics.get("price_to_earnings"),
+            "P/B": metrics.get("price_to_book"),
+            "ROE": metrics.get("return_on_equity") * 100 if metrics.get("return_on_equity") is not None else None,
+            "Div. yield": metrics.get("dividend_yield") * 100 if metrics.get("dividend_yield") is not None else None,
+            "Score": score_row["score"],
+            "Comment": short_comment(score_row["score"]),
+        })
+    return rows
+
+
+def render_ranking_table(ranking_rows, *, key=None):
+    """Render the full-universe table without an internal vertical scrollbar."""
+    st.dataframe(
+        ranking_rows,
+        width="stretch",
+        hide_index=True,
+        height=845,
+        row_height=28,
+        key=key,
+        column_config={
+            "Flag": st.column_config.ImageColumn("Flag", width=38),
+            "Index weight": st.column_config.NumberColumn("Index wt.", format="%.2f%%"),
+            "Current price": st.column_config.NumberColumn("Price", format="€%.2f"),
+            "P/E": st.column_config.NumberColumn("P/E", format="%.2fx"),
+            "P/B": st.column_config.NumberColumn("P/B", format="%.2fx"),
+            "ROE": st.column_config.NumberColumn("ROE", format="%.1f%%"),
+            "Div. yield": st.column_config.NumberColumn("Div. yield", format="%.1f%%"),
+            "Score": st.column_config.NumberColumn("Score", format="%.1f"),
+        },
+    )
+
+
 def build_signal_map(rows):
     """Build the two-dimensional signal map with market-sized bubbles."""
     figure = go.Figure()
@@ -217,6 +268,54 @@ plotted_rows = [
     and market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score") is not None
 ]
 
+ranking_rows = build_ranking_rows(scores, banks)
+timestamps = [bank.get("retrieved_at") for bank in banks.values() if bank.get("retrieved_at")]
+observed = (
+    datetime.fromisoformat(max(timestamps).replace("Z", "+00:00")).date()
+    if timestamps else None
+)
+data_age = (date.today() - observed).days if observed else None
+group_counts = {
+    group_name: sum(row["Investment group"] == group_name for row in plotted_rows)
+    for group_name in GROUP_ORDER
+}
+
+st.markdown(
+    """
+    <style>
+    .block-container {padding-top: 2.2rem; padding-bottom: 4rem;}
+    .prism-kicker {color:#8fa6c7;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:1.2rem;}
+    .prism-rule {height:1px;background:linear-gradient(90deg,#4fa3ff55,transparent);margin:.35rem 0 1.2rem;}
+    .prism-group {border-left:4px solid var(--group-color);padding:.1rem 0 .1rem .8rem;min-height:5.4rem;}
+    .prism-group-name {font-weight:750;font-size:1rem;}
+    .prism-group-count {font-size:1.8rem;font-weight:750;line-height:1.15;}
+    .prism-muted {color:#aeb8c7;font-size:.82rem;line-height:1.35;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown("<div class='prism-kicker'>01 · Executive snapshot</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+snapshot_cols = st.columns(5)
+snapshot_cols[0].metric("EURO STOXX banks", len(universe), border=True)
+snapshot_cols[1].metric("Ranked", f"{len(scored_tickers)}/{len(universe)}", border=True)
+snapshot_cols[2].metric("Prism leaders", group_counts.get("Prism Leaders", 0), border=True)
+snapshot_cols[3].metric(
+    "Risk / watch queue",
+    group_counts.get("Divergence & Watch", 0) + group_counts.get("Structural Laggards", 0),
+    border=True,
+)
+snapshot_cols[4].metric(
+    "Provider snapshot",
+    observed.isoformat() if observed else "Unknown",
+    f"{data_age} day(s) old" if data_age is not None else None,
+    delta_color="off",
+    border=True,
+)
+if data_age is not None and data_age > 3:
+    st.warning("Market-provider data is stale. Refresh before using the screen for current research.")
+
+st.markdown("<div class='prism-kicker'>02 · Core signal map</div><div class='prism-rule'></div>", unsafe_allow_html=True)
 st.subheader("Numerical × Linguistic signal map")
 st.caption(
     "Management language runs horizontally and fundamentals & valuation vertically. "
@@ -258,22 +357,27 @@ if plotted_rows:
             )
         st.caption("Colors and this legend are generated from the same code dictionary.")
 
+    st.markdown("<div class='prism-kicker'>03 · Investment groups</div><div class='prism-rule'></div>", unsafe_allow_html=True)
     st.subheader("Investment Groups")
     st.caption(
         "Groups use peer-relative gates (leader floor 55, high ≥67, low <33) and preserve all three signals; "
         "they are not a blended score. "
         "Language-history confidence is shown separately."
     )
-    group_summary = []
-    for group_name in GROUP_ORDER:
+    group_columns = st.columns(3, gap="medium")
+    for index, group_name in enumerate(GROUP_ORDER):
         members = sorted(row["Ticker"] for row in plotted_rows if row["Investment group"] == group_name)
-        group_summary.append({
-            "Group": group_name,
-            "Banks": ", ".join(members) if members else "—",
-            "Count": len(members),
-            "Why": GROUP_META[group_name]["meaning"],
-        })
-    st.dataframe(group_summary, width="stretch", hide_index=True)
+        meta = GROUP_META[group_name]
+        with group_columns[index % 3].container(border=True):
+            st.markdown(
+                f"<div class='prism-group' style='--group-color:{meta['color']}'>"
+                f"<div class='prism-group-name'>{group_name}</div>"
+                f"<div class='prism-group-count'>{len(members)}</div>"
+                f"<div class='prism-muted'>{meta['meaning']}</div>"
+                f"<div style='margin-top:.55rem'>{' · '.join(members) if members else 'No bank currently assigned'}</div>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
 
     with st.expander("Bank-level group assignments"):
         st.dataframe(
@@ -304,59 +408,117 @@ st.caption(
     "A future market-expectations axis will require consistent consensus-estimate data."
 )
 
+st.markdown("<div class='prism-kicker'>04 · Research triage</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.subheader("Opportunities and risk queue")
+st.caption("A prioritisation view for deeper research—not an investment recommendation.")
+opportunity_groups = {"Prism Leaders", "Re-rating Candidates"}
+opportunities = sorted(
+    (row for row in plotted_rows if row["Investment group"] in opportunity_groups),
+    key=lambda row: (row["Numeric score"] + row["Language score"], row["Market confirmation"]),
+    reverse=True,
+)
+risk_groups = {"Structural Laggards", "Divergence & Watch"}
+risks = sorted(
+    (row for row in plotted_rows if row["Investment group"] in risk_groups),
+    key=lambda row: (
+        row["Investment group"] == "Structural Laggards",
+        100 - row["Numeric score"],
+        abs(row["Gap"]),
+    ),
+    reverse=True,
+)[:6]
+left_queue, right_queue = st.columns(2, gap="large")
+with left_queue:
+    st.markdown("#### Research opportunities")
+    if opportunities:
+        for row in opportunities:
+            with st.container(border=True):
+                st.markdown(f"**{row['Ticker']} · {row['Bank']}**")
+                st.caption(
+                    f"{row['Investment group']} · Numeric {row['Numeric score']:.1f} · "
+                    f"Language {row['Language score']:.1f} · Market {row['Market confirmation']:.1f}"
+                )
+                st.write(GROUP_META[row["Investment group"]]["meaning"])
+    else:
+        st.info("No bank currently clears the opportunity gates.")
+with right_queue:
+    st.markdown("#### Risk / verification queue")
+    for row in risks:
+        with st.container(border=True):
+            st.markdown(f"**{row['Ticker']} · {row['Bank']}**")
+            st.caption(
+                f"{row['Investment group']} · Numeric {row['Numeric score']:.1f} · "
+                f"Language {row['Language score']:.1f} · Gap {row['Gap']:+.1f}"
+            )
+            st.write(GROUP_META[row["Investment group"]]["meaning"])
+
+st.markdown("<div class='prism-kicker'>05 · Full peer ranking</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.subheader("Relative ranking")
+st.caption(
+    f"Coverage: {len(scored_tickers)}/{len(universe)} banks · all rows are shown · "
+    "fundamental score remains separate from the language and market overlays"
+)
+render_ranking_table(ranking_rows, key="homepage_ranking")
+st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
+
+st.markdown("<div class='prism-kicker'>06 · Quick diagnostic</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.subheader("One-bank research snapshot")
+quick_ticker = st.selectbox(
+    "Select a bank",
+    [row["ticker"] for row in universe],
+    key="homepage_bank_diagnostic",
+)
+quick_bank = banks[quick_ticker]
+quick_score = next((row for row in scores if row["ticker"] == quick_ticker), {"score": None})
+quick_signal = next((row for row in plotted_rows if row["Ticker"] == quick_ticker), None)
+quick_metrics = quick_bank.get("metrics", {})
+st.markdown(f"#### {quick_bank['bank_name']} ({quick_ticker})")
+quick_cols = st.columns(7)
+quick_cols[0].metric("Fundamental score", decimal(quick_score.get("score")), border=True)
+quick_cols[1].metric("P/B", multiple(quick_metrics.get("price_to_book")), border=True)
+quick_cols[2].metric("P/E", multiple(quick_metrics.get("price_to_earnings")), border=True)
+quick_cols[3].metric("ROE", percent(quick_metrics.get("return_on_equity")), border=True)
+quick_cols[4].metric("Dividend yield", percent(quick_metrics.get("dividend_yield")), border=True)
+quick_cols[5].metric("Language", decimal(quick_signal.get("Language score") if quick_signal else None), border=True)
+quick_cols[6].metric("Market", decimal(quick_signal.get("Market confirmation") if quick_signal else None), border=True)
+if quick_signal:
+    st.info(
+        f"{quick_signal['Investment group']}: {GROUP_META[quick_signal['Investment group']]['meaning']} "
+        f"Evidence status: {quick_signal['Evidence status']}."
+    )
+
+st.markdown("<div class='prism-kicker'>07 · Evidence readiness</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.subheader("Language drift and governance gate")
+evidence_cols = st.columns(5)
+evidence_cols[0].metric("Language coverage", f"{language_coverage.get('provisional_banks', 0)}/{len(universe)}", border=True)
+evidence_cols[1].metric("Market coverage", f"{market_coverage}/{len(universe)}", border=True)
+evidence_cols[2].metric("Table sources", table_evidence.get("source_count", 0), border=True)
+evidence_cols[3].metric("Extracted tables", table_evidence.get("table_count", 0), border=True)
+evidence_cols[4].metric("Backtested signals", 0, border=True)
+st.warning(
+    "Four comparable quarterly reports support preliminary linguistic-drift screening. "
+    "Signals remain provisional until citations are reviewed and predictive value is backtested."
+)
+
+st.markdown("<div class='prism-kicker'>08 · Research workbench</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.caption("Use the tabs below for detailed diagnostics, source links, and methodology.")
+
 ranking_tab, signals_tab, details_tab, evidence_tab, methodology_tab = st.tabs(
     ["Relative ranking", "Signals", "Bank details", "Evidence", "Methodology"]
 )
 
 with ranking_tab:
     st.subheader("Relative ranking")
-    timestamps = [bank.get("retrieved_at") for bank in banks.values() if bank.get("retrieved_at")]
-    if timestamps:
-        latest = max(timestamps)
-        observed = datetime.fromisoformat(latest.replace("Z", "+00:00")).date()
-        age = (date.today() - observed).days
-        (st.error if age > 3 else st.info)(f"Provider data retrieved: {observed} ({age} day(s) old)." + (" Refresh before analysis." if age > 3 else ""))
+    if observed:
+        (st.error if data_age > 3 else st.info)(
+            f"Provider data retrieved: {observed} ({data_age} day(s) old)."
+            + (" Refresh before analysis." if data_age > 3 else "")
+        )
     st.caption(
         f"Coverage: {len(scored_tickers)}/{len(universe)} banks ranked · "
         f"{language_coverage.get('provisional_banks', 0)}/{len(universe)} banks with provisional language signals"
     )
-    ranking_rows = []
-    for i, row in enumerate((item for item in scores if item["status"] == "ranked"), 1):
-        bank = banks[row["ticker"]]
-        metrics = bank.get("metrics", {})
-        country_code, flag_code = COUNTRY_INFO.get(bank["country"], (bank["country"], ""))
-        ranking_rows.append({
-            "Rank": i,
-            "Flag": f"https://flagcdn.com/20x15/{flag_code}.png" if flag_code else "",
-            "Country": country_code,
-            "Bank": row["bank_name"],
-            "Ticker": row["ticker"],
-            "Index weight": bank.get("weight_percent"),
-            "Current price": metrics.get("price"),
-            "P/E": metrics.get("price_to_earnings"),
-            "P/B": metrics.get("price_to_book"),
-            "ROE": metrics.get("return_on_equity") * 100 if metrics.get("return_on_equity") is not None else None,
-            "Div. yield": metrics.get("dividend_yield") * 100 if metrics.get("dividend_yield") is not None else None,
-            "Score": row["score"],
-            "Comment": short_comment(row["score"]),
-        })
-    st.dataframe(
-        ranking_rows,
-        width="stretch",
-        hide_index=True,
-        height=845,
-        row_height=28,
-        column_config={
-            "Flag": st.column_config.ImageColumn("Flag", width=38),
-            "Index weight": st.column_config.NumberColumn("Index wt.", format="%.2f%%"),
-            "Current price": st.column_config.NumberColumn("Price", format="€%.2f"),
-            "P/E": st.column_config.NumberColumn("P/E", format="%.2fx"),
-            "P/B": st.column_config.NumberColumn("P/B", format="%.2fx"),
-            "ROE": st.column_config.NumberColumn("ROE", format="%.1f%%"),
-            "Div. yield": st.column_config.NumberColumn("Div. yield", format="%.1f%%"),
-            "Score": st.column_config.NumberColumn("Score", format="%.1f"),
-        },
-    )
+    render_ranking_table(ranking_rows, key="workbench_ranking")
     st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
 
 with signals_tab:
