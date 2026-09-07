@@ -109,7 +109,7 @@ Market prices ---------------------> comparable dataset
 
 ```powershell
 & "C:\FG\.venv\Scripts\python.exe" run_pilot_pipeline.py
-& "C:\FG\.venv\Scripts\python.exe" -m streamlit run pilot_dashboard.py
+& "C:\FG\.venv\Scripts\python.exe" -m streamlit run streamlit_app.py
 ```
 
 To monitor rollout coverage across all 23 constituents:

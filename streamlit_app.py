@@ -96,8 +96,10 @@ if st.button("Refresh data"):
         st.code(result.stderr or result.stdout)
 
 banks, scores, universe, report_pages, table_evidence, language_signals = load_data()
-ranking_tab, signals_tab, details_tab, coverage_tab, evidence_tab, methodology_tab = st.tabs(
-    ["Relative ranking", "Signals", "Bank details", "Universe coverage", "Evidence", "Methodology"]
+scored_tickers = {row["ticker"] for row in scores if row["status"] == "ranked"}
+language_coverage = language_signals.get("coverage", {})
+ranking_tab, signals_tab, details_tab, evidence_tab, methodology_tab = st.tabs(
+    ["Relative ranking", "Signals", "Bank details", "Evidence", "Methodology"]
 )
 
 with ranking_tab:
@@ -108,6 +110,10 @@ with ranking_tab:
         observed = datetime.fromisoformat(latest.replace("Z", "+00:00")).date()
         age = (date.today() - observed).days
         (st.error if age > 3 else st.info)(f"Provider data retrieved: {observed} ({age} day(s) old)." + (" Refresh before analysis." if age > 3 else ""))
+    st.caption(
+        f"Coverage: {len(scored_tickers)}/{len(universe)} banks ranked · "
+        f"{language_coverage.get('provisional_banks', 0)}/{len(universe)} banks with provisional language signals"
+    )
     ranking_rows = []
     for i, row in enumerate((item for item in scores if item["status"] == "ranked"), 1):
         bank = banks[row["ticker"]]
@@ -154,11 +160,10 @@ with signals_tab:
         "but document genres and reporting periods are not yet aligned. "
         "No quadrant label is a buy or sell recommendation."
     )
-    coverage = language_signals.get("coverage", {})
     with st.container(horizontal=True):
-        st.metric("Bank universe", coverage.get("universe_banks", len(universe)), border=True)
-        st.metric("Provisional language coverage", coverage.get("provisional_banks", 0), border=True)
-        st.metric("Insufficient language data", coverage.get("insufficient_banks", len(universe)), border=True)
+        st.metric("Bank universe", language_coverage.get("universe_banks", len(universe)), border=True)
+        st.metric("Provisional language coverage", language_coverage.get("provisional_banks", 0), border=True)
+        st.metric("Insufficient language data", language_coverage.get("insufficient_banks", len(universe)), border=True)
         st.metric("Backtested signals", 0, border=True)
 
     signal_rows = language_signals.get("signals", [])
@@ -377,15 +382,6 @@ with details_tab:
         )
         st.line_chart(history_frame, x="Period", y="Language score")
 
-with coverage_tab:
-    st.subheader("EURO STOXX Banks universe")
-    scored = {row["ticker"] for row in scores if row["status"] == "ranked"}
-    st.caption(f"{len(scored)} of {len(universe)} banks currently have market-data screening scores.")
-    st.dataframe([
-        {"Bank": row.get("bank_name"), "Ticker": row.get("ticker"), "Country": row.get("country"), "Index weight": f"{row.get('weight_percent', 0):.2f}%", "Status": "Ranked" if row.get("ticker") in scored else "Insufficient provider data"}
-        for row in universe
-    ], width="stretch", hide_index=True)
-
 with evidence_tab:
     st.subheader("Official financial reports")
     st.caption("Links open official issuer reporting pages where the latest publication is maintained.")
@@ -457,6 +453,16 @@ with evidence_tab:
 
 with methodology_tab:
     st.subheader("Methodology and controls")
+    st.markdown("#### Data quality")
+    st.write(
+        f"Market-data ranking coverage: **{len(scored_tickers)}/{len(universe)} banks**. "
+        f"Provisional management-language coverage: "
+        f"**{language_coverage.get('provisional_banks', 0)}/{len(universe)} banks**. "
+        f"Insufficient language data: **{language_coverage.get('insufficient_banks', len(universe))} banks**."
+    )
+    st.caption(
+        "Detailed constituent-level coverage remains available in the internal coverage report and automated tests."
+    )
     st.markdown("**Common 23-bank score:** P/B 25%, P/E 15%, ROE 20%, ROA 10%, dividend yield 10%, earnings growth 10%, and revenue growth 10%. Lower valuation multiples score higher; higher returns, yield, and growth score higher. Percentile ranking limits the influence of extreme values.")
     st.markdown("**Official-report overlay:** CET1, leverage, LCR, NSFR, NPL ratio, NPL coverage, cost of risk, NIM, cost/income, loan/deposit ratio, and IRRBB sensitivities are included only when period-aligned evidence is available.")
     st.markdown("**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort to correct management-document optimism. The numeric and language axes are not combined.")
