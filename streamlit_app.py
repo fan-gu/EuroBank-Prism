@@ -40,7 +40,9 @@ COUNTRY_INFO = {
 
 
 @st.cache_data
-def load_data():
+def load_data(data_version):
+    """Load dashboard files; data_version invalidates stale deployment caches."""
+    del data_version
     with (BASE_DIR / "full_universe_dataset.json").open(encoding="utf-8") as handle:
         banks = {row["ticker"]: row for row in json.load(handle)}
     with (BASE_DIR / "full_universe_scores.json").open(encoding="utf-8") as handle:
@@ -72,6 +74,19 @@ def load_data():
         else {"records": [], "methodology": {}}
     )
     return banks, scores, universe, report_pages, table_evidence, language_signals, market_confirmation
+
+
+def data_version():
+    """Fingerprint the small dashboard inputs without reading them twice."""
+    names = (
+        "full_universe_dataset.json", "full_universe_scores.json", "bank_master.json",
+        "official_report_pages.json", "table_evidence_index.json",
+        "language_signals.json", "market_confirmation.json",
+    )
+    return tuple(
+        (name, (BASE_DIR / name).stat().st_size, (BASE_DIR / name).stat().st_mtime_ns)
+        for name in names if (BASE_DIR / name).exists()
+    )
 
 
 def percent(value):
@@ -236,7 +251,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-banks, scores, universe, report_pages, table_evidence, language_signals, market_confirmation = load_data()
+banks, scores, universe, report_pages, table_evidence, language_signals, market_confirmation = load_data(data_version())
 scored_tickers = {row["ticker"] for row in scores if row["status"] == "ranked"}
 language_coverage = language_signals.get("coverage", {})
 market_by_ticker = {row["ticker"]: row for row in market_confirmation.get("records", [])}
