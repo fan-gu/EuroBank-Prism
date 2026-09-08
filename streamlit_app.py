@@ -834,10 +834,6 @@ with methodology_section:
     )
     st.markdown("**Controls:** common reporting dates, source evidence, freshness checks, sensitivity analysis, and publication gate.")
     st.markdown("**Scope:** this is a research screening tool, not personalized investment advice.")
-    report_path = BASE_DIR / "pilot_report.md"
-    if report_path.exists():
-        st.download_button("Download analyst report", report_path.read_text(encoding="utf-8"), "pilot_report.md", "text/markdown")
-
 st.html(
     """
     <script>

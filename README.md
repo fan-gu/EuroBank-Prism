@@ -1,127 +1,82 @@
 # EuroBank Prism
 
-**Three signals. One clearer view.**
+**A transparent three-signal research screen for the 23 EURO STOXX Banks constituents.**
 
-EuroBank Prism is a research screening dashboard for the 23 constituents of
-the EURO STOXX Banks index. It compares public bank disclosures and market
-data consistently; it is not personalized investment advice.
+[Open the live dashboard](https://eurobank-prism.streamlit.app/) · [View the source](https://github.com/fan-gu/EuroBank-Prism)
 
-## What it shows
+![EuroBank Prism dashboard](assets/readme/eurobank-prism-dashboard.png)
 
-- Relative peer ranking using P/B, P/E, ROE, ROA, dividend yield, and growth.
-- Price, country, ticker, index weight, and official-report links.
-- A separate management-language signal with cited passages, pages, and an
-  auditable four-period drift pipeline.
-- Standard forward-looking, safe-harbour, offer, warranty, and similar legal
-  boilerplate is removed before language scoring. Exclusion counts are audited.
-- Price confirmation encoded independently by bubble size, so price
-  disagreement remains visible without adding a third spatial axis.
-- A compact, interactive first-screen signal map: management language is
-  horizontal, fundamentals are vertical, and price confirmation sets bubble
-  size. Logos sit inside large bubbles and move beside small bubbles so neither
-  the logo nor ticker is crushed.
-- A waterfall-style homepage that moves from the signal map to
-  investment groups, research triage, the full peer ranking, and a compact
-  research-readiness gate without requiring tab hopping.
-- A persistent left rail containing the product title, refresh/freshness
-  control, and section navigation.
-- Six transparent investment-value research groups shown by bubble color, with
-  a bank-level assignment table and a separate language-history confidence
-  gate.
-- Evidence controls for reporting period, definition, unit, scope, and source.
-- Research triage lists every caution, reversal, drift, and numeric-language
-  divergence alert with the supporting passage, page, and official source.
-- Dark-mode dashboard with a continuous research narrative; bank research,
-  source evidence, and methodology are independent waterfall sections rather
-  than nested tabs.
+## What it does
 
-The current release has two spatial axes—fundamentals and management
-language—plus price confirmation encoded by bubble size. The three signals
-remain visible and are not blended into one opaque score.
+EuroBank Prism compares European banks using three independent signals instead
+of blending every observation into one opaque score.
 
-## Investment groups
+| Signal | Display | What it measures |
+|---|---|---|
+| Fundamentals & valuation | Vertical position | Relative P/B, P/E, profitability, yield, and growth |
+| Management language | Horizontal position | Disclosure tone, commitment, uncertainty, caution, and linguistic drift |
+| Price confirmation | Bubble size | Relative 1-, 3-, and 6-month price momentum plus the 200-day trend |
 
-The signal map assigns each bank to one of six directional research groups
-without averaging away disagreement: **Conviction Leaders**, **Strong Signals,
-Weak Price**, **Cautious Value**, **Price Ahead of Fundamentals**, **Story Ahead
-of Numbers**, or **Downside Risk**. Missing coordinates are handled separately as
-**Insufficient Evidence**, not forced into an investment group. The rules use
-axis-specific peer quantiles rather than one shared raw cutoff. All group labels
-remain provisional until comparable language history and backtesting are available.
+Bubble colour identifies the bank's deterministic research group. The dashboard
+also provides a complete peer ranking, bank-level research pages, triage alerts,
+official report links, and methodology notes.
 
-## Workflow
+## Research workflow
 
 ```text
-Official reports ──> PDF/page screening ──> cited evidence
-                                  └──────> management language + drift history
-Market data ──────> comparable metrics ──> weighted peer ranking
-              └──> price history ───────> price-confirmation overlay
-                    quality and freshness gates ──> dashboard/report
+Official reports ──> page-aware extraction ──> language evidence and drift
+Market data ───────> comparable metrics ─────> peer-relative fundamentals
+Price history ─────> momentum checks ────────> price-confirmation bubble
+                               governance gates ──> Streamlit dashboard
 ```
 
-## Data and controls
+## Evidence and governance
 
-- 23-bank EURO STOXX Banks universe with country, ticker, and index weight.
-- Official annual and quarterly/interim report links for every constituent.
-- Missing or non-comparable observations are excluded, never invented.
-- Language observations retain source URL, document hash, period, and page.
-- Table and language evidence remains review-pending until validated.
-- The current archive contains 66 validated PDFs: 23 curated latest-period
-  sources, nine manually verified official history files, and 34 automated
-  review-pending history files. Eight banks now have a continuous, same-genre
-  four-period trend; the remaining 15 are single-period or partial-history
-  snapshots. A missing quarter resets the sequence. Eight comparable periods
-  enable drift-alert research. Human review and backtesting remain required.
-- The current language build excluded 85 dedicated disclaimer pages and 62
-  boilerplate passages before scoring.
-- Price confirmation peer-ranks 1-, 3-, and 6-month return with price versus
-  its 200-day average. It confirms or challenges market behaviour only; it does
-  not measure analyst expectations and does not alter the fundamental score.
-- The left-rail refresh control fetches provider fundamentals and price history;
-  report-language curation is a separate governed workflow.
+- The universe is fixed to 23 EURO STOXX Banks constituents.
+- Standard legal disclaimers and safe-harbour boilerplate are excluded from
+  management-language scoring.
+- Language observations retain the source document, reporting period, page,
+  quotation, and document hash.
+- Four adjacent comparable periods enable a preliminary drift observation;
+  eight periods, human review, and out-of-sample testing are required before a
+  drift signal is treated as validated research.
+- Missing or non-comparable observations remain missing—they are never inferred.
 
 ## Run locally
 
-From the repository root, with the project virtual environment activated:
-
 ```powershell
-python run_pilot_pipeline.py
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 python -m streamlit run streamlit_app.py
 ```
 
-Useful maintenance commands:
+Core refresh commands:
 
 ```powershell
-python coverage_report.py
-python download_language_reports.py
-python discover_language_reports.py
-python discover_language_reports.py --sources-only
-python download_language_reports.py --sources language_history_sources.json --manifest language_history_download_manifest.json
-python -m app.language_signals
+python build_full_universe.py
 python build_market_confirmation.py
-python app/table_evidence.py
+python discover_language_reports.py
+python download_language_reports.py
+python -m app.language_signals
 ```
 
-The `.env` file is local-only and must contain any required provider keys. Never
-commit secrets. Large PDF and evidence archives are retained for auditability;
-the dashboard reads the curated JSON indexes and evidence images.
-The entry point reloads its small deterministic helper modules on Streamlit
-Cloud hot updates, preventing stale imports without a disruptive manual reboot.
+Keep provider credentials in a local `.env` file. Never commit secrets.
 
-## Repository map
+## Repository structure
 
 ```text
-streamlit_app.py           Dashboard entry point
-app/                       Ingestion, language signals, table evidence, visuals
-assets/bank_logos/         Issuer logo assets
-tests/                     Automated validation
-full_universe_*.json       Current 23-bank data and scores
-official_report_pages.json Official report directory
-archive/                   Historical planning material
+streamlit_app.py             Streamlit entry point
+app/                         Scoring, ingestion, evidence, and visual modules
+assets/                      Bank logos and README media
+evidence/                    Reviewable table evidence
+reports/                     Local official-report archive (Git-ignored PDFs)
+tests/                       Automated checks
+archive/legacy_pilot/        Superseded three-bank prototype
+archive/planning/            Historical roadmap material
 ```
 
 ## Disclaimer
 
-EuroBank Prism is an educational/research screening tool. Scores and labels
-are relative inputs, not recommendations to buy, sell, short, or hold any
-security. Verify all figures against the linked official disclosures.
+EuroBank Prism is an educational research tool, not personalized investment
+advice. Verify all observations against the linked official disclosures.

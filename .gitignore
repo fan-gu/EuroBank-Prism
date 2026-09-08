@@ -4,4 +4,5 @@ reports/**/*.pdf
 production_pdf_archive.json
 language_report_registry.json
 __pycache__/
+.pytest_cache/
 *.pyc

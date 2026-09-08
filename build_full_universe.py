@@ -58,8 +58,15 @@ def percentile(values, value, reverse=False):
 def main():
     master = json.loads((BASE_DIR / "bank_master.json").read_text(encoding="utf-8"))
     universe = master["constituents"]
-    pilot_path = BASE_DIR / "pilot_real_data.json"
-    pilot = {row["ticker"]: row for row in json.loads(pilot_path.read_text(encoding="utf-8"))} if pilot_path.exists() else {}
+    seed_path = BASE_DIR / "prudential_evidence_seed.json"
+    prudential_seed = (
+        {
+            row["ticker"]: row
+            for row in json.loads(seed_path.read_text(encoding="utf-8"))
+        }
+        if seed_path.exists()
+        else {}
+    )
     retrieved_at = datetime.now(timezone.utc).isoformat()
     records = []
 
@@ -91,9 +98,9 @@ def main():
             record["metrics"] = {}
             record["status"] = "market_data_failed"
             record["error"] = str(exc)
-        if ticker in pilot:
-            record["prudential_metrics"] = pilot[ticker].get("metrics", {})
-            record["official_evidence"] = pilot[ticker].get("evidence", [])
+        if ticker in prudential_seed:
+            record["prudential_metrics"] = prudential_seed[ticker].get("metrics", {})
+            record["official_evidence"] = prudential_seed[ticker].get("evidence", [])
         else:
             record["prudential_metrics"] = {}
             record["official_evidence"] = []
