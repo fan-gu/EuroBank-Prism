@@ -1,6 +1,6 @@
 # EuroBank Prism
 
-**A transparent three-signal research screen for the 23 EURO STOXX Banks constituents.**
+**A fully deterministic, evidence-traceable triangulation of fundamentals, linguistic drift in official disclosures, and price momentum across the EURO STOXX Banks universe**
 
 [Open the live dashboard](https://eurobank-prism.streamlit.app/) · [View the source](https://github.com/fan-gu/EuroBank-Prism)
 
