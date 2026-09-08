@@ -105,6 +105,8 @@ python app/table_evidence.py
 The `.env` file is local-only and must contain any required provider keys. Never
 commit secrets. Large PDF and evidence archives are retained for auditability;
 the dashboard reads the curated JSON indexes and evidence images.
+The entry point reloads its small deterministic helper modules on Streamlit
+Cloud hot updates, preventing stale imports without a disruptive manual reboot.
 
 ## Repository map
 

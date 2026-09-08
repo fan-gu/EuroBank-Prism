@@ -13,24 +13,27 @@ import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 
-from app.dashboard_visuals import (
-    layout_signal_labels,
-    market_bubble_diameter,
-    padded_domain,
-    signal_logo_layout,
-)
+from app import dashboard_visuals as dashboard_visuals_module
 from app import investment_groups as investment_groups_module
-from app.language_signals import comparable_history, period_sort_key
+from app import language_signals as language_signals_module
 
 # Streamlit Cloud can hot-rerun this entry point without restarting imported
-# modules. Reload the tiny deterministic rule module so deployed group labels
-# and gates always match the current commit.
+# modules. Reload the small deterministic helpers before binding their symbols
+# so a newly added function is never requested from a stale in-memory module.
+dashboard_visuals_module = importlib.reload(dashboard_visuals_module)
 investment_groups_module = importlib.reload(investment_groups_module)
+language_signals_module = importlib.reload(language_signals_module)
+layout_signal_labels = dashboard_visuals_module.layout_signal_labels
+market_bubble_diameter = dashboard_visuals_module.market_bubble_diameter
+padded_domain = dashboard_visuals_module.padded_domain
+signal_logo_layout = dashboard_visuals_module.signal_logo_layout
 GROUP_META = investment_groups_module.GROUP_META
 GROUP_ORDER = investment_groups_module.GROUP_ORDER
 evidence_status = investment_groups_module.evidence_status
 investment_group = investment_groups_module.investment_group
 derive_group_thresholds = investment_groups_module.derive_group_thresholds
+comparable_history = language_signals_module.comparable_history
+period_sort_key = language_signals_module.period_sort_key
 
 load_dotenv(Path(__file__).with_name(".env"))
 
