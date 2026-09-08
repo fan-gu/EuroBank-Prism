@@ -1,19 +1,25 @@
 """Transparent three-axis investment-value group rules.
 
 The groups preserve disagreement between fundamentals, management language,
-and market confirmation.  They are research-screen labels, not advice.
+and price confirmation. They are research-screen labels, not advice.
 """
 
-LEADER_FLOOR = 55.0
-LANGUAGE_SUPPORT = 50.0
-MOMENTUM_FLOOR = 60.0
-PEER_MIDPOINT = 50.0
+DEFAULT_THRESHOLDS = {
+    "numeric_mid": 50.0,
+    "numeric_high": 60.0,
+    "language_mid": 50.0,
+    "language_high": 60.0,
+    "price_low": 40.0,
+    "price_mid": 50.0,
+    "price_high": 60.0,
+}
 
 GROUP_ORDER = (
     "Conviction Leaders",
     "Re-rating Candidates",
     "Contrarian Value",
-    "Expectations-led Momentum",
+    "Price-led Momentum",
+    "Verification Watch",
     "Downside Risk",
     "No Clear Edge",
 )
@@ -29,15 +35,19 @@ GROUP_META = {
     },
     "Contrarian Value": {
         "color": "#32C6D4",
-        "meaning": "Fundamentals screen strongly while management language is cautious; verify whether the discount is justified.",
+        "meaning": "Fundamentals are at or above the peer median and price avoids the bottom tier, while language remains cautious.",
     },
-    "Expectations-led Momentum": {
+    "Price-led Momentum": {
         "color": "#9B7BFF",
         "meaning": "Price momentum is ahead of the fundamental score; upside may depend on future delivery.",
     },
+    "Verification Watch": {
+        "color": "#F28E5B",
+        "meaning": "Management language is materially stronger than the accounts; verify whether delivery catches up with the story.",
+    },
     "Downside Risk": {
         "color": "#EF6262",
-        "meaning": "Below-midpoint fundamentals have at least one confirming warning from language or price action.",
+        "meaning": "Weak fundamentals have a confirming warning, or apparently stronger fundamentals face both cautious language and bottom-tier price action.",
     },
     "No Clear Edge": {
         "color": "#FFB347",
@@ -50,28 +60,90 @@ GROUP_META = {
 }
 
 
-def investment_group(numeric_score, language_score, market_score) -> str:
+def _quantile(values: list[float], probability: float) -> float:
+    """Return a linearly interpolated quantile without a heavy dependency."""
+    ordered = sorted(values)
+    if not ordered:
+        raise ValueError("cannot calculate a threshold from an empty axis")
+    if len(ordered) == 1:
+        return ordered[0]
+    position = (len(ordered) - 1) * probability
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    fraction = position - lower
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * fraction
+
+
+def derive_group_thresholds(rows: list[dict]) -> dict[str, float]:
+    """Derive axis-specific peer gates from the current complete cross-section."""
+    complete = [
+        row for row in rows
+        if all(isinstance(row.get(key), (int, float)) for key in ("numeric", "language", "price"))
+    ]
+    if len(complete) < 5:
+        return DEFAULT_THRESHOLDS.copy()
+    axes = {
+        key: [float(row[key]) for row in complete]
+        for key in ("numeric", "language", "price")
+    }
+    return {
+        "numeric_mid": _quantile(axes["numeric"], 0.50),
+        "numeric_high": _quantile(axes["numeric"], 0.60),
+        "language_mid": _quantile(axes["language"], 0.50),
+        "language_high": _quantile(axes["language"], 0.60),
+        "price_low": _quantile(axes["price"], 0.40),
+        "price_mid": _quantile(axes["price"], 0.50),
+        "price_high": _quantile(axes["price"], 0.60),
+    }
+
+
+def investment_group(
+    numeric_score,
+    language_score,
+    price_score,
+    thresholds: dict[str, float] | None = None,
+) -> str:
     """Assign one mutually exclusive group without blending the three axes."""
-    values = (numeric_score, language_score, market_score)
+    values = (numeric_score, language_score, price_score)
     if not all(isinstance(value, (int, float)) for value in values):
         return "Insufficient Evidence"
 
     numeric = float(numeric_score)
     language = float(language_score)
-    market = float(market_score)
+    price = float(price_score)
+    gates = DEFAULT_THRESHOLDS if thresholds is None else thresholds
 
-    # Six directional research outcomes. Missing evidence remains a separate
+    # Seven directional research outcomes. Missing evidence remains a separate
     # publication gate and is not counted as an investment group.
-    if min(numeric, language, market) >= LEADER_FLOOR:
+    if (
+        numeric >= gates["numeric_high"]
+        and language >= gates["language_high"]
+        and price >= gates["price_high"]
+    ):
         return "Conviction Leaders"
-    if numeric >= LEADER_FLOOR and language >= LANGUAGE_SUPPORT and market < LEADER_FLOOR:
+    if (
+        numeric >= gates["numeric_mid"]
+        and language >= gates["language_mid"]
+        and price < gates["price_mid"]
+    ):
         return "Re-rating Candidates"
-    if market >= MOMENTUM_FLOOR and numeric < LEADER_FLOOR:
-        return "Expectations-led Momentum"
-    if numeric >= PEER_MIDPOINT and language < LANGUAGE_SUPPORT:
+    if numeric < gates["numeric_mid"] and language >= gates["language_high"]:
+        return "Verification Watch"
+    if price >= gates["price_high"]:
+        return "Price-led Momentum"
+    if (
+        numeric >= gates["numeric_mid"]
+        and language < gates["language_mid"]
+        and price >= gates["price_low"]
+    ):
         return "Contrarian Value"
-    if numeric < PEER_MIDPOINT and (
-        language < LANGUAGE_SUPPORT or market < LANGUAGE_SUPPORT
+    if (
+        numeric < gates["numeric_mid"]
+        and (language < gates["language_mid"] or price < gates["price_mid"])
+    ) or (
+        numeric >= gates["numeric_mid"]
+        and language < gates["language_mid"]
+        and price < gates["price_low"]
     ):
         return "Downside Risk"
     return "No Clear Edge"

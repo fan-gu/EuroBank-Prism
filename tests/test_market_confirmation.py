@@ -1,4 +1,4 @@
-"""Tests for the independent market-confirmation axis."""
+"""Tests for the independent price-confirmation axis."""
 
 from pathlib import Path
 import sys
@@ -21,9 +21,9 @@ class MarketConfirmationTests(unittest.TestCase):
             {"ticker": "C", "one_month_return": -0.10, "three_month_return": -0.08, "six_month_return": -0.05, "trend_vs_200d": -0.10},
         ]
         scored = score_records(records)
-        self.assertGreater(scored[0]["market_confirmation_score"], scored[2]["market_confirmation_score"])
-        self.assertEqual(scored[0]["market_regime"], "Confirming")
-        self.assertEqual(scored[2]["market_regime"], "Unconfirmed")
+        self.assertGreater(scored[0]["price_confirmation_score"], scored[2]["price_confirmation_score"])
+        self.assertEqual(scored[0]["price_regime"], "Confirming")
+        self.assertEqual(scored[2]["price_regime"], "Unconfirmed")
         self.assertNotIn("numeric_score", scored[0])
 
 

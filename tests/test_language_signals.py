@@ -177,7 +177,13 @@ class LanguageCoverageTests(unittest.TestCase):
     def test_signal_archive_has_auditable_provisional_coverage(self):
         self.assertEqual(self.archive["coverage"]["provisional_banks"], 23)
         self.assertEqual(self.archive["coverage"]["insufficient_banks"], 0)
-        self.assertEqual(len(self.archive["documents"]), 23)
+        self.assertEqual(self.archive["coverage"]["four_period_trends"], 10)
+        self.assertEqual(len(self.archive["documents"]), 56)
+        source_statuses = {
+            status: sum(row.get("source_status") == status for row in self.archive["documents"])
+            for status in ("curated", "pending_human_review")
+        }
+        self.assertEqual(source_statuses, {"curated": 23, "pending_human_review": 33})
         self.assertTrue(
             all(len(row["evidence"]) >= 3 for row in self.archive["documents"])
         )

@@ -12,16 +12,16 @@ data consistently; it is not personalized investment advice.
 - Price, country, ticker, index weight, and official-report links.
 - A separate management-language signal with cited passages, pages, and an
   auditable four-period drift pipeline.
-- Market confirmation encoded independently by bubble size, so price
+- Price confirmation encoded independently by bubble size, so price
   disagreement remains visible without adding a third spatial axis.
 - A compact, interactive first-screen signal map: management language is
-  horizontal, fundamentals are vertical, and market confirmation sets bubble
+  horizontal, fundamentals are vertical, and price confirmation sets bubble
   size. Its investment-group legend is horizontal.
 - A waterfall-style homepage that moves from the signal map to
   investment groups, research triage, the full peer ranking, a one-bank
   diagnostic, and the evidence-readiness gate without requiring tab hopping.
 - A persistent left navigation rail and a top-right refresh/freshness control.
-- Six transparent investment-value research groups shown by bubble color, with
+- Seven transparent investment-value research groups shown by bubble color, with
   a bank-level assignment table and a separate language-history confidence
   gate.
 - Evidence controls for reporting period, definition, unit, scope, and source.
@@ -29,18 +29,18 @@ data consistently; it is not personalized investment advice.
   signals, ranking, bank, evidence, and methodology workbench at the bottom.
 
 The current release has two spatial axes—fundamentals and management
-language—plus market confirmation encoded by bubble size. The three signals
+language—plus price confirmation encoded by bubble size. The three signals
 remain visible and are not blended into one opaque score.
 
 ## Investment groups
 
-The signal map assigns each bank to one of six directional research groups
+The signal map assigns each bank to one of seven directional research groups
 without averaging away disagreement: **Conviction Leaders**, **Re-rating
-Candidates**, **Contrarian Value**, **Expectations-led Momentum**, **Downside
-Risk**, or **No Clear Edge**. Missing coordinates are handled separately as
+Candidates**, **Contrarian Value**, **Price-led Momentum**, **Verification
+Watch**, **Downside Risk**, or **No Clear Edge**. Missing coordinates are handled separately as
 **Insufficient Evidence**, not forced into an investment group. The rules use
-peer-relative gates; current-language groups remain provisional until four
-comparable reporting periods are available.
+axis-specific peer quantiles rather than one shared raw cutoff. All group labels
+remain provisional until comparable language history and backtesting are available.
 
 ## Workflow
 
@@ -48,7 +48,7 @@ comparable reporting periods are available.
 Official reports ──> PDF/page screening ──> cited evidence
                                   └──────> management language + drift history
 Market data ──────> comparable metrics ──> weighted peer ranking
-              └──> price history ───────> Axis 1 market-confirmation overlay
+              └──> price history ───────> price-confirmation overlay
                     quality and freshness gates ──> dashboard/report
 ```
 
@@ -59,12 +59,16 @@ Market data ──────> comparable metrics ──> weighted peer ranking
 - Missing or non-comparable observations are excluded, never invented.
 - Language observations retain source URL, document hash, period, and page.
 - Table and language evidence remains review-pending until validated.
-- Four comparable periods enable a preliminary language trend; eight enable
-  drift-alert research. Human review and backtesting are required for validated
-  publication.
-- Market confirmation peer-ranks 1-, 3-, and 6-month return with price versus
+- The current archive contains 56 validated PDFs: 23 curated latest-period
+  sources plus 33 review-pending historical sources. Ten banks now have a
+  preliminary four-period trend; the remaining 13 are still single-period or
+  partial-history snapshots. Eight comparable periods enable drift-alert
+  research. Human review and backtesting remain required for publication.
+- Price confirmation peer-ranks 1-, 3-, and 6-month return with price versus
   its 200-day average. It confirms or challenges market behaviour only; it does
-  not alter the fundamental score.
+  not measure analyst expectations and does not alter the fundamental score.
+- The top-right refresh control fetches provider fundamentals and price history;
+  report-language curation is a separate governed workflow.
 
 ## Run locally
 
@@ -80,6 +84,8 @@ Useful maintenance commands:
 ```powershell
 python coverage_report.py
 python download_language_reports.py
+python discover_language_reports.py
+python download_language_reports.py --sources language_history_sources.json --manifest language_history_download_manifest.json
 python -m app.language_signals
 python build_market_confirmation.py
 python app/table_evidence.py

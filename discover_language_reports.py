@@ -433,8 +433,50 @@ def run(download: bool, workers: int = 6) -> list[dict]:
     results.sort(key=lambda row: order[row["ticker"]])
     output = BASE_DIR / "language_report_registry.json"
     output.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
+    write_history_sources(results)
     print(f"Wrote {output}")
     return results
+
+
+def write_history_sources(results: list[dict]) -> Path:
+    """Merge curated latest reports with strict, review-pending history candidates."""
+    curated_path = BASE_DIR / "language_report_sources.json"
+    curated = json.loads(curated_path.read_text(encoding="utf-8"))["sources"]
+    sources = [{**source, "source_status": "curated"} for source in curated]
+    seen = {(source["ticker"], source["period"]) for source in sources}
+    for result in results:
+        for candidate in result.get("selected_periods", []):
+            key = (result["ticker"], candidate["period"])
+            if key in seen:
+                continue
+            seen.add(key)
+            sources.append({
+                "ticker": result["ticker"],
+                "bank_name": result["bank_name"],
+                "period": candidate["period"],
+                "document_type": candidate["document_type"],
+                "document_series": "management_results",
+                "official_page": result["official_page"],
+                "download_url": candidate["url"],
+                "filename": safe_filename(result["ticker"], candidate),
+                "source_status": "pending_human_review",
+                "discovery_score": candidate["score"],
+            })
+    destination = BASE_DIR / "language_history_sources.json"
+    destination.write_text(
+        json.dumps({
+            "schema_version": "1.0",
+            "generated_at": utc_now(),
+            "policy": (
+                "Curated latest sources plus up to four comparable management-results "
+                "periods per bank. Historical discoveries remain pending human review."
+            ),
+            "sources": sources,
+        }, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    print(f"Wrote {destination}: {len(sources)} source records")
+    return destination
 
 
 def parse_args() -> argparse.Namespace:

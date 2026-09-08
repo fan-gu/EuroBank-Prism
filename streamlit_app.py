@@ -25,6 +25,7 @@ GROUP_META = investment_groups_module.GROUP_META
 GROUP_ORDER = investment_groups_module.GROUP_ORDER
 evidence_status = investment_groups_module.evidence_status
 investment_group = investment_groups_module.investment_group
+derive_group_thresholds = investment_groups_module.derive_group_thresholds
 
 load_dotenv(Path(__file__).with_name(".env"))
 
@@ -156,7 +157,7 @@ def build_signal_map(rows):
         x_domain,
         y_domain,
         width=1_150,
-        height=330,
+        height=305,
         x_key="Language score",
         y_key="Numeric score",
     )
@@ -170,20 +171,20 @@ def build_signal_map(rows):
             y=[row["Numeric score"] for row in group_rows],
             mode="markers",
             marker={
-                "size": [market_bubble_diameter(row["Market confirmation"]) for row in group_rows],
+                "size": [market_bubble_diameter(row["Price confirmation"]) for row in group_rows],
                 "sizemode": "diameter",
                 "color": GROUP_META[group_name]["color"],
                 "line": {"color": "#f4f6fb", "width": 1.4},
                 "opacity": 0.86,
             },
             customdata=[
-                [row["Bank"], row["Ticker"], row["Investment group"], row["Market regime"], row["Gap"], row["Evidence status"], row["Market confirmation"]]
+                [row["Bank"], row["Ticker"], row["Investment group"], row["Price regime"], row["Gap"], row["Evidence status"], row["Price confirmation"]]
                 for row in group_rows
             ],
             hovertemplate=(
                 "<b>%{customdata[0]} (%{customdata[1]})</b><br>"
                 "Fundamentals & valuation: %{y:.1f}<br>Language: %{x:.1f}<br>"
-                "Market confirmation: %{customdata[6]:.1f}<br>"
+                "Price confirmation: %{customdata[6]:.1f}<br>"
                 "Numeric-language gap: %{customdata[4]:+.1f}<br>"
                 "%{customdata[2]} · %{customdata[3]}<br>"
                 "Evidence: %{customdata[5]}<extra></extra>"
@@ -206,7 +207,7 @@ def build_signal_map(rows):
     figure.add_vline(x=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
     figure.add_hline(y=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
     figure.update_layout(
-        height=380,
+        height=355,
         margin={"l": 20, "r": 15, "t": 20, "b": 20},
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(14,18,27,0.60)",
@@ -240,10 +241,21 @@ scored_tickers = {row["ticker"] for row in scores if row["status"] == "ranked"}
 language_coverage = language_signals.get("coverage", {})
 market_by_ticker = {row["ticker"]: row for row in market_confirmation.get("records", [])}
 market_coverage = sum(
-    row.get("status") == "market_confirmation_available"
+    row.get("status") in {"market_confirmation_available", "price_confirmation_available"}
     for row in market_by_ticker.values()
 )
 signal_rows = language_signals.get("signals", [])
+group_thresholds = derive_group_thresholds([
+    {
+        "numeric": row.get("numeric_score"),
+        "language": row.get("language_score"),
+        "price": market_by_ticker.get(row["ticker"], {}).get(
+            "price_confirmation_score",
+            market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+        ),
+    }
+    for row in signal_rows
+])
 plotted_rows = [
     {
         "Ticker": row["ticker"],
@@ -253,19 +265,32 @@ plotted_rows = [
         "Negative pressure": row.get("negative_pressure_score"),
         "Gap": row["divergence"],
         "Research quadrant": row["quadrant"],
-        "Market confirmation": market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
-        "Market regime": market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
+        "Price confirmation": market_by_ticker.get(row["ticker"], {}).get(
+            "price_confirmation_score",
+            market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+        ),
+        "Price regime": market_by_ticker.get(row["ticker"], {}).get(
+            "price_regime",
+            market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
+        ),
         "Investment group": investment_group(
             row.get("numeric_score"),
             row.get("language_score"),
-            market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+            market_by_ticker.get(row["ticker"], {}).get(
+                "price_confirmation_score",
+                market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+            ),
+            group_thresholds,
         ),
         "Evidence status": evidence_status(row.get("history_periods")),
     }
     for row in signal_rows
     if row.get("numeric_score") is not None
     and row.get("language_score") is not None
-    and market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score") is not None
+    and market_by_ticker.get(row["ticker"], {}).get(
+        "price_confirmation_score",
+        market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+    ) is not None
 ]
 
 ranking_rows = build_ranking_rows(scores, banks)
@@ -292,9 +317,10 @@ st.markdown(
     .prism-muted {color:#aeb8c7;font-size:.82rem;line-height:1.35;}
     .prism-nav a {display:block;color:#aeb8c7;text-decoration:none;padding:.42rem .2rem;border-left:2px solid #28364b;padding-left:.75rem;}
     .prism-nav a:hover {color:#f4f6fb;border-left-color:#4fa3ff;}
-    .prism-legend {display:flex;gap:.3rem;align-items:center;flex-wrap:nowrap;overflow-x:auto;margin:.2rem 0 .42rem;padding-bottom:.1rem;}
+    .prism-legend {display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;margin:.2rem 0 .42rem;padding-bottom:.1rem;}
     .prism-chip {display:inline-flex;align-items:center;gap:.3rem;border:1px solid #2c3545;border-radius:999px;padding:.2rem .42rem;color:#dce3ee;font-size:.70rem;white-space:nowrap;}
     .prism-dot {width:.62rem;height:.62rem;border-radius:50%;display:inline-block;}
+    .prism-badge {display:inline-block;margin-left:.28rem;padding:.05rem .24rem;border:1px solid #5d6b80;border-radius:4px;color:#9faec2;font-size:.52rem;font-weight:700;letter-spacing:.05em;vertical-align:middle;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -325,7 +351,12 @@ with brand_col:
     st.title("EuroBank Prism")
     st.caption("Three signals. One clearer view. · EURO STOXX Banks research intelligence")
 with action_col:
-    refresh_clicked = st.button("Refresh data", width="stretch", icon=":material/refresh:")
+    refresh_clicked = st.button(
+        "Refresh data",
+        width="stretch",
+        icon=":material/refresh:",
+        help="Fetch fresh provider metrics and price history. Official-report language history is curated separately.",
+    )
     if data_age is None:
         st.caption("Data date unavailable")
     elif data_age > 3:
@@ -349,19 +380,19 @@ st.markdown("<div id='core-signal-map'></div>", unsafe_allow_html=True)
 st.header("Core signal map")
 st.caption(
     "Numerical × linguistic: management language runs horizontally and fundamentals & valuation vertically. "
-    "Bubble size is market confirmation: larger means stronger relative price confirmation."
+    "Bubble size is price confirmation: larger means stronger relative price momentum."
 )
 if plotted_rows:
     legend_chips = "".join(
         f"<span class='prism-chip' title=\"{GROUP_META[group]['meaning']}\">"
-        f"<span class='prism-dot' style='background:{GROUP_META[group]['color']}'></span>{group}</span>"
+        f"<span class='prism-dot' style='background:{GROUP_META[group]['color']}'></span>{group}<span class='prism-badge' title='Provisional'>P</span></span>"
         for group in GROUP_ORDER
     )
     st.markdown(f"<div class='prism-legend'>{legend_chips}</div>", unsafe_allow_html=True)
     st.plotly_chart(
         build_signal_map(plotted_rows),
         width="stretch",
-        height=380,
+        height=355,
         key="front_page_signal_map",
         config={"displaylogo": False, "scrollZoom": True},
     )
@@ -369,7 +400,7 @@ if plotted_rows:
     st.markdown("<div id='investment-groups' class='prism-kicker'>02 · Investment groups</div><div class='prism-rule'></div>", unsafe_allow_html=True)
     st.subheader("Investment Groups")
     st.caption(
-        "Six directional outcomes use explicit peer-relative gates and preserve all three signals; "
+        "Seven directional outcomes use axis-specific peer quantiles and preserve all three signals; "
         "they are not a blended score. Missing evidence remains a separate publication gate. "
         "Language-history confidence is shown separately."
     )
@@ -380,7 +411,7 @@ if plotted_rows:
         with group_columns[index % 3].container(border=True):
             st.markdown(
                 f"<div class='prism-group' style='--group-color:{meta['color']}'>"
-                f"<div class='prism-group-name'>{group_name}</div>"
+                f"<div class='prism-group-name'>{group_name}<span class='prism-badge'>PROVISIONAL</span></div>"
                 f"<div class='prism-group-count'>{len(members)}</div>"
                 f"<div class='prism-muted'>{meta['meaning']}</div>"
                 f"<div style='margin-top:.55rem'>{' · '.join(members) if members else 'No bank currently assigned'}</div>"
@@ -397,7 +428,7 @@ if plotted_rows:
                     "Bank": row["Bank"],
                     "Numeric": row["Numeric score"],
                     "Language": row["Language score"],
-                    "Market": row["Market confirmation"],
+                    "Price": row["Price confirmation"],
                     "Evidence": row["Evidence status"],
                 }
                 for row in sorted(plotted_rows, key=lambda item: (GROUP_ORDER.index(item["Investment group"]), item["Ticker"]))
@@ -407,13 +438,13 @@ if plotted_rows:
             column_config={
                 "Numeric": st.column_config.NumberColumn(format="%.1f"),
                 "Language": st.column_config.NumberColumn(format="%.1f"),
-                "Market": st.column_config.NumberColumn(format="%.1f"),
+                "Price": st.column_config.NumberColumn(format="%.1f"),
             },
         )
 else:
     st.info("Complete three-signal coverage is not yet available.")
 st.caption(
-    "Market confirmation is encoded only by bubble size, so disagreement remains visible without distorting either axis. "
+    "Price confirmation is encoded only by bubble size, so disagreement remains visible without distorting either axis. "
     "A future market-expectations axis will require consistent consensus-estimate data."
 )
 
@@ -423,19 +454,21 @@ st.caption("A prioritisation view for deeper research—not an investment recomm
 opportunity_groups = {"Conviction Leaders", "Re-rating Candidates", "Contrarian Value"}
 opportunities = sorted(
     (row for row in plotted_rows if row["Investment group"] in opportunity_groups),
-    key=lambda row: (row["Numeric score"] + row["Language score"], row["Market confirmation"]),
+    key=lambda row: (row["Numeric score"] + row["Language score"], row["Price confirmation"]),
     reverse=True,
 )
-risk_groups = {"Downside Risk", "Expectations-led Momentum"}
-risks = sorted(
-    (row for row in plotted_rows if row["Investment group"] in risk_groups),
-    key=lambda row: (
-        row["Investment group"] == "Downside Risk",
-        100 - row["Numeric score"],
-        abs(row["Gap"]),
-    ),
-    reverse=True,
-)[:6]
+risks = []
+for group_name in ("Verification Watch", "Downside Risk", "Price-led Momentum"):
+    group_queue = sorted(
+        (row for row in plotted_rows if row["Investment group"] == group_name),
+        key=lambda row: (
+            abs(row["Gap"]),
+            100 - row["Numeric score"],
+            row["Price confirmation"],
+        ),
+        reverse=True,
+    )
+    risks.extend(group_queue[:2])
 left_queue, right_queue = st.columns(2, gap="large")
 with left_queue:
     st.markdown("#### Research opportunities")
@@ -445,7 +478,7 @@ with left_queue:
                 st.markdown(f"**{row['Ticker']} · {row['Bank']}**")
                 st.caption(
                     f"{row['Investment group']} · Numeric {row['Numeric score']:.1f} · "
-                    f"Language {row['Language score']:.1f} · Market {row['Market confirmation']:.1f}"
+                    f"Language {row['Language score']:.1f} · Price {row['Price confirmation']:.1f}"
                 )
                 st.write(GROUP_META[row["Investment group"]]["meaning"])
     else:
@@ -465,7 +498,7 @@ st.markdown("<div id='full-peer-ranking' class='prism-kicker'>04 · Full peer ra
 st.subheader("Relative ranking")
 st.caption(
     f"Coverage: {len(scored_tickers)}/{len(universe)} banks · all rows are shown · "
-    "fundamental score remains separate from the language and market overlays"
+    "fundamental score remains separate from the language and price overlays"
 )
 render_ranking_table(ranking_rows, key="homepage_ranking")
 st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
@@ -489,7 +522,7 @@ quick_cols[2].metric("P/E", multiple(quick_metrics.get("price_to_earnings")), bo
 quick_cols[3].metric("ROE", percent(quick_metrics.get("return_on_equity")), border=True)
 quick_cols[4].metric("Dividend yield", percent(quick_metrics.get("dividend_yield")), border=True)
 quick_cols[5].metric("Language", decimal(quick_signal.get("Language score") if quick_signal else None), border=True)
-quick_cols[6].metric("Market", decimal(quick_signal.get("Market confirmation") if quick_signal else None), border=True)
+quick_cols[6].metric("Price confirmation", decimal(quick_signal.get("Price confirmation") if quick_signal else None), border=True)
 if quick_signal:
     st.info(
         f"{quick_signal['Investment group']}: {GROUP_META[quick_signal['Investment group']]['meaning']} "
@@ -500,13 +533,24 @@ st.markdown("<div id='evidence-readiness' class='prism-kicker'>06 · Evidence re
 st.subheader("Language drift and governance gate")
 evidence_cols = st.columns(5)
 evidence_cols[0].metric("Language coverage", f"{language_coverage.get('provisional_banks', 0)}/{len(universe)}", border=True)
-evidence_cols[1].metric("Market coverage", f"{market_coverage}/{len(universe)}", border=True)
+evidence_cols[1].metric("Price coverage", f"{market_coverage}/{len(universe)}", border=True)
 evidence_cols[2].metric("Table sources", table_evidence.get("source_count", 0), border=True)
 evidence_cols[3].metric("Extracted tables", table_evidence.get("table_count", 0), border=True)
 evidence_cols[4].metric("Backtested signals", 0, border=True)
-st.warning(
-    "Four comparable quarterly reports support preliminary linguistic-drift screening. "
-    "Signals remain provisional until citations are reviewed and predictive value is backtested."
+four_period_count = language_coverage.get("four_period_trends", 0)
+if four_period_count:
+    st.warning(
+        f"{four_period_count}/{len(universe)} banks have a preliminary four-period language trend. "
+        "All signals remain provisional until citations are reviewed and predictive value is backtested."
+    )
+else:
+    st.warning(
+        "0/23 banks currently have four curated comparable periods; all language scores are single-period provisional snapshots. "
+        "Linguistic drift is not yet active."
+    )
+st.caption(
+    "Drift alerts require eight curated comparable management-results documents per bank plus a backtest. "
+    "Historical periods can be backfilled from issuer archives; readiness depends on source comparability and review, not simply waiting for future quarters."
 )
 
 st.markdown("<div id='research-workbench' class='prism-kicker'>07 · Research workbench</div><div class='prism-rule'></div>", unsafe_allow_html=True)
@@ -533,29 +577,29 @@ with ranking_tab:
 with signals_tab:
     st.subheader("Signal diagnostics")
     st.warning(
-        "Research preview only: neither the language signal nor market-confirmation overlay changes the fundamental score. "
+        "Research preview only: neither the language signal nor price-confirmation overlay changes the fundamental score. "
         "No quadrant, momentum regime, or combination is a buy or sell recommendation."
     )
     with st.container(horizontal=True):
         st.metric("Bank universe", language_coverage.get("universe_banks", len(universe)), border=True)
         st.metric("Provisional language coverage", language_coverage.get("provisional_banks", 0), border=True)
-        st.metric("Market confirmation coverage", f"{market_coverage}/{len(universe)}", border=True)
+        st.metric("Price confirmation coverage", f"{market_coverage}/{len(universe)}", border=True)
         st.metric("Insufficient language data", language_coverage.get("insufficient_banks", len(universe)), border=True)
         st.metric("Backtested signals", 0, border=True)
 
     if plotted_rows:
-        market_frame = pd.DataFrame(plotted_rows).sort_values("Market confirmation", ascending=True)
+        market_frame = pd.DataFrame(plotted_rows).sort_values("Price confirmation", ascending=True)
         if not market_frame.empty:
             st.markdown("#### Axis 1 market-positioning overlay")
             market_chart = alt.Chart(market_frame).mark_bar().encode(
-                x=alt.X("Market confirmation:Q", title="Peer-relative market-confirmation score", scale=alt.Scale(domain=[0, 100])),
+                x=alt.X("Price confirmation:Q", title="Peer-relative price-confirmation score", scale=alt.Scale(domain=[0, 100])),
                 y=alt.Y("Ticker:N", sort="-x", title=None),
                 color=alt.Color(
-                    "Market regime:N",
+                    "Price regime:N",
                     scale=alt.Scale(domain=["Confirming", "Neutral", "Unconfirmed"], range=["#35c48d", "#9fa8b8", "#ef6262"]),
                     legend=alt.Legend(title=None, orient="bottom"),
                 ),
-                tooltip=["Bank:N", "Ticker:N", "Market confirmation:Q", "Market regime:N"],
+                tooltip=["Bank:N", "Ticker:N", "Price confirmation:Q", "Price regime:N"],
             ).properties(height=max(360, len(market_frame) * 24))
             st.altair_chart(market_chart, width="stretch")
             st.caption("This overlay peer-ranks 1-, 3-, and 6-month returns plus price versus the 200-day average. It qualifies Axis 1 but does not change the fundamental ranking score.")
@@ -570,8 +614,14 @@ with signals_tab:
             "Language": row.get("language_score"),
             "Negative pressure": row.get("negative_pressure_score"),
             "Gap": row.get("divergence"),
-            "Market confirmation": market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
-            "Market regime": market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
+            "Price confirmation": market_by_ticker.get(row["ticker"], {}).get(
+                "price_confirmation_score",
+                market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
+            ),
+            "Price regime": market_by_ticker.get(row["ticker"], {}).get(
+                "price_regime",
+                market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
+            ),
             "Quadrant": row.get("quadrant") or "Not assigned",
             "Coverage status": row["status"],
         }
@@ -586,7 +636,7 @@ with signals_tab:
             "Language": st.column_config.NumberColumn(format="%.1f"),
             "Negative pressure": st.column_config.NumberColumn(format="%.1f"),
             "Gap": st.column_config.NumberColumn(format="%+.1f"),
-            "Market confirmation": st.column_config.NumberColumn(format="%.1f"),
+            "Price confirmation": st.column_config.NumberColumn(format="%.1f"),
         },
     )
 
@@ -655,7 +705,8 @@ with details_tab:
     cols[3].metric("P/E", multiple(metrics.get("price_to_earnings")))
     cols[4].metric("ROE", percent(metrics.get("return_on_equity")))
     cols[5].metric("Dividend yield", percent(metrics.get("dividend_yield")))
-    cols[6].metric("Market confirmation", market.get("market_confirmation_score") if market.get("market_confirmation_score") is not None else "N/A")
+    price_confirmation = market.get("price_confirmation_score", market.get("market_confirmation_score"))
+    cols[6].metric("Price confirmation", price_confirmation if price_confirmation is not None else "N/A")
     st.markdown("#### Additional equity-research metrics")
     st.dataframe([
         {"Metric": "Forward P/E", "Value": multiple(metrics.get("forward_price_to_earnings"))},
@@ -784,13 +835,14 @@ with methodology_tab:
     st.markdown("**Official-report overlay:** CET1, leverage, LCR, NSFR, NPL ratio, NPL coverage, cost of risk, NIM, cost/income, loan/deposit ratio, and IRRBB sensitivities are included only when period-aligned evidence is available.")
     st.markdown("**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort to correct management-document optimism. The numeric and language axes are not combined.")
     st.markdown("**Language history gate:** four comparable reports of the same document type enable a preliminary drift observation; eight enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
-    st.markdown("**Market-confirmation bubble size:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. The result controls only bubble size, so disagreement stays visible and never alters either axis or the fundamental score.")
+    st.markdown("**Price-confirmation bubble size:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. This is backward-looking price behaviour—not analyst expectations. The result controls only bubble size and never alters either axis or the fundamental score.")
     st.markdown(
-        "**Investment-value groups:** deterministic gates classify the three visible signals without averaging them. "
-        "Conviction Leaders clear 55 on every axis. Re-rating Candidates have fundamentals ≥55 and language ≥50 while market confirmation remains below 55. "
-        "Contrarian Value combines fundamentals ≥50 with language below 50. Expectations-led Momentum requires market confirmation ≥60 while fundamentals remain below 55. "
-        "Downside Risk combines fundamentals below 50 with at least one confirming warning from language or market confirmation below 50. Remaining mid-pack combinations are No Clear Edge. "
-        "Missing signals are handled by the separate Insufficient Evidence gate."
+        "**Investment-value groups:** deterministic gates use each axis's own current cross-section rather than one shared raw cutoff. "
+        f"Current gates — numeric median {group_thresholds['numeric_mid']:.1f}, numeric 60th percentile {group_thresholds['numeric_high']:.1f}; "
+        f"language median {group_thresholds['language_mid']:.1f}, language 60th percentile {group_thresholds['language_high']:.1f}; "
+        f"price 40th/50th/60th percentiles {group_thresholds['price_low']:.1f}/{group_thresholds['price_mid']:.1f}/{group_thresholds['price_high']:.1f}. "
+        "Re-rating identifies supportive fundamentals and language before price confirmation. Verification Watch identifies language materially ahead of below-median fundamentals. "
+        "Contrarian Value requires at least a 40th-percentile price floor; otherwise the pattern is treated as downside/value-trap risk. Missing signals remain a separate evidence gate."
     )
     st.markdown("**Controls:** common reporting dates, source evidence, freshness checks, sensitivity analysis, and publication gate.")
     st.markdown("**Scope:** this is a research screening tool, not personalized investment advice.")

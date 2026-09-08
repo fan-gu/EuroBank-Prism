@@ -424,6 +424,7 @@ def analyze_pdf(path: Path, source: dict) -> dict:
         "publication_date": None,
         "source_url": source.get("download_url"),
         "official_page": source.get("official_page"),
+        "source_status": source.get("source_status", "curated"),
         "document_sha256": sha256(path),
         "page_count": page_count,
         "analyzed_word_count": word_count,
@@ -450,18 +451,31 @@ def analyze_pdf(path: Path, source: dict) -> dict:
 
 
 def load_language_manifest() -> list[dict]:
-    path = BASE_DIR / "language_download_manifest.json"
-    if not path.exists():
+    paths = [
+        BASE_DIR / "language_download_manifest.json",
+        BASE_DIR / "language_history_download_manifest.json",
+    ]
+    if not paths[0].exists():
         raise FileNotFoundError(
             "language_download_manifest.json is missing; run "
             "download_language_reports.py first."
         )
-    return [
-        record
-        for record in json.loads(path.read_text(encoding="utf-8"))
-        if record.get("status") == "downloaded"
-        and record.get("source_status", "curated") == "curated"
-    ]
+    records = []
+    seen = set()
+    for path in paths:
+        if not path.exists():
+            continue
+        for record in json.loads(path.read_text(encoding="utf-8")):
+            key = (record.get("ticker"), record.get("period"))
+            if key in seen or record.get("status") != "downloaded":
+                continue
+            if record.get("source_status", "curated") not in {
+                "curated", "pending_human_review"
+            }:
+                continue
+            seen.add(key)
+            records.append(record)
+    return records
 
 
 def load_universe() -> list[dict]:

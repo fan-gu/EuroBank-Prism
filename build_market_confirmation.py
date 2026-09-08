@@ -1,4 +1,4 @@
-"""Build an independent market-confirmation axis for EuroBank Prism.
+"""Build an independent price-confirmation axis for EuroBank Prism.
 
 The axis is deliberately not fed into the fundamental relative-value score.
 It measures whether market behaviour confirms or challenges a bank's current
@@ -82,18 +82,22 @@ def score_records(records: list[dict]) -> list[dict]:
         weight_used = sum(component["weight"] for component in components.values())
         row["components"] = components
         row["weight_coverage"] = round(weight_used, 2)
-        row["market_confirmation_score"] = (
+        row["price_confirmation_score"] = (
             round(100 * sum(component["percentile_score"] * component["weight"] for component in components.values()) / weight_used, 1)
             if weight_used >= 0.70
             else None
         )
-        row["status"] = "market_confirmation_available" if row["market_confirmation_score"] is not None else "insufficient_price_history"
-        score = row["market_confirmation_score"]
-        row["market_regime"] = (
+        # Retain one legacy field for existing saved datasets; new UI and
+        # downstream code use the more accurate price-confirmation name.
+        row["market_confirmation_score"] = row["price_confirmation_score"]
+        row["status"] = "price_confirmation_available" if row["price_confirmation_score"] is not None else "insufficient_price_history"
+        score = row["price_confirmation_score"]
+        row["price_regime"] = (
             "Confirming" if score is not None and score >= 60 else
             "Unconfirmed" if score is not None and score <= 40 else
             "Neutral" if score is not None else "Insufficient history"
         )
+        row["market_regime"] = row["price_regime"]
     return records
 
 
@@ -138,7 +142,7 @@ def build_market_confirmation() -> dict:
         "schema_version": "1.0",
         "generated_at": retrieved_at,
         "methodology": {
-            "axis": "independent_market_confirmation",
+            "axis": "independent_price_confirmation",
             "components": "1m 20%, 3m 35%, 6m 35%, price versus 200-day average 10%",
             "interpretation": "Cross-sectional peer percentile; not included in the fundamental relative-value score.",
             "provider": "Yahoo Finance via yfinance",
@@ -146,7 +150,7 @@ def build_market_confirmation() -> dict:
         "records": scored,
     }
     OUTPUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
-    available = sum(row["status"] == "market_confirmation_available" for row in scored)
+    available = sum(row["status"] == "price_confirmation_available" for row in scored)
     print(f"Wrote {OUTPUT_PATH}: {available}/{len(scored)} scores available.")
     return payload
 
