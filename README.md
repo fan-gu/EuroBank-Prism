@@ -16,7 +16,8 @@ data consistently; it is not personalized investment advice.
   disagreement remains visible without adding a third spatial axis.
 - A compact, interactive first-screen signal map: management language is
   horizontal, fundamentals are vertical, and price confirmation sets bubble
-  size. Its investment-group legend is horizontal.
+  size. Local bank logos sit inside the bubbles while ticker labels remain
+  readable outside them.
 - A waterfall-style homepage that moves from the signal map to
   investment groups, research triage, the full peer ranking, and a compact
   research-readiness gate without requiring tab hopping.
@@ -26,8 +27,9 @@ data consistently; it is not personalized investment advice.
   a bank-level assignment table and a separate language-history confidence
   gate.
 - Evidence controls for reporting period, definition, unit, scope, and source.
-- Dark-mode dashboard with a continuous research narrative and three compact
-  follow-up tabs for bank research, source evidence, and methodology.
+- Dark-mode dashboard with a continuous research narrative; bank research,
+  source evidence, and methodology are independent waterfall sections rather
+  than nested tabs.
 
 The current release has two spatial axes—fundamentals and management
 language—plus price confirmation encoded by bubble size. The three signals

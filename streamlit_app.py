@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from datetime import date, datetime
+import base64
 import importlib
 import json
 import subprocess
@@ -29,6 +30,23 @@ derive_group_thresholds = investment_groups_module.derive_group_thresholds
 load_dotenv(Path(__file__).with_name(".env"))
 
 BASE_DIR = Path(__file__).resolve().parent
+LOGO_DIR = BASE_DIR / "assets" / "bank_logos"
+
+
+def bank_logo_uri(ticker):
+    """Return a local bank logo as an embeddable data URI."""
+    logo_path = LOGO_DIR / f"{ticker}.png"
+    if not logo_path.exists():
+        return None
+    encoded = base64.b64encode(logo_path.read_bytes()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
+
+
+BANK_LOGOS = {
+    path.stem: bank_logo_uri(path.stem)
+    for path in LOGO_DIR.glob("*.png")
+}
+
 COUNTRY_INFO = {
     "Austria": ("AT", "at"), "Belgium": ("BE", "be"),
     "Finland": ("FI", "fi"), "France": ("FR", "fr"),
@@ -200,6 +218,22 @@ def build_signal_map(rows):
             )
         )
     for row in positioned:
+        logo = BANK_LOGOS.get(row["Ticker"])
+        if logo:
+            figure.add_layout_image(
+                source=logo,
+                x=row["Language score"],
+                y=row["Numeric score"],
+                xref="x",
+                yref="y",
+                xanchor="center",
+                yanchor="middle",
+                sizex=2.6,
+                sizey=2.6,
+                sizing="contain",
+                opacity=0.96,
+                layer="above",
+            )
         figure.add_shape(
             type="line",
             x0=row["Language score"], y0=row["Numeric score"],
@@ -316,24 +350,26 @@ st.markdown(
     """
     <style>
     .block-container {padding-top: 1.2rem; padding-bottom: 4rem;}
-    .prism-kicker {color:#8fa6c7;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:1.2rem;}
-    .prism-rule {height:1px;background:linear-gradient(90deg,#4fa3ff55,transparent);margin:.35rem 0 1.2rem;}
-    .prism-group {border-left:4px solid var(--group-color);padding:.1rem 0 .1rem .8rem;min-height:5.4rem;}
-    .prism-group-name {font-weight:750;font-size:1rem;}
-    .prism-group-count {font-size:1.8rem;font-weight:750;line-height:1.15;}
-    .prism-muted {color:#aeb8c7;font-size:.82rem;line-height:1.35;}
-    .prism-nav a {display:block;color:#aeb8c7;text-decoration:none;padding:.42rem .2rem;border-left:2px solid #28364b;padding-left:.75rem;}
+    .prism-group {border-left:4px solid var(--group-color);padding:.12rem 0 .12rem .8rem;min-height:8rem;}
+    .prism-group-name {font-weight:760;font-size:1.08rem;margin-bottom:.38rem;}
+    .prism-signal-line {color:#f1f4f9;font-size:.78rem;line-height:1.45;}
+    .prism-group-summary {color:#9eabbd;font-size:.76rem;margin:.22rem 0 .58rem;}
+    .prism-bank-list {display:flex;gap:.38rem;flex-wrap:wrap;align-items:center;}
+    .prism-bank-token {display:inline-flex;align-items:center;gap:.25rem;border:1px solid #30394a;border-radius:999px;padding:.13rem .38rem .13rem .18rem;font-size:.67rem;font-weight:700;color:#edf2f8;}
+    .prism-bank-logo {width:1.18rem;height:1.18rem;border-radius:50%;object-fit:contain;background:#ffffff;}
+    .prism-nav a {display:block;color:#aeb8c7;text-decoration:none;padding:.31rem .2rem;border-left:2px solid #28364b;padding-left:.75rem;font-size:.91rem;}
     .prism-nav a:hover {color:#f4f6fb;border-left-color:#4fa3ff;}
     .prism-nav a.active {color:#ffffff;border-left-color:#4fa3ff;background:linear-gradient(90deg,#4fa3ff18,transparent);font-weight:700;}
     .prism-legend {display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;margin:.2rem 0 .42rem;padding-bottom:.1rem;}
     .prism-chip {display:inline-flex;align-items:center;gap:.3rem;border:1px solid #2c3545;border-radius:999px;padding:.2rem .42rem;color:#dce3ee;font-size:.70rem;white-space:nowrap;}
     .prism-dot {width:.62rem;height:.62rem;border-radius:50%;display:inline-block;}
-    .prism-badge {display:inline-block;margin-left:.28rem;padding:.05rem .24rem;border:1px solid #5d6b80;border-radius:4px;color:#9faec2;font-size:.52rem;font-weight:700;letter-spacing:.05em;vertical-align:middle;}
     div[data-testid="stDataFrame"] {font-size:.70rem;}
     div[data-testid="stDataFrame"] * {font-size:.70rem;}
-    section[data-testid="stSidebar"] h2 {font-size:2.05rem;line-height:1.05;margin-bottom:.1rem;}
+    section[data-testid="stSidebar"] h2 {font-size:2.22rem;line-height:1.02;margin-bottom:.1rem;letter-spacing:-.035em;white-space:nowrap;}
     section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {overflow-y:hidden !important;}
-    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:.42rem;}
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:.32rem;}
+    section[data-testid="stMain"] h2 {font-size:2rem;letter-spacing:-.02em;}
+    section[data-testid="stMain"] h3 {font-size:1.28rem;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -362,7 +398,9 @@ with st.sidebar:
           <a href="#research-triage">Research triage</a>
           <a href="#full-peer-ranking">Peer ranking</a>
           <a href="#research-readiness">Research readiness</a>
-          <a href="#research-details">Research details</a>
+          <a href="#bank-research">Bank research</a>
+          <a href="#sources-evidence">Sources &amp; evidence</a>
+          <a href="#methodology">Methodology</a>
         </div>
         """,
         unsafe_allow_html=True,
@@ -381,11 +419,11 @@ if refresh_clicked:
             st.code((fundamental_result.stderr or fundamental_result.stdout) + "\n" + (market_result.stderr or market_result.stdout))
 
 st.markdown("<div id='core-signal-map'></div>", unsafe_allow_html=True)
-st.header("Signal Map")
+st.header("Signal map")
 if plotted_rows:
     legend_chips = "".join(
         f"<span class='prism-chip' title=\"{GROUP_META[group]['meaning']}\">"
-        f"<span class='prism-dot' style='background:{GROUP_META[group]['color']}'></span>{group}<span class='prism-badge' title='Provisional'>P</span></span>"
+        f"<span class='prism-dot' style='background:{GROUP_META[group]['color']}'></span>{group}</span>"
         for group in GROUP_ORDER
     )
     st.markdown(f"<div class='prism-legend'>{legend_chips}</div>", unsafe_allow_html=True)
@@ -397,24 +435,23 @@ if plotted_rows:
         config={"displaylogo": False, "scrollZoom": True},
     )
 
-    st.markdown("<div id='investment-groups' class='prism-kicker'>02 · Investment groups</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-    st.subheader("Investment Groups")
-    st.caption(
-        "Six directional outcomes use axis-specific peer quantiles and preserve all three signals; "
-        "they are not a blended score. Missing evidence remains a separate publication gate. "
-        "Language-history confidence is shown separately."
-    )
+    st.markdown("<div id='investment-groups'></div>", unsafe_allow_html=True)
+    st.header("02 · Investment groups")
     group_columns = st.columns(3, gap="medium")
     for index, group_name in enumerate(GROUP_ORDER):
         members = sorted(row["Ticker"] for row in plotted_rows if row["Investment group"] == group_name)
         meta = GROUP_META[group_name]
+        member_tokens = "".join(
+            f"<span class='prism-bank-token'><img class='prism-bank-logo' src='{BANK_LOGOS.get(ticker, '')}' alt=''>{ticker}</span>"
+            for ticker in members
+        )
         with group_columns[index % 3].container(border=True):
             st.markdown(
                 f"<div class='prism-group' style='--group-color:{meta['color']}'>"
-                f"<div class='prism-group-name'>{group_name}<span class='prism-badge'>PROVISIONAL</span></div>"
-                f"<div class='prism-group-count'>{len(members)}</div>"
-                f"<div class='prism-muted'>{meta['meaning']}</div>"
-                f"<div style='margin-top:.55rem'>{' · '.join(members) if members else 'No bank currently assigned'}</div>"
+                f"<div class='prism-group-name'>{group_name} · {len(members)}</div>"
+                f"<div class='prism-signal-line'>{meta['signals']}</div>"
+                f"<div class='prism-group-summary'>{meta['summary']}</div>"
+                f"<div class='prism-bank-list'>{member_tokens or 'No bank assigned'}</div>"
                 "</div>",
                 unsafe_allow_html=True,
             )
@@ -443,14 +480,9 @@ if plotted_rows:
         )
 else:
     st.info("Complete three-signal coverage is not yet available.")
-st.caption(
-    "Price confirmation is encoded only by bubble size, so disagreement remains visible without distorting either axis. "
-    "A future market-expectations axis will require consistent consensus-estimate data."
-)
 
-st.markdown("<div id='research-triage' class='prism-kicker'>03 · Research triage</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-st.subheader("Opportunities and risk queue")
-st.caption("A prioritisation view for deeper research—not an investment recommendation.")
+st.markdown("<div id='research-triage'></div>", unsafe_allow_html=True)
+st.header("03 · Research triage")
 opportunity_groups = {"Conviction Leaders", "Strong Signals, Weak Price", "Cautious Value"}
 opportunities = sorted(
     (row for row in plotted_rows if row["Investment group"] in opportunity_groups),
@@ -494,20 +526,17 @@ with right_queue:
             )
             st.write(GROUP_META[row["Investment group"]]["meaning"])
 
-st.markdown("<div id='full-peer-ranking' class='prism-kicker'>04 · Full peer ranking</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-st.subheader("Relative ranking")
+st.markdown("<div id='full-peer-ranking'></div>", unsafe_allow_html=True)
+st.header("04 · Relative ranking")
 st.caption(
-    f"Coverage: {len(scored_tickers)}/{len(universe)} banks · all rows are shown · "
-    "fundamental score remains separate from the language and price overlays"
+    "Fundamental ranking only; language and price remain independent signals."
 )
 render_ranking_table(ranking_rows, key="homepage_ranking")
-st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
 
-st.markdown("<div id='research-readiness' class='prism-kicker'>05 · Research readiness</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-st.subheader("Can these signals support research use?")
+st.markdown("<div id='research-readiness'></div>", unsafe_allow_html=True)
+st.header("05 · Research readiness")
 st.caption(
-    "This gate checks whether the inputs are complete, period-comparable, source-linked and backtested. "
-    "It is a confidence control—not another investment signal."
+    "Confidence gate: are inputs complete, period-comparable, source-linked and backtested?"
 )
 four_period_count = language_coverage.get("four_period_trends", 0)
 with st.container(horizontal=True):
@@ -520,14 +549,13 @@ st.caption(
     "eight periods, citation review and out-of-sample testing are required for a validated alert."
 )
 
-st.markdown("<div id='research-details' class='prism-kicker'>06 · Research details</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-st.caption("Open only the bank detail, source evidence or methodology needed for follow-up research.")
+details_section = st.container()
+evidence_section = st.container()
+methodology_section = st.container()
 
-details_tab, evidence_tab, methodology_tab = st.tabs(
-    ["Bank research", "Sources & evidence", "Methodology"]
-)
-
-with details_tab:
+with details_section:
+    st.markdown("<div id='bank-research'></div>", unsafe_allow_html=True)
+    st.header("06 · Bank research")
     selected = st.selectbox("Select a bank", [row["ticker"] for row in universe])
     bank = banks[selected]
     score = next((row for row in scores if row["ticker"] == selected), {"score": None, "components": {}})
@@ -620,8 +648,9 @@ with details_tab:
                     icon=":material/open_in_new:",
                 )
 
-with evidence_tab:
-    st.subheader("Official financial reports")
+with evidence_section:
+    st.markdown("<div id='sources-evidence'></div>", unsafe_allow_html=True)
+    st.header("07 · Sources & evidence")
     st.caption("Links open official issuer reporting pages where the latest publication is maintained.")
     st.dataframe(
         [
@@ -689,8 +718,9 @@ with evidence_tab:
                         icon=":material/open_in_new:",
                     )
 
-with methodology_tab:
-    st.subheader("Methodology and controls")
+with methodology_section:
+    st.markdown("<div id='methodology'></div>", unsafe_allow_html=True)
+    st.header("08 · Methodology")
     st.markdown("#### Data quality")
     st.write(
         f"Market-data ranking coverage: **{len(scored_tickers)}/{len(universe)} banks**. "
@@ -730,7 +760,9 @@ st.html(
         "research-triage",
         "full-peer-ranking",
         "research-readiness",
-        "research-details"
+        "bank-research",
+        "sources-evidence",
+        "methodology"
       ];
       const links = Array.from(document.querySelectorAll(".prism-nav a"));
       const sections = sectionIds

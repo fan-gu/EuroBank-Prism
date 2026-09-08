@@ -27,26 +27,38 @@ GROUP_META = {
     "Conviction Leaders": {
         "color": "#35C48D",
         "meaning": "All three signals agree: strong fundamentals, supportive language and confirming price action.",
+        "signals": "Fundamentals ✔ · Management language 💪 · Price confirmation ↑",
+        "summary": "All three signals agree.",
     },
     "Strong Signals, Weak Price": {
         "color": "#4FA3FF",
         "meaning": "Fundamentals and language are supportive, but price action has not yet confirmed the thesis.",
+        "signals": "Fundamentals ✔ · Management language 💪 · Price confirmation ↓",
+        "summary": "Strong case; price has not confirmed it.",
     },
     "Cautious Value": {
         "color": "#FFD84D",
         "meaning": "Fundamentals are at or above the peer median and price avoids the bottom tier, while language remains cautious.",
+        "signals": "Fundamentals ✔ · Management language ⚠ · Price confirmation ↔",
+        "summary": "Value support, but management stays cautious.",
     },
     "Price Ahead of Fundamentals": {
         "color": "#9B7BFF",
         "meaning": "Price action is stronger than the fundamental case; further upside may depend on future delivery.",
+        "signals": "Fundamentals ⚠ · Management language ↔ · Price confirmation ↑",
+        "summary": "Price leads; verify future delivery.",
     },
     "Story Ahead of Numbers": {
         "color": "#F28E5B",
         "meaning": "Management language is materially stronger than the accounts; verify whether delivery catches up with the story.",
+        "signals": "Fundamentals ↓ · Management language 💪 · Price confirmation ↔",
+        "summary": "Management's story leads the numbers.",
     },
     "Downside Risk": {
         "color": "#EF6262",
         "meaning": "Weak fundamentals have a confirming warning, or apparently stronger fundamentals face both cautious language and bottom-tier price action.",
+        "signals": "Fundamentals ↓ · Management language ⚠ · Price confirmation ↓",
+        "summary": "Weak inputs reinforce the risk case.",
     },
     "Insufficient Evidence": {
         "color": "#9FA8B8",

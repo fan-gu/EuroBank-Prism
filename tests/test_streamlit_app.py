@@ -12,14 +12,18 @@ class StreamlitAppTests(unittest.TestCase):
         app = AppTest.from_file(str(app_path), default_timeout=30).run()
         self.assertEqual(app.exception, [])
         headings = [item.value for item in app.header] + [item.value for item in app.subheader]
-        for expected in (
-            "Signal Map",
-            "Investment Groups",
-            "Opportunities and risk queue",
+        self.assertIn("Signal map", headings)
+        for section_name in (
+            "Investment groups",
+            "Research triage",
             "Relative ranking",
-            "Can these signals support research use?",
+            "Research readiness",
+            "Bank research",
+            "Sources & evidence",
+            "Methodology",
         ):
-            self.assertIn(expected, headings)
+            self.assertTrue(any(heading.endswith(section_name) for heading in headings))
+        self.assertEqual(len(app.tabs), 0)
         self.assertGreaterEqual(len(app.dataframe), 2)
 
 
