@@ -13,7 +13,7 @@ class StreamlitAppTests(unittest.TestCase):
         self.assertEqual(app.exception, [])
         headings = [item.value for item in app.header] + [item.value for item in app.subheader]
         for expected in (
-            "Core signal map",
+            "Signal Map",
             "Investment Groups",
             "Opportunities and risk queue",
             "Relative ranking",

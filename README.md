@@ -20,7 +20,8 @@ data consistently; it is not personalized investment advice.
 - A waterfall-style homepage that moves from the signal map to
   investment groups, research triage, the full peer ranking, a one-bank
   diagnostic, and the evidence-readiness gate without requiring tab hopping.
-- A persistent left navigation rail and a top-right refresh/freshness control.
+- A persistent left rail containing the product title, refresh/freshness
+  control, and section navigation.
 - Seven transparent investment-value research groups shown by bubble color, with
   a bank-level assignment table and a separate language-history confidence
   gate.
@@ -35,9 +36,9 @@ remain visible and are not blended into one opaque score.
 ## Investment groups
 
 The signal map assigns each bank to one of seven directional research groups
-without averaging away disagreement: **Conviction Leaders**, **Re-rating
-Candidates**, **Contrarian Value**, **Price-led Momentum**, **Verification
-Watch**, **Downside Risk**, or **No Clear Edge**. Missing coordinates are handled separately as
+without averaging away disagreement: **Conviction Leaders**, **Strong Signals,
+Weak Price**, **Cautious Value**, **Price Momentum**, **Story Ahead of
+Numbers**, **Downside Risk**, or **No Clear Edge**. Missing coordinates are handled separately as
 **Insufficient Evidence**, not forced into an investment group. The rules use
 axis-specific peer quantiles rather than one shared raw cutoff. All group labels
 remain provisional until comparable language history and backtesting are available.
@@ -67,7 +68,7 @@ Market data ──────> comparable metrics ──> weighted peer ranking
 - Price confirmation peer-ranks 1-, 3-, and 6-month return with price versus
   its 200-day average. It confirms or challenges market behaviour only; it does
   not measure analyst expectations and does not alter the fundamental score.
-- The top-right refresh control fetches provider fundamentals and price history;
+- The left-rail refresh control fetches provider fundamentals and price history;
   report-language curation is a separate governed workflow.
 
 ## Run locally

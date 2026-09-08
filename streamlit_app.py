@@ -101,16 +101,6 @@ def decimal(value):
     return f"{value:.2f}" if isinstance(value, (int, float)) else "Not available"
 
 
-def short_comment(score):
-    if score is None:
-        return "Insufficient comparable data"
-    if score >= 67:
-        return "Strong relative screen"
-    if score >= 45:
-        return "Mixed; broadly mid-pack"
-    return "Weak relative screen"
-
-
 def build_ranking_rows(scores, banks):
     """Create one canonical ranking table for the homepage and workbench."""
     rows = []
@@ -135,7 +125,6 @@ def build_ranking_rows(scores, banks):
             "ROE": metrics.get("return_on_equity") * 100 if metrics.get("return_on_equity") is not None else None,
             "Div. yield": metrics.get("dividend_yield") * 100 if metrics.get("dividend_yield") is not None else None,
             "Score": score_row["score"],
-            "Comment": short_comment(score_row["score"]),
         })
     return rows
 
@@ -146,18 +135,22 @@ def render_ranking_table(ranking_rows, *, key=None):
         ranking_rows,
         width="stretch",
         hide_index=True,
-        height=845,
-        row_height=28,
+        height=610,
+        row_height=24,
         key=key,
         column_config={
-            "Flag": st.column_config.ImageColumn("Flag", width=38),
-            "Index weight": st.column_config.NumberColumn("Index wt.", format="%.2f%%"),
-            "Current price": st.column_config.NumberColumn("Price", format="€%.2f"),
-            "P/E": st.column_config.NumberColumn("P/E", format="%.2fx"),
-            "P/B": st.column_config.NumberColumn("P/B", format="%.2fx"),
-            "ROE": st.column_config.NumberColumn("ROE", format="%.1f%%"),
-            "Div. yield": st.column_config.NumberColumn("Div. yield", format="%.1f%%"),
-            "Score": st.column_config.NumberColumn("Score", format="%.1f"),
+            "Rank": st.column_config.NumberColumn("#", width=42),
+            "Flag": st.column_config.ImageColumn("", width=30),
+            "Country": st.column_config.TextColumn("Country", width=54),
+            "Bank": st.column_config.TextColumn("Bank", width=175),
+            "Ticker": st.column_config.TextColumn("Ticker", width=62),
+            "Index weight": st.column_config.NumberColumn("Index wt.", format="%.2f%%", width=70),
+            "Current price": st.column_config.NumberColumn("Price", format="€%.2f", width=70),
+            "P/E": st.column_config.NumberColumn("P/E", format="%.2fx", width=62),
+            "P/B": st.column_config.NumberColumn("P/B", format="%.2fx", width=62),
+            "ROE": st.column_config.NumberColumn("ROE", format="%.1f%%", width=62),
+            "Div. yield": st.column_config.NumberColumn("Div. yield", format="%.1f%%", width=70),
+            "Score": st.column_config.NumberColumn("Score", format="%.1f", width=58),
         },
     )
 
@@ -336,13 +329,29 @@ st.markdown(
     .prism-chip {display:inline-flex;align-items:center;gap:.3rem;border:1px solid #2c3545;border-radius:999px;padding:.2rem .42rem;color:#dce3ee;font-size:.70rem;white-space:nowrap;}
     .prism-dot {width:.62rem;height:.62rem;border-radius:50%;display:inline-block;}
     .prism-badge {display:inline-block;margin-left:.28rem;padding:.05rem .24rem;border:1px solid #5d6b80;border-radius:4px;color:#9faec2;font-size:.52rem;font-weight:700;letter-spacing:.05em;vertical-align:middle;}
+    div[data-testid="stDataFrame"] {font-size:.70rem;}
+    div[data-testid="stDataFrame"] * {font-size:.70rem;}
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 with st.sidebar:
-    st.markdown("### EuroBank Prism")
+    st.markdown("## EuroBank Prism")
+    st.caption("Three signals. One clearer view.")
+    refresh_clicked = st.button(
+        "Refresh data",
+        width="stretch",
+        icon=":material/refresh:",
+        help="Fetch fresh provider metrics and price history. Official-report language history is curated separately.",
+    )
+    if data_age is None:
+        st.caption("Provider snapshot unavailable")
+    elif data_age > 3:
+        st.caption(f"⚠ {observed} · {data_age} days old")
+    else:
+        st.caption(f"Data {observed} · current")
+    st.divider()
     st.caption(f"{len(scored_tickers)}/{len(universe)} banks ranked · 3 independent signals")
     st.markdown(
         """
@@ -361,24 +370,6 @@ with st.sidebar:
     st.divider()
     st.caption("Scores are peer-relative research signals, not investment advice.")
 
-brand_col, action_col = st.columns([5.2, 1.45], vertical_alignment="top")
-with brand_col:
-    st.title("EuroBank Prism")
-    st.caption("Three signals. One clearer view. · EURO STOXX Banks research intelligence")
-with action_col:
-    refresh_clicked = st.button(
-        "Refresh data",
-        width="stretch",
-        icon=":material/refresh:",
-        help="Fetch fresh provider metrics and price history. Official-report language history is curated separately.",
-    )
-    if data_age is None:
-        st.caption("Data date unavailable")
-    elif data_age > 3:
-        st.caption(f"⚠ Provider snapshot {observed} · {data_age} days old")
-    else:
-        st.caption(f"Provider snapshot {observed} · current")
-
 if refresh_clicked:
     with st.status("Refreshing all 23 banks...", expanded=False) as status:
         fundamental_result = subprocess.run([sys.executable, str(BASE_DIR / "build_full_universe.py")], cwd=BASE_DIR, capture_output=True, text=True)
@@ -392,11 +383,7 @@ if refresh_clicked:
             st.code((fundamental_result.stderr or fundamental_result.stdout) + "\n" + (market_result.stderr or market_result.stdout))
 
 st.markdown("<div id='core-signal-map'></div>", unsafe_allow_html=True)
-st.header("Core signal map")
-st.caption(
-    "Numerical × linguistic: management language runs horizontally and fundamentals & valuation vertically. "
-    "Bubble size is price confirmation: larger means stronger relative price momentum."
-)
+st.header("Signal Map")
 if plotted_rows:
     legend_chips = "".join(
         f"<span class='prism-chip' title=\"{GROUP_META[group]['meaning']}\">"
@@ -466,14 +453,14 @@ st.caption(
 st.markdown("<div id='research-triage' class='prism-kicker'>03 · Research triage</div><div class='prism-rule'></div>", unsafe_allow_html=True)
 st.subheader("Opportunities and risk queue")
 st.caption("A prioritisation view for deeper research—not an investment recommendation.")
-opportunity_groups = {"Conviction Leaders", "Re-rating Candidates", "Contrarian Value"}
+opportunity_groups = {"Conviction Leaders", "Strong Signals, Weak Price", "Cautious Value"}
 opportunities = sorted(
     (row for row in plotted_rows if row["Investment group"] in opportunity_groups),
     key=lambda row: (row["Numeric score"] + row["Language score"], row["Price confirmation"]),
     reverse=True,
 )
 risks = []
-for group_name in ("Verification Watch", "Downside Risk", "Price-led Momentum"):
+for group_name in ("Story Ahead of Numbers", "Downside Risk", "Price Momentum"):
     group_queue = sorted(
         (row for row in plotted_rows if row["Investment group"] == group_name),
         key=lambda row: (
@@ -856,8 +843,8 @@ with methodology_tab:
         f"Current gates — numeric median {group_thresholds['numeric_mid']:.1f}, numeric 60th percentile {group_thresholds['numeric_high']:.1f}; "
         f"language median {group_thresholds['language_mid']:.1f}, language 60th percentile {group_thresholds['language_high']:.1f}; "
         f"price 40th/50th/60th percentiles {group_thresholds['price_low']:.1f}/{group_thresholds['price_mid']:.1f}/{group_thresholds['price_high']:.1f}. "
-        "Re-rating identifies supportive fundamentals and language before price confirmation. Verification Watch identifies language materially ahead of below-median fundamentals. "
-        "Contrarian Value requires at least a 40th-percentile price floor; otherwise the pattern is treated as downside/value-trap risk. Missing signals remain a separate evidence gate."
+        "Strong Signals, Weak Price identifies supportive fundamentals and language before price confirmation. Story Ahead of Numbers identifies language materially ahead of below-median fundamentals. "
+        "Cautious Value requires at least a 40th-percentile price floor; otherwise the pattern is treated as downside/value-trap risk. Missing signals remain a separate evidence gate."
     )
     st.markdown("**Controls:** common reporting dates, source evidence, freshness checks, sensitivity analysis, and publication gate.")
     st.markdown("**Scope:** this is a research screening tool, not personalized investment advice.")

@@ -16,10 +16,10 @@ DEFAULT_THRESHOLDS = {
 
 GROUP_ORDER = (
     "Conviction Leaders",
-    "Re-rating Candidates",
-    "Contrarian Value",
-    "Price-led Momentum",
-    "Verification Watch",
+    "Strong Signals, Weak Price",
+    "Cautious Value",
+    "Price Momentum",
+    "Story Ahead of Numbers",
     "Downside Risk",
     "No Clear Edge",
 )
@@ -29,19 +29,19 @@ GROUP_META = {
         "color": "#35C48D",
         "meaning": "All three signals agree: strong fundamentals, supportive language and confirming price action.",
     },
-    "Re-rating Candidates": {
+    "Strong Signals, Weak Price": {
         "color": "#4FA3FF",
         "meaning": "Fundamentals and language are supportive, but price action has not yet confirmed the thesis.",
     },
-    "Contrarian Value": {
+    "Cautious Value": {
         "color": "#32C6D4",
         "meaning": "Fundamentals are at or above the peer median and price avoids the bottom tier, while language remains cautious.",
     },
-    "Price-led Momentum": {
+    "Price Momentum": {
         "color": "#9B7BFF",
         "meaning": "Price momentum is ahead of the fundamental score; upside may depend on future delivery.",
     },
-    "Verification Watch": {
+    "Story Ahead of Numbers": {
         "color": "#F28E5B",
         "meaning": "Management language is materially stronger than the accounts; verify whether delivery catches up with the story.",
     },
@@ -126,17 +126,17 @@ def investment_group(
         and language >= gates["language_mid"]
         and price < gates["price_mid"]
     ):
-        return "Re-rating Candidates"
+        return "Strong Signals, Weak Price"
     if numeric < gates["numeric_mid"] and language >= gates["language_high"]:
-        return "Verification Watch"
+        return "Story Ahead of Numbers"
     if price >= gates["price_high"]:
-        return "Price-led Momentum"
+        return "Price Momentum"
     if (
         numeric >= gates["numeric_mid"]
         and language < gates["language_mid"]
         and price >= gates["price_low"]
     ):
-        return "Contrarian Value"
+        return "Cautious Value"
     if (
         numeric < gates["numeric_mid"]
         and (language < gates["language_mid"] or price < gates["price_mid"])
