@@ -18,10 +18,9 @@ GROUP_ORDER = (
     "Conviction Leaders",
     "Strong Signals, Weak Price",
     "Cautious Value",
-    "Price Momentum",
+    "Price Ahead of Fundamentals",
     "Story Ahead of Numbers",
     "Downside Risk",
-    "No Clear Edge",
 )
 
 GROUP_META = {
@@ -34,12 +33,12 @@ GROUP_META = {
         "meaning": "Fundamentals and language are supportive, but price action has not yet confirmed the thesis.",
     },
     "Cautious Value": {
-        "color": "#32C6D4",
+        "color": "#FFD84D",
         "meaning": "Fundamentals are at or above the peer median and price avoids the bottom tier, while language remains cautious.",
     },
-    "Price Momentum": {
+    "Price Ahead of Fundamentals": {
         "color": "#9B7BFF",
-        "meaning": "Price momentum is ahead of the fundamental score; upside may depend on future delivery.",
+        "meaning": "Price action is stronger than the fundamental case; further upside may depend on future delivery.",
     },
     "Story Ahead of Numbers": {
         "color": "#F28E5B",
@@ -48,10 +47,6 @@ GROUP_META = {
     "Downside Risk": {
         "color": "#EF6262",
         "meaning": "Weak fundamentals have a confirming warning, or apparently stronger fundamentals face both cautious language and bottom-tier price action.",
-    },
-    "No Clear Edge": {
-        "color": "#FFB347",
-        "meaning": "Signals are clustered near the peer middle; the screen does not reveal a differentiated thesis.",
     },
     "Insufficient Evidence": {
         "color": "#9FA8B8",
@@ -113,7 +108,7 @@ def investment_group(
     price = float(price_score)
     gates = DEFAULT_THRESHOLDS if thresholds is None else thresholds
 
-    # Seven directional research outcomes. Missing evidence remains a separate
+    # Six directional research outcomes. Missing evidence remains a separate
     # publication gate and is not counted as an investment group.
     if (
         numeric >= gates["numeric_high"]
@@ -124,13 +119,19 @@ def investment_group(
     if (
         numeric >= gates["numeric_mid"]
         and language >= gates["language_mid"]
-        and price < gates["price_mid"]
+        and price < gates["price_high"]
     ):
         return "Strong Signals, Weak Price"
     if numeric < gates["numeric_mid"] and language >= gates["language_high"]:
         return "Story Ahead of Numbers"
     if price >= gates["price_high"]:
-        return "Price Momentum"
+        return "Price Ahead of Fundamentals"
+    if (
+        numeric < gates["numeric_mid"]
+        and language >= gates["language_mid"]
+        and price >= gates["price_mid"]
+    ):
+        return "Story Ahead of Numbers"
     if (
         numeric >= gates["numeric_mid"]
         and language < gates["language_mid"]
@@ -146,7 +147,7 @@ def investment_group(
         and price < gates["price_low"]
     ):
         return "Downside Risk"
-    return "No Clear Edge"
+    return "Downside Risk"
 
 
 def evidence_status(history_periods: int | None) -> str:

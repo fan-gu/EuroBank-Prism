@@ -18,16 +18,16 @@ data consistently; it is not personalized investment advice.
   horizontal, fundamentals are vertical, and price confirmation sets bubble
   size. Its investment-group legend is horizontal.
 - A waterfall-style homepage that moves from the signal map to
-  investment groups, research triage, the full peer ranking, a one-bank
-  diagnostic, and the evidence-readiness gate without requiring tab hopping.
+  investment groups, research triage, the full peer ranking, and a compact
+  research-readiness gate without requiring tab hopping.
 - A persistent left rail containing the product title, refresh/freshness
   control, and section navigation.
-- Seven transparent investment-value research groups shown by bubble color, with
+- Six transparent investment-value research groups shown by bubble color, with
   a bank-level assignment table and a separate language-history confidence
   gate.
 - Evidence controls for reporting period, definition, unit, scope, and source.
-- Dark-mode dashboard with a continuous research narrative and a detailed
-  signals, ranking, bank, evidence, and methodology workbench at the bottom.
+- Dark-mode dashboard with a continuous research narrative and three compact
+  follow-up tabs for bank research, source evidence, and methodology.
 
 The current release has two spatial axes—fundamentals and management
 language—plus price confirmation encoded by bubble size. The three signals
@@ -35,10 +35,10 @@ remain visible and are not blended into one opaque score.
 
 ## Investment groups
 
-The signal map assigns each bank to one of seven directional research groups
+The signal map assigns each bank to one of six directional research groups
 without averaging away disagreement: **Conviction Leaders**, **Strong Signals,
-Weak Price**, **Cautious Value**, **Price Momentum**, **Story Ahead of
-Numbers**, **Downside Risk**, or **No Clear Edge**. Missing coordinates are handled separately as
+Weak Price**, **Cautious Value**, **Price Ahead of Fundamentals**, **Story Ahead
+of Numbers**, or **Downside Risk**. Missing coordinates are handled separately as
 **Insufficient Evidence**, not forced into an investment group. The rules use
 axis-specific peer quantiles rather than one shared raw cutoff. All group labels
 remain provisional until comparable language history and backtesting are available.

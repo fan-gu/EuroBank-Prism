@@ -7,7 +7,6 @@ import json
 import subprocess
 import sys
 
-import altair as alt
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -102,7 +101,7 @@ def decimal(value):
 
 
 def build_ranking_rows(scores, banks):
-    """Create one canonical ranking table for the homepage and workbench."""
+    """Create the canonical ranking table for the waterfall homepage."""
     rows = []
     for rank, score_row in enumerate(
         (item for item in scores if item["status"] == "ranked"), 1
@@ -165,7 +164,7 @@ def build_signal_map(rows):
         x_domain,
         y_domain,
         width=1_150,
-        height=305,
+        height=385,
         x_key="Language score",
         y_key="Numeric score",
     )
@@ -215,7 +214,7 @@ def build_signal_map(rows):
     figure.add_vline(x=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
     figure.add_hline(y=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
     figure.update_layout(
-        height=355,
+        height=430,
         margin={"l": 20, "r": 15, "t": 20, "b": 20},
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(14,18,27,0.60)",
@@ -325,12 +324,16 @@ st.markdown(
     .prism-muted {color:#aeb8c7;font-size:.82rem;line-height:1.35;}
     .prism-nav a {display:block;color:#aeb8c7;text-decoration:none;padding:.42rem .2rem;border-left:2px solid #28364b;padding-left:.75rem;}
     .prism-nav a:hover {color:#f4f6fb;border-left-color:#4fa3ff;}
+    .prism-nav a.active {color:#ffffff;border-left-color:#4fa3ff;background:linear-gradient(90deg,#4fa3ff18,transparent);font-weight:700;}
     .prism-legend {display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;margin:.2rem 0 .42rem;padding-bottom:.1rem;}
     .prism-chip {display:inline-flex;align-items:center;gap:.3rem;border:1px solid #2c3545;border-radius:999px;padding:.2rem .42rem;color:#dce3ee;font-size:.70rem;white-space:nowrap;}
     .prism-dot {width:.62rem;height:.62rem;border-radius:50%;display:inline-block;}
     .prism-badge {display:inline-block;margin-left:.28rem;padding:.05rem .24rem;border:1px solid #5d6b80;border-radius:4px;color:#9faec2;font-size:.52rem;font-weight:700;letter-spacing:.05em;vertical-align:middle;}
     div[data-testid="stDataFrame"] {font-size:.70rem;}
     div[data-testid="stDataFrame"] * {font-size:.70rem;}
+    section[data-testid="stSidebar"] h2 {font-size:2.05rem;line-height:1.05;margin-bottom:.1rem;}
+    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {overflow-y:hidden !important;}
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:.42rem;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -351,8 +354,6 @@ with st.sidebar:
         st.caption(f"⚠ {observed} · {data_age} days old")
     else:
         st.caption(f"Data {observed} · current")
-    st.divider()
-    st.caption(f"{len(scored_tickers)}/{len(universe)} banks ranked · 3 independent signals")
     st.markdown(
         """
         <div class="prism-nav">
@@ -360,15 +361,12 @@ with st.sidebar:
           <a href="#investment-groups">Investment groups</a>
           <a href="#research-triage">Research triage</a>
           <a href="#full-peer-ranking">Peer ranking</a>
-          <a href="#quick-diagnostic">Quick diagnostic</a>
-          <a href="#evidence-readiness">Evidence readiness</a>
-          <a href="#research-workbench">Research workbench</a>
+          <a href="#research-readiness">Research readiness</a>
+          <a href="#research-details">Research details</a>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    st.divider()
-    st.caption("Scores are peer-relative research signals, not investment advice.")
 
 if refresh_clicked:
     with st.status("Refreshing all 23 banks...", expanded=False) as status:
@@ -394,7 +392,7 @@ if plotted_rows:
     st.plotly_chart(
         build_signal_map(plotted_rows),
         width="stretch",
-        height=355,
+        height=430,
         key="front_page_signal_map",
         config={"displaylogo": False, "scrollZoom": True},
     )
@@ -402,7 +400,7 @@ if plotted_rows:
     st.markdown("<div id='investment-groups' class='prism-kicker'>02 · Investment groups</div><div class='prism-rule'></div>", unsafe_allow_html=True)
     st.subheader("Investment Groups")
     st.caption(
-        "Seven directional outcomes use axis-specific peer quantiles and preserve all three signals; "
+        "Six directional outcomes use axis-specific peer quantiles and preserve all three signals; "
         "they are not a blended score. Missing evidence remains a separate publication gate. "
         "Language-history confidence is shown separately."
     )
@@ -460,7 +458,7 @@ opportunities = sorted(
     reverse=True,
 )
 risks = []
-for group_name in ("Story Ahead of Numbers", "Downside Risk", "Price Momentum"):
+for group_name in ("Story Ahead of Numbers", "Downside Risk", "Price Ahead of Fundamentals"):
     group_queue = sorted(
         (row for row in plotted_rows if row["Investment group"] == group_name),
         key=lambda row: (
@@ -505,191 +503,29 @@ st.caption(
 render_ranking_table(ranking_rows, key="homepage_ranking")
 st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
 
-st.markdown("<div id='quick-diagnostic' class='prism-kicker'>05 · Quick diagnostic</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-st.subheader("One-bank research snapshot")
-quick_ticker = st.selectbox(
-    "Select a bank",
-    [row["ticker"] for row in universe],
-    key="homepage_bank_diagnostic",
-)
-quick_bank = banks[quick_ticker]
-quick_score = next((row for row in scores if row["ticker"] == quick_ticker), {"score": None})
-quick_signal = next((row for row in plotted_rows if row["Ticker"] == quick_ticker), None)
-quick_metrics = quick_bank.get("metrics", {})
-st.markdown(f"#### {quick_bank['bank_name']} ({quick_ticker})")
-quick_cols = st.columns(7)
-quick_cols[0].metric("Fundamental score", decimal(quick_score.get("score")), border=True)
-quick_cols[1].metric("P/B", multiple(quick_metrics.get("price_to_book")), border=True)
-quick_cols[2].metric("P/E", multiple(quick_metrics.get("price_to_earnings")), border=True)
-quick_cols[3].metric("ROE", percent(quick_metrics.get("return_on_equity")), border=True)
-quick_cols[4].metric("Dividend yield", percent(quick_metrics.get("dividend_yield")), border=True)
-quick_cols[5].metric("Language", decimal(quick_signal.get("Language score") if quick_signal else None), border=True)
-quick_cols[6].metric("Price confirmation", decimal(quick_signal.get("Price confirmation") if quick_signal else None), border=True)
-if quick_signal:
-    st.info(
-        f"{quick_signal['Investment group']}: {GROUP_META[quick_signal['Investment group']]['meaning']} "
-        f"Evidence status: {quick_signal['Evidence status']}."
-    )
-
-st.markdown("<div id='evidence-readiness' class='prism-kicker'>06 · Evidence readiness</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-st.subheader("Language drift and governance gate")
-evidence_cols = st.columns(5)
-evidence_cols[0].metric("Language coverage", f"{language_coverage.get('provisional_banks', 0)}/{len(universe)}", border=True)
-evidence_cols[1].metric("Price coverage", f"{market_coverage}/{len(universe)}", border=True)
-evidence_cols[2].metric("Table sources", table_evidence.get("source_count", 0), border=True)
-evidence_cols[3].metric("Extracted tables", table_evidence.get("table_count", 0), border=True)
-evidence_cols[4].metric("Backtested signals", 0, border=True)
-four_period_count = language_coverage.get("four_period_trends", 0)
-if four_period_count:
-    st.warning(
-        f"{four_period_count}/{len(universe)} banks have a preliminary four-period language trend. "
-        "All signals remain provisional until citations are reviewed and predictive value is backtested."
-    )
-else:
-    st.warning(
-        "0/23 banks currently have four curated comparable periods; all language scores are single-period provisional snapshots. "
-        "Linguistic drift is not yet active."
-    )
+st.markdown("<div id='research-readiness' class='prism-kicker'>05 · Research readiness</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.subheader("Can these signals support research use?")
 st.caption(
-    "Drift alerts require eight curated comparable management-results documents per bank plus a backtest. "
-    "Historical periods can be backfilled from issuer archives; readiness depends on source comparability and review, not simply waiting for future quarters."
+    "This gate checks whether the inputs are complete, period-comparable, source-linked and backtested. "
+    "It is a confidence control—not another investment signal."
+)
+four_period_count = language_coverage.get("four_period_trends", 0)
+with st.container(horizontal=True):
+    st.metric("Current language coverage", f"{language_coverage.get('provisional_banks', 0)}/{len(universe)}", border=True)
+    st.metric("Four-period language history", f"{four_period_count}/{len(universe)}", border=True)
+    st.metric("Price-history coverage", f"{market_coverage}/{len(universe)}", border=True)
+    st.metric("Backtested signals", 0, border=True)
+st.caption(
+    "Current status: preliminary screening only. Four comparable reports support an early drift view; "
+    "eight periods, citation review and out-of-sample testing are required for a validated alert."
 )
 
-st.markdown("<div id='research-workbench' class='prism-kicker'>07 · Research workbench</div><div class='prism-rule'></div>", unsafe_allow_html=True)
-st.caption("Use the tabs below for detailed diagnostics, source links, and methodology.")
+st.markdown("<div id='research-details' class='prism-kicker'>06 · Research details</div><div class='prism-rule'></div>", unsafe_allow_html=True)
+st.caption("Open only the bank detail, source evidence or methodology needed for follow-up research.")
 
-ranking_tab, signals_tab, details_tab, evidence_tab, methodology_tab = st.tabs(
-    ["Relative ranking", "Signals", "Bank details", "Evidence", "Methodology"]
+details_tab, evidence_tab, methodology_tab = st.tabs(
+    ["Bank research", "Sources & evidence", "Methodology"]
 )
-
-with ranking_tab:
-    st.subheader("Relative ranking")
-    if observed:
-        (st.error if data_age > 3 else st.info)(
-            f"Provider data retrieved: {observed} ({data_age} day(s) old)."
-            + (" Refresh before analysis." if data_age > 3 else "")
-        )
-    st.caption(
-        f"Coverage: {len(scored_tickers)}/{len(universe)} banks ranked · "
-        f"{language_coverage.get('provisional_banks', 0)}/{len(universe)} banks with provisional language signals"
-    )
-    render_ranking_table(ranking_rows, key="workbench_ranking")
-    st.warning("A higher score indicates stronger relative inputs under this methodology; it is not a buy or sell recommendation.")
-
-with signals_tab:
-    st.subheader("Signal diagnostics")
-    st.warning(
-        "Research preview only: neither the language signal nor price-confirmation overlay changes the fundamental score. "
-        "No quadrant, momentum regime, or combination is a buy or sell recommendation."
-    )
-    with st.container(horizontal=True):
-        st.metric("Bank universe", language_coverage.get("universe_banks", len(universe)), border=True)
-        st.metric("Provisional language coverage", language_coverage.get("provisional_banks", 0), border=True)
-        st.metric("Price confirmation coverage", f"{market_coverage}/{len(universe)}", border=True)
-        st.metric("Insufficient language data", language_coverage.get("insufficient_banks", len(universe)), border=True)
-        st.metric("Backtested signals", 0, border=True)
-
-    if plotted_rows:
-        market_frame = pd.DataFrame(plotted_rows).sort_values("Price confirmation", ascending=True)
-        if not market_frame.empty:
-            st.markdown("#### Axis 1 market-positioning overlay")
-            market_chart = alt.Chart(market_frame).mark_bar().encode(
-                x=alt.X("Price confirmation:Q", title="Peer-relative price-confirmation score", scale=alt.Scale(domain=[0, 100])),
-                y=alt.Y("Ticker:N", sort="-x", title=None),
-                color=alt.Color(
-                    "Price regime:N",
-                    scale=alt.Scale(domain=["Confirming", "Neutral", "Unconfirmed"], range=["#35c48d", "#9fa8b8", "#ef6262"]),
-                    legend=alt.Legend(title=None, orient="bottom"),
-                ),
-                tooltip=["Bank:N", "Ticker:N", "Price confirmation:Q", "Price regime:N"],
-            ).properties(height=max(360, len(market_frame) * 24))
-            st.altair_chart(market_chart, width="stretch")
-            st.caption("This overlay peer-ranks 1-, 3-, and 6-month returns plus price versus the 200-day average. It qualifies Axis 1 but does not change the fundamental ranking score.")
-    else:
-        st.info("No bank currently has complete three-signal evidence.")
-
-    matrix_rows = [
-        {
-            "Bank": row["bank_name"],
-            "Ticker": row["ticker"],
-            "Numeric": row.get("numeric_score"),
-            "Language": row.get("language_score"),
-            "Negative pressure": row.get("negative_pressure_score"),
-            "Gap": row.get("divergence"),
-            "Price confirmation": market_by_ticker.get(row["ticker"], {}).get(
-                "price_confirmation_score",
-                market_by_ticker.get(row["ticker"], {}).get("market_confirmation_score"),
-            ),
-            "Price regime": market_by_ticker.get(row["ticker"], {}).get(
-                "price_regime",
-                market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
-            ),
-            "Quadrant": row.get("quadrant") or "Not assigned",
-            "Coverage status": row["status"],
-        }
-        for row in signal_rows
-    ]
-    st.dataframe(
-        matrix_rows,
-        width="stretch",
-        hide_index=True,
-        column_config={
-            "Numeric": st.column_config.NumberColumn(format="%.1f"),
-            "Language": st.column_config.NumberColumn(format="%.1f"),
-            "Negative pressure": st.column_config.NumberColumn(format="%.1f"),
-            "Gap": st.column_config.NumberColumn(format="%+.1f"),
-            "Price confirmation": st.column_config.NumberColumn(format="%.1f"),
-        },
-    )
-
-    language_documents = language_signals.get("documents", [])
-    if language_documents:
-        st.markdown("#### Language evidence and review queue")
-        language_tickers = sorted({document["ticker"] for document in language_documents})
-        selected_language_ticker = st.pills(
-            "View language evidence for",
-            language_tickers,
-            default=language_tickers[0],
-            key="language_evidence_bank",
-        )
-        language_document = max(
-            (document for document in language_documents if document["ticker"] == selected_language_ticker),
-            key=lambda document: period_sort_key(document.get("period", "")),
-        )
-        language_signal = next(
-            row for row in signal_rows if row["ticker"] == selected_language_ticker
-        )
-        with st.container(horizontal=True):
-            st.metric("Language score", language_signal["language_score"], border=True)
-            st.metric("Negative pressure", language_signal.get("negative_pressure_score"), border=True)
-            st.metric("Numeric-language gap", f"{language_signal['divergence']:+.1f}", border=True)
-            st.metric("History available", f"{language_document['history_periods']} period", border=True)
-            st.metric("Review status", "Pending", border=True)
-        st.caption(
-            "Four comparable reports enable a preliminary drift observation; eight and a backtest are still required before an event alert can be validated."
-        )
-        st.caption(
-            f"{language_document['document_type'].replace('_', ' ').title()} · "
-            f"{language_document['period']} · {language_document['analyzed_word_count']:,} analyzed words · "
-            f"rule {language_signals.get('rule_version', 'unknown')}"
-        )
-        if language_signal.get("alerts"):
-            for alert in language_signal["alerts"]:
-                st.warning(alert["message"] + " Human review required.")
-        for item in language_document.get("evidence", []):
-            hit_labels = [name.replace("_", " ") for name, value in item["hits"].items() if value]
-            with st.container(border=True):
-                st.caption(
-                    f"PDF page {item['page']} · {', '.join(hit_labels) or 'guidance'} · "
-                    f"{item['review_status'].replace('_', ' ')}"
-                )
-                st.write(item["sentence"])
-        if language_document.get("source_url"):
-            st.link_button(
-                "Open official source",
-                language_document["source_url"],
-                icon=":material/open_in_new:",
-            )
 
 with details_tab:
     selected = st.selectbox("Select a bank", [row["ticker"] for row in universe])
@@ -751,6 +587,38 @@ with details_tab:
             f"Preliminary drift score: {signal.get('language_drift_score', 'N/A')} · "
             f"status: {signal.get('status', 'N/A').replace('_', ' ')}."
         )
+    if bank_language_documents:
+        latest_language_document = bank_language_documents[-1]
+        language_signal = next(
+            (row for row in signal_rows if row["ticker"] == selected),
+            {},
+        )
+        with st.expander(
+            "Latest management-language evidence",
+            icon=":material/format_quote:",
+        ):
+            st.caption(
+                f"{latest_language_document['period']} · "
+                f"Language {language_signal.get('language_score', 'N/A')} · "
+                f"Negative pressure {language_signal.get('negative_pressure_score', 'N/A')} · "
+                "human review pending"
+            )
+            for item in latest_language_document.get("evidence", [])[:5]:
+                hit_labels = [
+                    name.replace("_", " ")
+                    for name, value in item.get("hits", {}).items()
+                    if value
+                ]
+                st.markdown(
+                    f"**Page {item['page']} · {', '.join(hit_labels) or 'guidance'}**  \n"
+                    f"{item['sentence']}"
+                )
+            if latest_language_document.get("source_url"):
+                st.link_button(
+                    "Open official source",
+                    latest_language_document["source_url"],
+                    icon=":material/open_in_new:",
+                )
 
 with evidence_tab:
     st.subheader("Official financial reports")
@@ -851,3 +719,50 @@ with methodology_tab:
     report_path = BASE_DIR / "pilot_report.md"
     if report_path.exists():
         st.download_button("Download analyst report", report_path.read_text(encoding="utf-8"), "pilot_report.md", "text/markdown")
+
+st.html(
+    """
+    <script>
+    (() => {
+      const sectionIds = [
+        "core-signal-map",
+        "investment-groups",
+        "research-triage",
+        "full-peer-ranking",
+        "research-readiness",
+        "research-details"
+      ];
+      const links = Array.from(document.querySelectorAll(".prism-nav a"));
+      const sections = sectionIds
+        .map((id) => document.getElementById(id))
+        .filter(Boolean);
+      if (!links.length || !sections.length) return;
+
+      if (window.__prismScrollSpyCleanup) window.__prismScrollSpyCleanup();
+
+      const updateActiveSection = () => {
+        const marker = window.innerHeight * 0.30;
+        let activeId = sections[0].id;
+        for (const section of sections) {
+          if (section.getBoundingClientRect().top <= marker) activeId = section.id;
+        }
+        for (const link of links) {
+          link.classList.toggle(
+            "active",
+            link.getAttribute("href") === `#${activeId}`
+          );
+        }
+      };
+
+      document.addEventListener("scroll", updateActiveSection, true);
+      window.addEventListener("resize", updateActiveSection);
+      window.__prismScrollSpyCleanup = () => {
+        document.removeEventListener("scroll", updateActiveSection, true);
+        window.removeEventListener("resize", updateActiveSection);
+      };
+      requestAnimationFrame(updateActiveSection);
+    })();
+    </script>
+    """,
+    unsafe_allow_javascript=True,
+)

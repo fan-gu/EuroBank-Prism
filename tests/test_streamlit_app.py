@@ -17,8 +17,7 @@ class StreamlitAppTests(unittest.TestCase):
             "Investment Groups",
             "Opportunities and risk queue",
             "Relative ranking",
-            "One-bank research snapshot",
-            "Language drift and governance gate",
+            "Can these signals support research use?",
         ):
             self.assertIn(expected, headings)
         self.assertGreaterEqual(len(app.dataframe), 2)
