@@ -8,14 +8,13 @@
 
 ## What it does
 
-EuroBank Prism compares European banks using three independent signals instead
-of blending every observation into one opaque score.
+EuroBank Prism compares 23 listed European banks using three independent signals.
 
 | Signal | Display | What it measures |
 |---|---|---|
-| Fundamentals & valuation | Vertical position | Relative P/B, P/E, profitability, yield, and growth |
-| Management language | Horizontal position | Disclosure tone, commitment, uncertainty, caution, and linguistic drift |
-| Price confirmation | Bubble size | Relative 1-, 3-, and 6-month price momentum plus the 200-day trend |
+| Fundamentals & Valuation | Vertical Axis | Relative P/B, P/E, profitability, yield, and growth |
+| Management language | Horizontal Axis | Disclosure tone, commitment, uncertainty, caution, and linguistic drift |
+| Price confirmation | Bubble Size | Relative 1-, 3-, and 6-month price momentum plus the 200-day trend |
 
 Bubble colour identifies the bank's deterministic research group. The dashboard
 also provides a complete peer ranking, bank-level research pages, triage alerts,
