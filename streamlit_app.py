@@ -13,9 +13,14 @@ import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 
-from app.dashboard_visuals import layout_signal_labels, market_bubble_diameter, padded_domain
+from app.dashboard_visuals import (
+    layout_signal_labels,
+    market_bubble_diameter,
+    padded_domain,
+    signal_logo_layout,
+)
 from app import investment_groups as investment_groups_module
-from app.language_signals import period_sort_key
+from app.language_signals import comparable_history, period_sort_key
 
 # Streamlit Cloud can hot-rerun this entry point without restarting imported
 # modules. Reload the tiny deterministic rule module so deployed group labels
@@ -220,16 +225,30 @@ def build_signal_map(rows):
     for row in positioned:
         logo = BANK_LOGOS.get(row["Ticker"])
         if logo:
+            logo_layout = signal_logo_layout(
+                row,
+                x_domain,
+                y_domain,
+                width=1_150,
+                height=385,
+            )
+            if logo_layout["placement"] == "outside":
+                figure.add_shape(
+                    type="line",
+                    x0=row["Language score"], y0=row["Numeric score"],
+                    x1=logo_layout["x"], y1=logo_layout["y"],
+                    line={"color": "rgba(210,220,235,0.38)", "width": 1},
+                )
             figure.add_layout_image(
                 source=logo,
-                x=row["Language score"],
-                y=row["Numeric score"],
+                x=logo_layout["x"],
+                y=logo_layout["y"],
                 xref="x",
                 yref="y",
                 xanchor="center",
                 yanchor="middle",
-                sizex=2.6,
-                sizey=2.6,
+                sizex=logo_layout["sizex"],
+                sizey=logo_layout["sizey"],
                 sizing="contain",
                 opacity=0.96,
                 layer="above",
@@ -324,6 +343,10 @@ plotted_rows = [
             group_thresholds,
         ),
         "Evidence status": evidence_status(row.get("history_periods")),
+        "Language alerts": row.get("alerts", []),
+        "Language warning evidence": row.get("warning_evidence", []),
+        "Language drift": row.get("language_drift_score"),
+        "Directional reversal": row.get("directional_reversal"),
     }
     for row in signal_rows
     if row.get("numeric_score") is not None
@@ -350,9 +373,10 @@ st.markdown(
     """
     <style>
     .block-container {padding-top: 1.2rem; padding-bottom: 4rem;}
-    .prism-group {border-left:4px solid var(--group-color);padding:.12rem 0 .12rem .8rem;min-height:8rem;}
+    .prism-group {border-left:4px solid var(--group-color);padding:.12rem 0 .12rem .8rem;min-height:8.8rem;}
     .prism-group-name {font-weight:760;font-size:1.08rem;margin-bottom:.38rem;}
-    .prism-signal-line {color:#f1f4f9;font-size:.78rem;line-height:1.45;}
+    .prism-signal-line {display:flex;flex-direction:column;gap:.08rem;color:#f1f4f9;font-size:.78rem;line-height:1.45;margin-bottom:.55rem;}
+    .prism-signal-item {display:block;white-space:nowrap;}
     .prism-group-summary {color:#9eabbd;font-size:.76rem;margin:.22rem 0 .58rem;}
     .prism-bank-list {display:flex;gap:.38rem;flex-wrap:wrap;align-items:center;}
     .prism-bank-token {display:inline-flex;align-items:center;gap:.25rem;border:1px solid #30394a;border-radius:999px;padding:.13rem .38rem .13rem .18rem;font-size:.67rem;font-weight:700;color:#edf2f8;}
@@ -445,12 +469,15 @@ if plotted_rows:
             f"<span class='prism-bank-token'><img class='prism-bank-logo' src='{BANK_LOGOS.get(ticker, '')}' alt=''>{ticker}</span>"
             for ticker in members
         )
+        signal_lines = "".join(
+            f"<span class='prism-signal-item'>{line}</span>"
+            for line in meta["signals"]
+        )
         with group_columns[index % 3].container(border=True):
             st.markdown(
                 f"<div class='prism-group' style='--group-color:{meta['color']}'>"
                 f"<div class='prism-group-name'>{group_name} · {len(members)}</div>"
-                f"<div class='prism-signal-line'>{meta['signals']}</div>"
-                f"<div class='prism-group-summary'>{meta['summary']}</div>"
+                f"<div class='prism-signal-line'>{signal_lines}</div>"
                 f"<div class='prism-bank-list'>{member_tokens or 'No bank assigned'}</div>"
                 "</div>",
                 unsafe_allow_html=True,
@@ -526,6 +553,49 @@ with right_queue:
             )
             st.write(GROUP_META[row["Investment group"]]["meaning"])
 
+language_warning_rows = sorted(
+    (row for row in plotted_rows if row["Language alerts"]),
+    key=lambda row: (len(row["Language alerts"]), row["Negative pressure"] or 0),
+    reverse=True,
+)
+st.markdown("#### Management-language warnings")
+st.caption(
+    "Every triggered language warning is listed here independently of its investment group. "
+    "All remain review items, not trading signals."
+)
+if not language_warning_rows:
+    st.success("No management-language warning crossed the current peer-relative review gates.")
+else:
+    language_documents_by_ticker = {
+        ticker: sorted(
+            (
+                document for document in language_signals.get("documents", [])
+                if document["ticker"] == ticker
+            ),
+            key=lambda document: period_sort_key(document["period"]),
+        )
+        for ticker in (row["Ticker"] for row in language_warning_rows)
+    }
+    for row in language_warning_rows:
+        documents = language_documents_by_ticker.get(row["Ticker"], [])
+        latest_document = documents[-1] if documents else {}
+        with st.container(border=True):
+            st.markdown(f"**{row['Ticker']} · {row['Bank']}**")
+            for alert in row["Language alerts"]:
+                st.markdown(f"- ⚠️ {alert['message']}")
+            if row["Language warning evidence"]:
+                with st.expander("Review cited management wording"):
+                    for item in row["Language warning evidence"]:
+                        st.markdown(
+                            f"**Page {item['page']}** — {item['sentence']}"
+                        )
+                    if latest_document.get("source_url"):
+                        st.link_button(
+                            "Open official source",
+                            latest_document["source_url"],
+                            icon=":material/open_in_new:",
+                        )
+
 st.markdown("<div id='full-peer-ranking'></div>", unsafe_allow_html=True)
 st.header("04 · Relative ranking")
 st.caption(
@@ -539,14 +609,22 @@ st.caption(
     "Confidence gate: are inputs complete, period-comparable, source-linked and backtested?"
 )
 four_period_count = language_coverage.get("four_period_trends", 0)
+boilerplate_pages = sum(
+    document.get("excluded_boilerplate_pages", 0)
+    for document in language_signals.get("documents", [])
+)
+boilerplate_passages = sum(
+    document.get("excluded_boilerplate_passages", 0)
+    for document in language_signals.get("documents", [])
+)
 with st.container(horizontal=True):
     st.metric("Current language coverage", f"{language_coverage.get('provisional_banks', 0)}/{len(universe)}", border=True)
-    st.metric("Four-period language history", f"{four_period_count}/{len(universe)}", border=True)
+    st.metric("Continuous 4-period history", f"{four_period_count}/{len(universe)}", border=True)
     st.metric("Price-history coverage", f"{market_coverage}/{len(universe)}", border=True)
     st.metric("Backtested signals", 0, border=True)
 st.caption(
-    "Current status: preliminary screening only. Four comparable reports support an early drift view; "
-    "eight periods, citation review and out-of-sample testing are required for a validated alert."
+    "Only adjacent, comparable reporting checkpoints count toward language drift; a missing quarter resets the sequence. "
+    "Four periods support an early view, while eight periods, citation review and out-of-sample testing are required for validation."
 )
 
 details_section = st.container()
@@ -596,17 +674,19 @@ with details_section:
         document for document in language_signals.get("documents", []) if document["ticker"] == selected
     ]
     bank_language_documents.sort(key=lambda document: period_sort_key(document["period"]))
+    continuous_language_documents = comparable_history(bank_language_documents)
     st.markdown("#### Management-language history")
-    if len(bank_language_documents) < 4:
+    if len(continuous_language_documents) < 4:
         st.info(
-            "Four comparable periods are needed for a preliminary language trend; "
-            "eight periods are required before drift alerts can enter research validation."
+            f"{len(bank_language_documents)} report(s) are archived, but only "
+            f"{len(continuous_language_documents)} form the latest uninterrupted comparable sequence. "
+            "Four are needed for a preliminary trend."
         )
     else:
         history_frame = pd.DataFrame(
             {
-                "Period": [document["period"] for document in bank_language_documents],
-                "Absolute language score": [document["features"]["absolute_language_score"] for document in bank_language_documents],
+                "Period": [document["period"] for document in continuous_language_documents[-4:]],
+                "Absolute language score": [document["features"]["absolute_language_score"] for document in continuous_language_documents[-4:]],
             }
         )
         st.line_chart(history_frame, x="Period", y="Absolute language score")
@@ -733,8 +813,13 @@ with methodology_section:
     )
     st.markdown("**Common 23-bank score:** P/B 25%, P/E 15%, ROE 20%, ROA 10%, dividend yield 10%, earnings growth 10%, and revenue growth 10%. Lower valuation multiples score higher; higher returns, yield, and growth score higher. Percentile ranking limits the influence of extreme values.")
     st.markdown("**Official-report overlay:** CET1, leverage, LCR, NSFR, NPL ratio, NPL coverage, cost of risk, NIM, cost/income, loan/deposit ratio, and IRRBB sensitivities are included only when period-aligned evidence is available.")
-    st.markdown("**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort to correct management-document optimism. The numeric and language axes are not combined.")
-    st.markdown("**Language history gate:** four comparable reports of the same document type enable a preliminary drift observation; eight enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
+    st.markdown(
+        "**Independent language axis:** negative terms, uncertainty, weak commitment and cautious or euphemistic wording create an explicit negative-pressure penalty. "
+        "Dedicated disclaimers, safe-harbour pages, forward-looking boilerplate, no-offer language and standardized legal notices are removed before scoring; "
+        f"the current audit records {boilerplate_pages} excluded page(s) and {boilerplate_passages} excluded passage(s). "
+        "Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort. The numeric and language axes are not combined."
+    )
+    st.markdown("**Language history gate:** four adjacent, comparable reporting checkpoints enable a preliminary drift observation; gaps reset the sequence, so four scattered PDFs do not qualify. Eight periods enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
     st.markdown("**Price-confirmation bubble size:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. This is backward-looking price behaviour—not analyst expectations. The result controls only bubble size and never alters either axis or the fundamental score.")
     st.markdown(
         "**Investment-value groups:** deterministic gates use each axis's own current cross-section rather than one shared raw cutoff. "

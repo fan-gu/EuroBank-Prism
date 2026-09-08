@@ -6,7 +6,12 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.dashboard_visuals import layout_signal_labels, market_bubble_diameter, padded_domain
+from app.dashboard_visuals import (
+    layout_signal_labels,
+    market_bubble_diameter,
+    padded_domain,
+    signal_logo_layout,
+)
 
 
 class DashboardVisualTests(unittest.TestCase):
@@ -43,6 +48,35 @@ class DashboardVisualTests(unittest.TestCase):
         self.assertEqual(len(set(sizes)), len(sizes))
         self.assertEqual(market_bubble_diameter(-20), sizes[0])
         self.assertEqual(market_bubble_diameter(120), sizes[-1])
+
+    def test_small_bubble_logo_moves_outside_and_remains_square(self):
+        row = {
+            "Ticker": "BNP",
+            "Language score": 55.0,
+            "Numeric score": 60.0,
+            "Price confirmation": 12.0,
+            "Label x": 60.0,
+            "Label y": 64.0,
+        }
+        layout = signal_logo_layout(row, [30, 80], [35, 85])
+        self.assertEqual(layout["placement"], "outside")
+        self.assertNotEqual((layout["x"], layout["y"]), (55.0, 60.0))
+        x_pixels = layout["sizex"] / 50 * 1_150
+        y_pixels = layout["sizey"] / 50 * 385
+        self.assertAlmostEqual(x_pixels, y_pixels, delta=0.2)
+
+    def test_large_bubble_logo_stays_centered(self):
+        row = {
+            "Ticker": "TEST",
+            "Language score": 55.0,
+            "Numeric score": 60.0,
+            "Price confirmation": 80.0,
+            "Label x": 62.0,
+            "Label y": 65.0,
+        }
+        layout = signal_logo_layout(row, [30, 80], [35, 85])
+        self.assertEqual(layout["placement"], "inside")
+        self.assertEqual((layout["x"], layout["y"]), (55.0, 60.0))
 
 
 if __name__ == "__main__":

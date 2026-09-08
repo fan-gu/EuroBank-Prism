@@ -22,7 +22,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_REPORTS_DIR = BASE_DIR / "reports"
 DEFAULT_OUTPUT = BASE_DIR / "language_signals.json"
-RULE_VERSION = "management-language-v2.2"
+RULE_VERSION = "management-language-v2.3"
 
 LEXICONS = {
     "positive": {
@@ -79,6 +79,32 @@ EXCLUDED_CONTEXT = re.compile(
     r"committed to compliance|applicable laws and regulations|"
     r"sustainable finance|sustainability|climate change|ESG risk|"
     r"described in the management report|glossary|table of contents)\b",
+    flags=re.IGNORECASE,
+)
+# Results decks often repeat legal language whose purpose is liability control,
+# not management communication.  In particular, counting words such as
+# "may", "could" and "risk" inside a safe-harbour statement would create a
+# false caution signal.  Keep these patterns deliberately specific so genuine
+# guidance and risk commentary remain eligible.
+LEGAL_BOILERPLATE = re.compile(
+    r"\b(?:forward\s*[-–—]?\s*looking statements?|safe[- ]harbou?r|cautionary "
+    r"statements?|important (?:legal )?notice|legal disclaimer|disclaimer|"
+    r"actual (?:events or )?results (?:may|might|could) differ materially|"
+    r"(?:could cause |may cause )?actual results to differ|"
+    r"no representation or warranty|does not constitute (?:an )?(?:offer|"
+    r"recommendation|solicitation)|offer to (?:buy|sell)|solicitation of "
+    r"(?:an )?offer|for information purposes only|should not be relied (?:on|upon)|"
+    r"undertakes? no (?:obligation|duty) to update|under no obligation to update|"
+    r"securities act|prospectus|inside information|market abuse regulation|"
+    r"not intended to be (?:and should not be construed as )?(?:legal|tax|"
+    r"accounting|investment) advice|alternative performance measures? "
+    r"(?:are|is) defined|non[- ]gaap measures? (?:are|is) defined)\b",
+    flags=re.IGNORECASE,
+)
+BOILERPLATE_PAGE_HEADING = re.compile(
+    r"\b(?:important (?:legal )?notice|disclaimer|legal notice|safe[- ]harbou?r|"
+    r"forward\s*[-–—]?\s*looking statements?|cautionary statement|alternative "
+    r"performance measures?|glossary)\b",
     flags=re.IGNORECASE,
 )
 GUIDANCE_TERMS = re.compile(
@@ -140,8 +166,28 @@ def category_hits(text: str) -> dict[str, int]:
     }
 
 
+def is_legal_boilerplate(sentence: str) -> bool:
+    """Identify standard legal text that must not influence language scores."""
+    return bool(LEGAL_BOILERPLATE.search(sentence))
+
+
+def is_boilerplate_page(page_text: str) -> bool:
+    """Reject dedicated disclaimer pages while preserving mixed content pages."""
+    opening = clean_text(page_text)[:1_200]
+    if BOILERPLATE_PAGE_HEADING.search(opening[:350]):
+        return True
+    # Some slide decks place a company title before the legal heading.  Two
+    # distinct legal markers in the opening reliably identify a dedicated
+    # boilerplate slide without discarding an ordinary slide footer.
+    markers = {
+        match.group(0).lower()
+        for match in LEGAL_BOILERPLATE.finditer(opening)
+    }
+    return len(markers) >= 2
+
+
 def relevant_sentence(sentence: str) -> bool:
-    if EXCLUDED_CONTEXT.search(sentence):
+    if EXCLUDED_CONTEXT.search(sentence) or is_legal_boilerplate(sentence):
         return False
     # Requiring the narrative trigger in the same sentence prevents a single
     # word such as "performance" in a page heading from pulling an entire
@@ -239,6 +285,20 @@ def calibrate_peer_language_scores(records: list[dict]) -> dict:
     }
 
 
+def quantile(values: list[float], probability: float) -> float | None:
+    """Return a linearly interpolated quantile for a non-empty peer sample."""
+    ordered = sorted(float(value) for value in values if isinstance(value, (int, float)))
+    if not ordered:
+        return None
+    if len(ordered) == 1:
+        return ordered[0]
+    position = (len(ordered) - 1) * probability
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    fraction = position - lower
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * fraction
+
+
 def language_drift(current: dict, previous: dict) -> dict:
     """Measure negative wording drift between comparable document periods."""
     weak_change = (
@@ -302,11 +362,30 @@ def comparable_history(documents: list[dict]) -> list[dict]:
         return []
     ordered = sorted(eligible, key=lambda document: period_sort_key(document["period"]))
     latest_series = ordered[-1].get("document_series", "management_results")
-    return [
+    same_series = [
         document
         for document in ordered
         if document.get("document_series", "management_results") == latest_series
     ]
+    # Drift requires adjacent reporting checkpoints. Four files spread across
+    # several years are not a four-period trend. Keep only the uninterrupted
+    # sequence ending at the latest period and de-duplicate equivalent labels
+    # such as Q2/H1 or Q4/FY.
+    by_checkpoint = {}
+    for document in same_series:
+        year, checkpoint = period_sort_key(document["period"])
+        if not year or not checkpoint:
+            continue
+        by_checkpoint[year * 4 + checkpoint] = document
+    if not by_checkpoint:
+        return []
+    latest_checkpoint = max(by_checkpoint)
+    contiguous = []
+    checkpoint = latest_checkpoint
+    while checkpoint in by_checkpoint:
+        contiguous.append(by_checkpoint[checkpoint])
+        checkpoint -= 1
+    return list(reversed(contiguous))
 
 
 def summarize_history(documents: list[dict]) -> dict:
@@ -320,6 +399,7 @@ def summarize_history(documents: list[dict]) -> dict:
     if len(history) < 4:
         return {
             "documents": history,
+            "available_documents": len(documents),
             "history_periods": len(history),
             "language_drift_score": None,
             "directional_reversal": None,
@@ -334,12 +414,96 @@ def summarize_history(documents: list[dict]) -> dict:
     penalties = [observation["drift_penalty"] for observation in observations]
     return {
         "documents": history,
+        "available_documents": len(documents),
         "history_periods": len(history),
         "language_drift_score": round(sum(penalties) / len(penalties), 2),
         "directional_reversal": any(observation["directional_reversal"] for observation in observations),
         "drift_observations": observations,
         "drift_status": "preliminary_four_period_trend",
     }
+
+
+def warning_evidence(document: dict, limit: int = 3) -> list[dict]:
+    """Return the strongest caution passages for an auditable triage card."""
+    candidates = []
+    for item in document.get("evidence", []):
+        hits = item.get("hits", {})
+        pressure = (
+            2.0 * hits.get("negative", 0)
+            + 1.35 * hits.get("uncertainty", 0)
+            + 1.75 * hits.get("weak_modal", 0)
+            + 1.15 * hits.get("caution_buffer", 0)
+        )
+        if pressure > 0:
+            candidates.append((pressure, item))
+    candidates.sort(key=lambda row: row[0], reverse=True)
+    return [item for _, item in candidates[:limit]]
+
+
+def build_language_alerts(
+    language: dict,
+    history: dict,
+    divergence: float | None,
+    thresholds: dict[str, float | None],
+) -> list[dict]:
+    """Create review-only alerts from every warning-bearing language feature."""
+    alerts = []
+    if divergence is not None and abs(divergence) >= 20:
+        alerts.append({
+            "type": "numeric_language_divergence",
+            "severity": "research_review",
+            "message": f"Numeric-language gap reached {divergence:+.1f} points.",
+            "review_status": "pending_human_review",
+        })
+
+    features = language["features"]
+    pressure_threshold = thresholds.get("negative_pressure")
+    pressure = features.get("negative_pressure_score")
+    if pressure_threshold is not None and pressure is not None and pressure >= pressure_threshold:
+        drivers = []
+        for feature, label in (
+            ("weak_modal_per_1000_words", "weak commitment"),
+            ("uncertainty_per_1000_words", "uncertainty"),
+            ("caution_per_1000_words", "cautious/euphemistic wording"),
+            ("negative_per_1000_words", "negative wording"),
+        ):
+            threshold = thresholds.get(feature)
+            if threshold is not None and features.get(feature, 0) >= threshold:
+                drivers.append(label)
+        suffix = f" Main drivers: {', '.join(drivers)}." if drivers else ""
+        alerts.append({
+            "type": "elevated_negative_language_pressure",
+            "severity": "research_review",
+            "message": (
+                f"Negative-language pressure is in the peer top quartile "
+                f"({pressure:.1f} versus {pressure_threshold:.1f} gate).{suffix}"
+            ),
+            "review_status": "pending_human_review",
+        })
+
+    if history.get("directional_reversal"):
+        alerts.append({
+            "type": "confidence_to_caution_reversal",
+            "severity": "research_review",
+            "message": "Comparable-period language shifted from confidence toward caution.",
+            "review_status": "pending_human_review",
+        })
+
+    drift = history.get("language_drift_score")
+    drift_threshold = thresholds.get("language_drift")
+    if drift is not None and drift_threshold is not None and drift >= drift_threshold:
+        latest_change = history.get("drift_observations", [])[-1]
+        alerts.append({
+            "type": "adverse_language_drift",
+            "severity": "research_review",
+            "message": (
+                f"Adverse wording drift is in the peer top quartile ({drift:.1f}); "
+                f"latest move {latest_change.get('from_period')} → "
+                f"{latest_change.get('to_period')}."
+            ),
+            "review_status": "pending_human_review",
+        })
+    return alerts
 
 
 def infer_document_metadata(path: Path) -> tuple[str, str]:
@@ -358,6 +522,32 @@ def infer_document_metadata(path: Path) -> tuple[str, str]:
         quarter = re.search(r"q[1-4]", name).group(0).upper()
         return "quarterly_results", f"{quarter} {year}"
     return "unclassified", year
+
+
+def infer_document_series(path: Path, source: dict) -> str:
+    """Classify disclosure genre so drift never mixes releases and decks."""
+    declared = source.get("document_series")
+    text = " ".join(
+        str(value or "").lower()
+        for value in (
+            path.name,
+            source.get("filename"),
+            source.get("download_url"),
+            source.get("label"),
+        )
+    )
+    # Older manifests used the catch-all `other` label before URLs such as
+    # `press-presentation.pdf` were recognized. Upgrade only when the artifact
+    # itself provides unambiguous genre evidence.
+    if declared and declared not in {"management_results", "management_results_other"}:
+        return declared
+    if any(term in text for term in ("release", "announcement", "press-release", "persbericht")):
+        return "management_results_release"
+    if any(term in text for term in ("presentation", "slides", "analyst")):
+        return "management_results_presentation"
+    if "annual" in text:
+        return "annual_management_report"
+    return "management_results_other"
 
 
 def page_is_eligible(page_text: str, document_type: str) -> bool:
@@ -381,6 +571,9 @@ def analyze_pdf(path: Path, source: dict) -> dict:
     counts = {category: 0 for category in LEXICONS}
     word_count = 0
     page_count = 0
+    eligible_page_count = 0
+    excluded_boilerplate_pages = 0
+    excluded_boilerplate_passages = 0
 
     reader = PdfReader(str(path))
     print(f"Analyzing {ticker}: {path.name} ({len(reader.pages)} pages)", flush=True)
@@ -389,7 +582,14 @@ def analyze_pdf(path: Path, source: dict) -> dict:
         page_text = clean_text(page.extract_text() or "")
         if not page_text or not page_is_eligible(page_text, document_type):
             continue
+        eligible_page_count += 1
+        if is_boilerplate_page(page_text):
+            excluded_boilerplate_pages += 1
+            continue
         for sentence in split_sentences(page_text):
+            if is_legal_boilerplate(sentence):
+                excluded_boilerplate_passages += 1
+                continue
             if not relevant_sentence(sentence):
                 continue
             hits = category_hits(sentence)
@@ -413,13 +613,14 @@ def analyze_pdf(path: Path, source: dict) -> dict:
     features = score_features(counts, word_count)
     evidence.sort(key=evidence_priority, reverse=True)
     selected_evidence = evidence[:8]
-    minimum_coverage = word_count >= 150 and len(selected_evidence) >= 3
+    standard_coverage = word_count >= 150 and len(selected_evidence) >= 3
+    limited_coverage = word_count >= 80 and len(selected_evidence) >= 2
     record = {
         "ticker": ticker,
         "bank_name": source.get("bank_name"),
         "document": path.name,
         "document_type": document_type,
-        "document_series": source.get("document_series", "management_results"),
+        "document_series": infer_document_series(path, source),
         "period": period,
         "publication_date": None,
         "source_url": source.get("download_url"),
@@ -427,11 +628,17 @@ def analyze_pdf(path: Path, source: dict) -> dict:
         "source_status": source.get("source_status", "curated"),
         "document_sha256": sha256(path),
         "page_count": page_count,
+        "eligible_page_count": eligible_page_count,
+        "excluded_boilerplate_pages": excluded_boilerplate_pages,
+        "excluded_boilerplate_passages": excluded_boilerplate_passages,
         "analyzed_word_count": word_count,
         "feature_counts": counts,
         "features": features,
         "evidence": selected_evidence,
-        "status": "provisional_single_period" if minimum_coverage else "insufficient",
+        "status": "provisional_single_period" if limited_coverage else "insufficient",
+        "coverage_quality": "standard" if standard_coverage else (
+            "limited" if limited_coverage else "insufficient"
+        ),
         "history_periods": 1,
         "language_drift_score": None,
         "directional_reversal": None,
@@ -439,7 +646,9 @@ def analyze_pdf(path: Path, source: dict) -> dict:
         "backtest_status": "not_run",
         "publication_eligible": False,
         "comparability_warning": (
-            "Single-period and mixed document genres; do not interpret as a trading signal."
+            "Limited narrative sample; interpret with extra caution."
+            if limited_coverage and not standard_coverage
+            else "Single-period evidence; do not interpret as a trading signal."
         ),
     }
     print(
@@ -470,7 +679,7 @@ def load_language_manifest() -> list[dict]:
             if key in seen or record.get("status") != "downloaded":
                 continue
             if record.get("source_status", "curated") not in {
-                "curated", "pending_human_review"
+                "curated", "pending_human_review", "manually_verified_official"
             }:
                 continue
             seen.add(key)
@@ -519,6 +728,42 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
         for ticker, documents in analyzed.items()
     }
     calibration = calibrate_peer_language_scores(list(latest_documents.values()))
+    histories = {
+        ticker: summarize_history(documents)
+        for ticker, documents in analyzed.items()
+    }
+    latest_eligible = [
+        document for document in latest_documents.values()
+        if document["status"] != "insufficient"
+    ]
+    alert_thresholds = {
+        "negative_pressure": quantile(
+            [document["features"]["negative_pressure_score"] for document in latest_eligible],
+            0.75,
+        ),
+        **{
+            feature: quantile(
+                [document["features"][feature] for document in latest_eligible],
+                0.75,
+            )
+            for feature in (
+                "weak_modal_per_1000_words",
+                "uncertainty_per_1000_words",
+                "caution_per_1000_words",
+                "negative_per_1000_words",
+            )
+        },
+        # A four-period trend is still a research observation, not a trading
+        # alert. The upper 40% is routed to triage so a reviewer sees it.
+        "language_drift": quantile(
+            [
+                history["language_drift_score"]
+                for history in histories.values()
+                if history.get("language_drift_score") is not None
+            ],
+            0.60,
+        ),
+    }
     signals = []
     for bank in load_universe():
         ticker = bank["ticker"]
@@ -543,7 +788,7 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                 }
             )
             continue
-        history = summarize_history(documents)
+        history = histories[ticker]
         language["history_periods"] = history["history_periods"]
         language["language_drift_score"] = history["language_drift_score"]
         language["directional_reversal"] = history["directional_reversal"]
@@ -553,16 +798,12 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
         absolute_language_score = language["features"]["absolute_language_score"]
         negative_pressure_score = language["features"]["negative_pressure_score"]
         divergence = round(numeric_score - language_score, 1) if numeric_score is not None else None
-        alerts = []
-        if divergence is not None and abs(divergence) >= 20:
-            alerts.append(
-                {
-                    "type": "numeric_language_divergence",
-                    "severity": "research_review",
-                    "message": f"Numeric-language gap reached {divergence:+.1f} points.",
-                    "review_status": "pending_human_review",
-                }
-            )
+        alerts = build_language_alerts(
+            language,
+            history,
+            divergence,
+            alert_thresholds,
+        )
         status = (
             "provisional_four_period_trend"
             if history["history_periods"] >= 4
@@ -583,6 +824,7 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                 "quadrant": quadrant(numeric_score, language_score),
                 "status": status,
                 "alerts": alerts,
+                "warning_evidence": warning_evidence(language),
                 "publication_eligible": False,
             }
         )
@@ -600,6 +842,23 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                 "uncertainty": 1.35,
                 "weak_modals": 1.75,
                 "caution_or_euphemism": 1.15,
+            },
+            "legal_boilerplate_filter": {
+                "rule": "dedicated disclaimer pages and standard legal passages are excluded before lexicon scoring",
+                "audited_document_fields": [
+                    "eligible_page_count",
+                    "excluded_boilerplate_pages",
+                    "excluded_boilerplate_passages",
+                ],
+            },
+            "narrative_coverage_gate": {
+                "standard": "at least 150 narrative words and 3 cited passages",
+                "limited": "at least 80 narrative words and 2 cited passages; extra caution required",
+                "insufficient": "below the limited gate; excluded from peer calibration",
+            },
+            "research_triage_thresholds": {
+                key: round(value, 4) if isinstance(value, (int, float)) else None
+                for key, value in alert_thresholds.items()
             },
             "drift_penalty": (
                 "Weak-modal and uncertainty increases, caution increases, and "

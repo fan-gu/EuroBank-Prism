@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).with_name(".env"))
 
 BASE_DIR = Path(__file__).resolve().parent
+MANUAL_HISTORY_PATH = BASE_DIR / "language_manual_history_sources.json"
 USER_AGENT = "EuroBank-Prism/1.0 research-document-discovery"
 TIMEOUT = (8, 15)
 MAX_BYTES = 30 * 1024 * 1024
@@ -85,7 +86,7 @@ CHILD_PAGE_REJECT = (
 # These issuer archives contain links to very slow or non-responsive media
 # endpoints. Their verified current source remains in the curated registry and
 # historical periods are resolved manually from the issuer archive.
-DEEP_DISCOVERY_SKIP = {"BNP", "DBK", "SAB", "BPE"}
+DEEP_DISCOVERY_SKIP = set()
 
 
 def utc_now() -> str:
@@ -184,7 +185,7 @@ def discover_candidates(page_url: str) -> list[dict]:
     return sorted(candidates.values(), key=lambda row: row["score"], reverse=True)
 
 
-def discover_child_pages(page_url: str, limit: int = 8) -> list[str]:
+def discover_child_pages(page_url: str, limit: int = 20) -> list[str]:
     """Find a small, same-domain set of likely results pages to inspect."""
     response = requests.get(page_url, timeout=TIMEOUT, headers={"User-Agent": USER_AGENT})
     response.raise_for_status()
@@ -291,6 +292,30 @@ def safe_filename(ticker: str, candidate: dict) -> str:
     return f"{ticker}_{period_slug}_{document_type}_en.pdf"
 
 
+def document_series(label: str, url: str) -> str:
+    """Classify management material so releases and decks never mix in drift."""
+    text = normalized(f"{label} {url}")
+    if any(term in text for term in (
+        " press release ", " results release ", " announcement ",
+        " media release ", " persbericht ",
+    )):
+        return "management_results_release"
+    if any(term in text for term in (
+        " presentation ", " slides ", " analyst ", " investor call ",
+    )):
+        return "management_results_presentation"
+    return "management_results_other"
+
+
+def preferred_series(ticker: str) -> str:
+    """Return the genre of the manually curated latest source."""
+    curated = json.loads(
+        (BASE_DIR / "language_report_sources.json").read_text(encoding="utf-8")
+    )["sources"]
+    source = next(row for row in curated if row["ticker"] == ticker)
+    return document_series(source.get("filename", ""), source.get("download_url", ""))
+
+
 def download_pdf(ticker: str, candidate: dict) -> dict:
     folder = BASE_DIR / "reports" / ticker
     folder.mkdir(parents=True, exist_ok=True)
@@ -365,6 +390,7 @@ def discover_one(bank: dict, pages: dict, download: bool) -> dict:
         seen_periods = set()
         seen_checkpoints = set()
         eligible = []
+        target_series = preferred_series(ticker)
         for candidate in candidates:
             document_type, period = period_from_candidate(candidate)
             # Language drift compares interim/quarterly management material;
@@ -374,22 +400,26 @@ def discover_one(bank: dict, pages: dict, download: bool) -> dict:
                 "full_year_results",
             }:
                 continue
+            period_year = re.search(r"20\d{2}", period)
+            if not period_year or period_year.group(0) not in ACCEPTED_FULL_YEARS:
+                continue
             candidate_text = normalized(f"{candidate.get('label', '')} {candidate['url']}")
             # Compare one consistent management-facing genre. Regulatory
             # reports, releases and trading statements have different writing
             # conventions and would create artificial language drift.
-            if "presentation" not in candidate_text:
+            candidate_series = document_series(candidate.get("label", ""), candidate["url"])
+            if candidate_series != target_series:
                 continue
             if any(term in candidate_text for term in (
                 "modern slavery", "trading update", "annual report",
                 "financial report", "press release", " rns ", "infographic",
             )):
                 continue
-            eligible.append((period_order(period), candidate, document_type, period))
+            eligible.append((period_order(period), candidate, document_type, period, candidate_series))
         # Recency, not keyword score, determines the four-period window.  The
         # score only breaks ties between multiple files for the same period.
         eligible.sort(key=lambda row: (row[0], row[1]["score"]), reverse=True)
-        for _, candidate, document_type, period in eligible:
+        for _, candidate, document_type, period, candidate_series in eligible:
             if period in seen_periods:
                 continue
             checkpoint = period_order(period)
@@ -400,17 +430,20 @@ def discover_one(bank: dict, pages: dict, download: bool) -> dict:
             selected_periods.append({
                 **candidate,
                 "document_type": document_type,
-                "document_series": "management_results",
+                "document_series": candidate_series,
                 "period": period,
                 "source_status": "pending_human_review",
             })
             if len(selected_periods) == 4:
                 break
         result["selected_periods"] = selected_periods
-        result["selected"] = selected_periods[0] if selected_periods else candidates[0]
-        result["status"] = "discovered"
+        result["selected"] = selected_periods[0] if selected_periods else None
+        result["status"] = "discovered" if selected_periods else "manual_review_required"
+        if not selected_periods:
+            result["error"] = f"no {target_series} file with a recognized reporting period"
         if download:
-            result.update(download_pdf(ticker, result["selected"]))
+            if result["selected"]:
+                result.update(download_pdf(ticker, result["selected"]))
     except Exception as exc:
         result["error"] = str(exc)
     return result
@@ -444,8 +477,29 @@ def write_history_sources(results: list[dict]) -> Path:
     curated = json.loads(curated_path.read_text(encoding="utf-8"))["sources"]
     sources = [{**source, "source_status": "curated"} for source in curated]
     seen = {(source["ticker"], source["period"]) for source in sources}
+
+    # Some issuer archives are JavaScript-rendered or block automated crawling.
+    # Keep exact, manually verified official links in a small auditable supplement
+    # instead of weakening discovery rules or guessing document URLs.
+    if MANUAL_HISTORY_PATH.exists():
+        manual = json.loads(MANUAL_HISTORY_PATH.read_text(encoding="utf-8"))
+        for source in manual.get("sources", []):
+            period_year = re.search(r"20\d{2}", source.get("period", ""))
+            if not period_year or period_year.group(0) not in ACCEPTED_FULL_YEARS:
+                continue
+            key = (source["ticker"], source["period"])
+            if key in seen:
+                continue
+            seen.add(key)
+            sources.append({
+                **source,
+                "source_status": "manually_verified_official",
+            })
     for result in results:
         for candidate in result.get("selected_periods", []):
+            period_year = re.search(r"20\d{2}", candidate.get("period", ""))
+            if not period_year or period_year.group(0) not in ACCEPTED_FULL_YEARS:
+                continue
             key = (result["ticker"], candidate["period"])
             if key in seen:
                 continue
@@ -455,12 +509,52 @@ def write_history_sources(results: list[dict]) -> Path:
                 "bank_name": result["bank_name"],
                 "period": candidate["period"],
                 "document_type": candidate["document_type"],
-                "document_series": "management_results",
+                "document_series": candidate["document_series"],
                 "official_page": result["official_page"],
                 "download_url": candidate["url"],
+                "label": candidate.get("label"),
                 "filename": safe_filename(result["ticker"], candidate),
                 "source_status": "pending_human_review",
                 "discovery_score": candidate["score"],
+            })
+    # Discovery quality varies across issuer sites and runs. Preserve prior
+    # successfully downloaded, hash-recorded history whenever a new crawl does
+    # not rediscover it; never let a temporary JS/SSL/timeout failure erase the
+    # research archive.
+    previous_manifest_path = BASE_DIR / "language_history_download_manifest.json"
+    if previous_manifest_path.exists():
+        previous_records = json.loads(previous_manifest_path.read_text(encoding="utf-8"))
+        for record in previous_records:
+            key = (record.get("ticker"), record.get("period"))
+            if key in seen or record.get("status") != "downloaded":
+                continue
+            seen.add(key)
+            series = record.get("document_series")
+            inferred_series = document_series(
+                record.get("filename", ""),
+                record.get("download_url", ""),
+            )
+            if (
+                not series
+                or series == "management_results"
+                or (
+                    series == "management_results_other"
+                    and inferred_series != "management_results_other"
+                )
+            ):
+                series = inferred_series
+            sources.append({
+                "ticker": record["ticker"],
+                "bank_name": record.get("bank_name"),
+                "period": record["period"],
+                "document_type": record["document_type"],
+                "document_series": series,
+                "official_page": record.get("official_page"),
+                "download_url": record["download_url"],
+                "filename": record["filename"],
+                "source_status": record.get("source_status", "pending_human_review"),
+                "discovery_score": record.get("discovery_score"),
+                "archive_status": "preserved_verified_download",
             })
     destination = BASE_DIR / "language_history_sources.json"
     destination.write_text(
@@ -483,9 +577,20 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--download", action="store_true", help="Download each top-ranked candidate. Discovery is not automatic curation.")
     parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument(
+        "--sources-only",
+        action="store_true",
+        help="Rebuild the source registry from the last crawl plus preserved verified downloads.",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     arguments = parse_args()
-    run(download=arguments.download, workers=arguments.workers)
+    if arguments.sources_only:
+        previous_results = json.loads(
+            (BASE_DIR / "language_report_registry.json").read_text(encoding="utf-8")
+        )
+        write_history_sources(previous_results)
+    else:
+        run(download=arguments.download, workers=arguments.workers)

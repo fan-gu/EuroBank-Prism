@@ -65,6 +65,14 @@ class InvestmentGroupTests(unittest.TestCase):
         self.assertEqual(len(GROUP_ORDER), 6)
         self.assertEqual(len(colors), len(set(colors)))
 
+    def test_group_cards_use_three_consistent_signal_rows(self):
+        for group in GROUP_ORDER:
+            rows = GROUP_META[group]["signals"]
+            self.assertEqual(len(rows), 3)
+            self.assertTrue(rows[0].startswith("📊 Fundamentals"))
+            self.assertTrue(rows[1].startswith("🗣️ Management language"))
+            self.assertTrue(rows[2].startswith("📈 Price confirmation"))
+
 
 if __name__ == "__main__":
     unittest.main()

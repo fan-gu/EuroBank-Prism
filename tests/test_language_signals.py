@@ -11,10 +11,15 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.language_signals import (
+    build_language_alerts,
     calibrate_peer_language_scores,
     category_hits,
+    comparable_history,
+    is_boilerplate_page,
+    is_legal_boilerplate,
     language_drift,
     quadrant,
+    relevant_sentence,
     score_features,
     split_sentences,
     summarize_history,
@@ -153,6 +158,74 @@ class LanguageSignalTests(unittest.TestCase):
         self.assertTrue(any("remain confident" in item for item in passages))
         self.assertTrue(any("may remain challenging" in item for item in passages))
 
+    def test_standard_legal_disclaimer_is_excluded_before_scoring(self):
+        disclaimer = (
+            "These forward-looking statements may involve risks and actual results "
+            "could differ materially; the bank undertakes no obligation to update them."
+        )
+        self.assertTrue(is_legal_boilerplate(disclaimer))
+        self.assertFalse(relevant_sentence(disclaimer))
+        self.assertTrue(is_boilerplate_page(f"Example Bank Important notice {disclaimer}"))
+
+    def test_genuine_management_risk_commentary_remains_eligible(self):
+        commentary = (
+            "Management expects credit risk to remain elevated as corporate defaults "
+            "increase, and will maintain prudent underwriting."
+        )
+        self.assertFalse(is_legal_boilerplate(commentary))
+        self.assertTrue(relevant_sentence(commentary))
+
+    def test_history_gap_resets_the_comparable_sequence(self):
+        documents = [
+            {
+                "period": period,
+                "document_series": "management_results",
+                "status": "provisional_single_period",
+            }
+            for period in ("Q2 2024", "Q3 2024", "Q1 2026", "Q2 2026")
+        ]
+        history = comparable_history(documents)
+        self.assertEqual([row["period"] for row in history], ["Q1 2026", "Q2 2026"])
+
+    def test_all_material_language_warnings_become_alerts(self):
+        language = {
+            "features": {
+                "negative_pressure_score": 30.0,
+                "weak_modal_per_1000_words": 8.0,
+                "uncertainty_per_1000_words": 7.0,
+                "caution_per_1000_words": 6.0,
+                "negative_per_1000_words": 5.0,
+            }
+        }
+        history = {
+            "directional_reversal": True,
+            "language_drift_score": 12.0,
+            "drift_observations": [
+                {"from_period": "Q1 2026", "to_period": "Q2 2026"}
+            ],
+        }
+        thresholds = {
+            "negative_pressure": 20.0,
+            "weak_modal_per_1000_words": 5.0,
+            "uncertainty_per_1000_words": 5.0,
+            "caution_per_1000_words": 5.0,
+            "negative_per_1000_words": 5.0,
+            "language_drift": 10.0,
+        }
+        alert_types = {
+            alert["type"]
+            for alert in build_language_alerts(language, history, -25.0, thresholds)
+        }
+        self.assertEqual(
+            alert_types,
+            {
+                "numeric_language_divergence",
+                "elevated_negative_language_pressure",
+                "confidence_to_caution_reversal",
+                "adverse_language_drift",
+            },
+        )
+
 
 class LanguageCoverageTests(unittest.TestCase):
     @classmethod
@@ -177,15 +250,35 @@ class LanguageCoverageTests(unittest.TestCase):
     def test_signal_archive_has_auditable_provisional_coverage(self):
         self.assertEqual(self.archive["coverage"]["provisional_banks"], 23)
         self.assertEqual(self.archive["coverage"]["insufficient_banks"], 0)
-        self.assertEqual(self.archive["coverage"]["four_period_trends"], 10)
-        self.assertEqual(len(self.archive["documents"]), 56)
+        self.assertEqual(self.archive["coverage"]["four_period_trends"], 8)
+        self.assertEqual(len(self.archive["documents"]), 66)
         source_statuses = {
             status: sum(row.get("source_status") == status for row in self.archive["documents"])
-            for status in ("curated", "pending_human_review")
+            for status in (
+                "curated", "manually_verified_official", "pending_human_review"
+            )
         }
-        self.assertEqual(source_statuses, {"curated": 23, "pending_human_review": 33})
+        self.assertEqual(
+            source_statuses,
+            {
+                "curated": 23,
+                "manually_verified_official": 9,
+                "pending_human_review": 34,
+            },
+        )
         self.assertTrue(
-            all(len(row["evidence"]) >= 3 for row in self.archive["documents"])
+            all(
+                len(row["evidence"]) >= 3
+                for row in self.archive["documents"]
+                if row["coverage_quality"] == "standard"
+            )
+        )
+        self.assertTrue(
+            all(
+                len(row["evidence"]) >= 2
+                for row in self.archive["documents"]
+                if row["coverage_quality"] == "limited"
+            )
         )
         self.assertTrue(
             all(row["publication_eligible"] is False for row in self.archive["signals"])

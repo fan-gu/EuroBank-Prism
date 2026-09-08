@@ -29,6 +29,55 @@ def market_bubble_diameter(score: float) -> float:
     return round(16.0 + bounded * 0.42, 2)
 
 
+def signal_logo_layout(
+    row: dict,
+    x_domain: list[float],
+    y_domain: list[float],
+    width: int = 1_150,
+    height: int = 385,
+    external_threshold: float = 30.0,
+) -> dict:
+    """Size a logo in screen pixels and move it beside very small bubbles.
+
+    Plotly layout images are sized in axis units. Converting an intended pixel
+    square separately on x and y prevents stretched logos. For a small bubble,
+    the logo is placed opposite the collision-aware ticker label so the two do
+    not cover one another.
+    """
+    x_span = x_domain[1] - x_domain[0]
+    y_span = y_domain[1] - y_domain[0]
+    diameter = market_bubble_diameter(row["Price confirmation"])
+    inside = diameter >= external_threshold
+    logo_pixels = min(18.0, max(10.0, diameter - 6.0)) if inside else 18.0
+
+    anchor_x = (row["Language score"] - x_domain[0]) / x_span * width
+    anchor_y = height - (row["Numeric score"] - y_domain[0]) / y_span * height
+    logo_x = anchor_x
+    logo_y = anchor_y
+    if not inside:
+        label_x = (row["Label x"] - x_domain[0]) / x_span * width
+        label_y = height - (row["Label y"] - y_domain[0]) / y_span * height
+        dx = label_x - anchor_x
+        dy = label_y - anchor_y
+        length = math.hypot(dx, dy) or 1.0
+        distance = diameter / 2 + logo_pixels / 2 + 4
+        logo_x = anchor_x - distance * dx / length
+        logo_y = anchor_y - distance * dy / length
+        half = logo_pixels / 2 + 3
+        logo_x = min(max(logo_x, half), width - half)
+        logo_y = min(max(logo_y, half), height - half)
+
+    score_x = x_domain[0] + logo_x / width * x_span
+    score_y = y_domain[0] + (height - logo_y) / height * y_span
+    return {
+        "placement": "inside" if inside else "outside",
+        "x": round(score_x, 3),
+        "y": round(score_y, 3),
+        "sizex": round(logo_pixels / width * x_span, 3),
+        "sizey": round(logo_pixels / height * y_span, 3),
+    }
+
+
 def _overlap_area(first: tuple[float, ...], second: tuple[float, ...]) -> float:
     width = max(0.0, min(first[2], second[2]) - max(first[0], second[0]))
     height = max(0.0, min(first[3], second[3]) - max(first[1], second[1]))

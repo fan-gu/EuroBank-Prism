@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "policy": "Exact official issuer-document links manually verified when automated archive discovery is incomplete. Only the same management-document series as the current period is allowed.",
+  "sources": [
+    {
+      "ticker": "BNP",
+      "bank_name": "BNP Paribas S.A.",
+      "period": "Q1 2026",
+      "document_type": "quarterly_results",
+      "document_series": "management_results_presentation",
+      "official_page": "https://invest.bnpparibas/en/search/reports/documents/results",
+      "download_url": "https://invest.bnpparibas/document/1q26-slides",
+      "label": "1Q26 results presentation",
+      "filename": "BNP_2026_Q1_results_presentation_en.pdf"
+    },
+    {
+      "ticker": "BNP",
+      "bank_name": "BNP Paribas S.A.",
+      "period": "FY2025",
+      "document_type": "full_year_results",
+      "document_series": "management_results_presentation",
+      "official_page": "https://invest.bnpparibas/en/search/reports/documents/results",
+      "download_url": "https://invest.bnpparibas/en/document/4q25-slides",
+      "label": "4Q25 results presentation",
+      "filename": "BNP_2025_FY_results_presentation_en.pdf"
+    },
+    {
+      "ticker": "BNP",
+      "bank_name": "BNP Paribas S.A.",
+      "period": "Q3 2025",
+      "document_type": "quarterly_results",
+      "document_series": "management_results_presentation",
+      "official_page": "https://invest.bnpparibas/en/search/reports/documents/results",
+      "download_url": "https://invest.bnpparibas/en/document/3q25-slides",
+      "label": "3Q25 results presentation",
+      "filename": "BNP_2025_Q3_results_presentation_en.pdf"
+    },
+    {
+      "ticker": "ACA",
+      "bank_name": "Crédit Agricole S.A.",
+      "period": "Q1 2026",
+      "document_type": "quarterly_results",
+      "document_series": "management_results_presentation",
+      "official_page": "https://www.credit-agricole.com/en/finance/financial-results/first-quarter-2026-results",
+      "download_url": "https://www.credit-agricole.com/en/pdfPreview/210280",
+      "label": "Q1 2026 financial-results slides",
+      "filename": "ACA_2026_Q1_results_presentation_en.pdf"
+    },
+    {
+      "ticker": "ACA",
+      "bank_name": "Crédit Agricole S.A.",
+      "period": "FY2025",
+      "document_type": "full_year_results",
+      "document_series": "management_results_presentation",
+      "official_page": "https://www.credit-agricole.com/en/finance/financial-results/fourth-quarter-and-full-year-2025",
+      "download_url": "https://www.credit-agricole.com/en/pdfPreview/208645",
+      "label": "FY2025 financial-results slides",
+      "filename": "ACA_2025_FY_results_presentation_en.pdf"
+    },
+    {
+      "ticker": "ACA",
+      "bank_name": "Crédit Agricole S.A.",
+      "period": "Q3 2025",
+      "document_type": "quarterly_results",
+      "document_series": "management_results_presentation",
+      "official_page": "https://www.credit-agricole.com/en/finance/financial-results/third-quarter-and-first-nine-months-2025",
+      "download_url": "https://www.credit-agricole.com/en/pdfPreview/208015",
+      "label": "Q3 2025 financial-results slides",
+      "filename": "ACA_2025_Q3_results_presentation_en.pdf"
+    },
+    {
+      "ticker": "CABK",
+      "bank_name": "CaixaBank S.A.",
+      "period": "Q1 2026",
+      "document_type": "quarterly_results",
+      "document_series": "management_results_release",
+      "official_page": "https://www.caixabank.com/en/shareholders-investors/economic-financial-information/quarterly-financial-information.html",
+      "download_url": "https://www.caixabank.com/docs/comunicacion/90170.pdf",
+      "label": "Q1 2026 results release",
+      "filename": "CABK_2026_Q1_results_release_en.pdf"
+    },
+    {
+      "ticker": "CABK",
+      "bank_name": "CaixaBank S.A.",
+      "period": "FY2025",
+      "document_type": "full_year_results",
+      "document_series": "management_results_release",
+      "official_page": "https://www.caixabank.com/en/shareholders-investors/economic-financial-information/quarterly-financial-information.html",
+      "download_url": "https://www.caixabank.com/docs/comunicacion/89010.pdf",
+      "label": "FY2025 results release",
+      "filename": "CABK_2025_FY_results_release_en.pdf"
+    },
+    {
+      "ticker": "CABK",
+      "bank_name": "CaixaBank S.A.",
+      "period": "Q3 2025",
+      "document_type": "quarterly_results",
+      "document_series": "management_results_release",
+      "official_page": "https://www.caixabank.com/en/shareholders-investors/economic-financial-information/quarterly-financial-information.html",
+      "download_url": "https://www.caixabank.com/docs/comunicacion/88315.pdf",
+      "label": "Q3 2025 results release",
+      "filename": "CABK_2025_Q3_results_release_en.pdf"
+    }
+  ]
+}
