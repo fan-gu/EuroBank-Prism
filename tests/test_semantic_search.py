@@ -51,6 +51,17 @@ class SemanticSearchTests(unittest.TestCase):
         self.assertNotIn("rounding", cleaned.lower())
         self.assertIn("Revenue remained strong", cleaned)
 
+    def test_semantic_filter_removes_disclosure_and_flattened_table(self):
+        page = (
+            "There may be different or even conflicting laws in relevant jurisdictions.\n"
+            "Q2 2026 results overview Reported P&L € mln 2,354 1,987 24% 17%.\n"
+            "Management expects costs to remain controlled during the second half."
+        )
+        cleaned = clean_semantic_page(page, "Q2 2026")
+        self.assertNotIn("conflicting laws", cleaned.lower())
+        self.assertNotIn("reported p&l", cleaned.lower())
+        self.assertIn("costs to remain controlled", cleaned.lower())
+
     def test_page_chunks_never_cross_page_boundaries(self):
         chunks = chunk_page(" ".join(f"word{index}" for index in range(400)))
         self.assertGreater(len(chunks), 1)

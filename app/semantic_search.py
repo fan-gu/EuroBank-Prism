@@ -26,6 +26,7 @@ from app.language_signals import (
     clean_text,
     infer_document_metadata,
     is_boilerplate_page,
+    is_table_like_fragment,
     is_legal_boilerplate,
     is_prior_period_technical,
     mask_procedural_condition_footnotes,
@@ -81,7 +82,7 @@ def clean_semantic_page(page_text: str, period: str | None) -> str:
     retained = []
     for raw_block in BLOCK_SPLIT.split(page_text):
         block = clean_text(raw_block)
-        if len(block) < 20 or is_legal_boilerplate(block):
+        if len(block) < 20 or is_legal_boilerplate(block) or is_table_like_fragment(block):
             continue
         if is_prior_period_technical(block, period):
             continue

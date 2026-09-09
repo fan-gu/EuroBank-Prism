@@ -22,7 +22,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_REPORTS_DIR = BASE_DIR / "reports"
 DEFAULT_OUTPUT = BASE_DIR / "language_signals.json"
-RULE_VERSION = "management-language-v2.4.3"
+RULE_VERSION = "management-language-v2.4.4"
 
 LEXICONS = {
     "positive": {
@@ -131,6 +131,16 @@ NEUTRAL_RISK_COMPOUNDS = re.compile(
     r"risk parameters?|risk architecture|risk framework|risk function|"
     r"risk committee|chief risk officer|risk models?|risk taxonom(?:y|ies)|"
     r"risk governance|risk data|risk reporting|risk weights?|risk culture)\b",
+    flags=re.IGNORECASE,
+)
+# These are disclosure, ESG methodology, or presentation statements.  They
+# can contain words such as "may", "risk" and "uncertain", but are not a
+# management view of the bank's operating outlook.
+NON_NARRATIVE_DISCLAIMER = re.compile(
+    r"\b(?:different or even conflicting laws|ESG-related material|"
+    r"publicly available information|sources believed to be reliable|"
+    r"no statement .* profit forecast|profit forecast|past performance is not|"
+    r"for illustrative purposes only)\b",
     flags=re.IGNORECASE,
 )
 # Routine distribution and governance conditions are often printed as tiny
@@ -453,7 +463,22 @@ def add_filter_example(
 
 def is_legal_boilerplate(sentence: str) -> bool:
     """Identify standard legal text that must not influence language scores."""
-    return bool(LEGAL_BOILERPLATE.search(sentence))
+    return bool(LEGAL_BOILERPLATE.search(sentence) or NON_NARRATIVE_DISCLAIMER.search(sentence))
+
+
+def is_table_like_fragment(sentence: str) -> bool:
+    """Reject flattened tables before they can masquerade as narrative."""
+    number_tokens = re.findall(r"\b\d[\d.,]*%?\b", sentence)
+    words = WORD_RE.findall(sentence)
+    table_heading = re.search(
+        r"\b(?:results overview|reported p&l|income statement|€\s*(?:m|mn|mln)|"
+        r"in millions|quarterly results)\b",
+        sentence,
+        flags=re.IGNORECASE,
+    )
+    return bool(table_heading and len(number_tokens) >= 2) or (
+        len(number_tokens) >= 5 and len(number_tokens) * 2 >= max(len(words), 1)
+    )
 
 
 def is_boilerplate_page(page_text: str) -> bool:
@@ -472,7 +497,7 @@ def is_boilerplate_page(page_text: str) -> bool:
 
 
 def relevant_sentence(sentence: str) -> bool:
-    if EXCLUDED_CONTEXT.search(sentence) or is_legal_boilerplate(sentence):
+    if EXCLUDED_CONTEXT.search(sentence) or is_legal_boilerplate(sentence) or is_table_like_fragment(sentence):
         return False
     # Requiring the narrative trigger in the same sentence prevents a single
     # word such as "performance" in a page heading from pulling an entire

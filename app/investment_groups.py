@@ -146,9 +146,12 @@ def investment_group(
 
     # Six directional research outcomes. Missing evidence remains a separate
     # publication gate and is not counted as an investment group.
+    # The gates are axis-specific peer percentiles.  A supportive language
+    # reading is above its median; it need not clear the much stricter 60th
+    # percentile to corroborate a genuinely strong numeric and price case.
     if (
         numeric >= gates["numeric_high"]
-        and language >= gates["language_high"]
+        and language >= gates["language_mid"]
         and price >= gates["price_high"]
     ):
         return "Conviction Leaders"
@@ -160,7 +163,7 @@ def investment_group(
         return "Strong Signals, Weak Price"
     if numeric < gates["numeric_mid"] and language >= gates["language_high"]:
         return "Story Ahead of Numbers"
-    if price >= gates["price_high"]:
+    if numeric < gates["numeric_high"] and price >= gates["price_high"]:
         return "Price Ahead of Fundamentals"
     if (
         numeric < gates["numeric_mid"]

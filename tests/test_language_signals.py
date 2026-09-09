@@ -409,6 +409,15 @@ class LanguageSignalTests(unittest.TestCase):
         self.assertFalse(relevant_sentence(disclaimer))
         self.assertTrue(is_boilerplate_page(f"Example Bank Important notice {disclaimer}"))
 
+    def test_esg_and_flattened_table_pollution_are_excluded(self):
+        disclaimer = (
+            "This document may contain ESG-related material based on publicly "
+            "available information and sources believed to be reliable."
+        )
+        table = "Q2 2026 results overview Reported P&L € mln 2,354 1,987 24% 17%"
+        self.assertFalse(relevant_sentence(disclaimer))
+        self.assertFalse(relevant_sentence(table))
+
     def test_genuine_management_risk_commentary_remains_eligible(self):
         commentary = (
             "Management expects credit risk to remain elevated as corporate defaults "

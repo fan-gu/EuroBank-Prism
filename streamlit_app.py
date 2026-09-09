@@ -6,10 +6,9 @@ import base64
 import importlib
 import json
 import os
-import subprocess
-import sys
 
 import pandas as pd
+import altair as alt
 import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
@@ -78,12 +77,6 @@ def load_data(data_version):
         universe = json.load(handle)["constituents"]
     with (BASE_DIR / "official_report_pages.json").open(encoding="utf-8") as handle:
         report_pages = json.load(handle)
-    evidence_path = BASE_DIR / "table_evidence_index.json"
-    table_evidence = (
-        json.loads(evidence_path.read_text(encoding="utf-8"))
-        if evidence_path.exists()
-        else {"source_count": 0, "table_count": 0, "documents": []}
-    )
     language_path = BASE_DIR / "language_signals.json"
     language_signals = (
         json.loads(language_path.read_text(encoding="utf-8"))
@@ -100,14 +93,14 @@ def load_data(data_version):
         if market_path.exists()
         else {"records": [], "methodology": {}}
     )
-    return banks, scores, universe, report_pages, table_evidence, language_signals, market_confirmation
+    return banks, scores, universe, report_pages, language_signals, market_confirmation
 
 
 def data_version():
     """Fingerprint the small dashboard inputs without reading them twice."""
     names = (
         "full_universe_dataset.json", "full_universe_scores.json", "bank_master.json",
-        "official_report_pages.json", "table_evidence_index.json",
+        "official_report_pages.json",
         "language_signals.json", "market_confirmation.json",
     )
     return tuple(
@@ -155,7 +148,7 @@ def decimal(value):
     return f"{value:.2f}" if isinstance(value, (int, float)) else "Not available"
 
 
-def build_signal_map(rows):
+def build_signal_map(rows, thresholds):
     """Build the two-dimensional signal map with market-sized bubbles."""
     figure = go.Figure()
     x_domain = padded_domain([row["Language score"] for row in rows])
@@ -242,8 +235,8 @@ def build_signal_map(rows):
             showarrow=False, font={"size": 10, "color": "#f4f6fb"},
             bgcolor="rgba(14,18,27,0.78)", borderpad=3,
         )
-    figure.add_vline(x=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
-    figure.add_hline(y=50, line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
+    figure.add_vline(x=thresholds["language_mid"], line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
+    figure.add_hline(y=thresholds["numeric_mid"], line_width=1, line_dash="dot", line_color="rgba(190,200,220,0.55)")
     figure.update_layout(
         height=430,
         margin={"l": 20, "r": 15, "t": 20, "b": 20},
@@ -274,8 +267,9 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-banks, scores, universe, report_pages, table_evidence, language_signals, market_confirmation = load_data(data_version())
+banks, scores, universe, report_pages, language_signals, market_confirmation = load_data(data_version())
 scored_tickers = {row["ticker"] for row in scores if row["status"] == "ranked"}
+score_by_ticker = {row["ticker"]: row for row in scores if row["status"] == "ranked"}
 language_coverage = language_signals.get("coverage", {})
 market_by_ticker = {row["ticker"]: row for row in market_confirmation.get("records", [])}
 market_coverage = sum(
@@ -285,7 +279,7 @@ market_coverage = sum(
 signal_rows = language_signals.get("signals", [])
 group_thresholds = derive_group_thresholds([
     {
-        "numeric": row.get("numeric_score"),
+        "numeric": score_by_ticker.get(row["ticker"], {}).get("score"),
         "language": row.get("language_score"),
         "price": market_by_ticker.get(row["ticker"], {}).get(
             "price_confirmation_score",
@@ -298,10 +292,10 @@ plotted_rows = [
     {
         "Ticker": row["ticker"],
         "Bank": row["bank_name"],
-        "Numeric score": row["numeric_score"],
+        "Numeric score": score_by_ticker.get(row["ticker"], {}).get("score"),
         "Language score": row["language_score"],
         "Negative pressure": row.get("negative_pressure_score"),
-        "Gap": row["divergence"],
+        "Gap": score_by_ticker.get(row["ticker"], {}).get("score") - row["language_score"],
         "Research quadrant": row["quadrant"],
         "Price confirmation": market_by_ticker.get(row["ticker"], {}).get(
             "price_confirmation_score",
@@ -312,7 +306,7 @@ plotted_rows = [
             market_by_ticker.get(row["ticker"], {}).get("market_regime", "Insufficient history"),
         ),
         "Investment group": investment_group(
-            row.get("numeric_score"),
+            score_by_ticker.get(row["ticker"], {}).get("score"),
             row.get("language_score"),
             market_by_ticker.get(row["ticker"], {}).get(
                 "price_confirmation_score",
@@ -321,13 +315,13 @@ plotted_rows = [
             group_thresholds,
         ),
         "Evidence status": evidence_status(row.get("history_periods")),
-        "Language alerts": row.get("alerts", []),
+        "Language alerts": [alert for alert in row.get("alerts", []) if alert.get("type") != "numeric_language_gap"],
         "Language warning evidence": row.get("warning_evidence", []),
         "Language drift": row.get("language_drift_score"),
         "Directional reversal": row.get("directional_reversal"),
     }
     for row in signal_rows
-    if row.get("numeric_score") is not None
+    if score_by_ticker.get(row["ticker"], {}).get("score") is not None
     and row.get("language_score") is not None
     and market_by_ticker.get(row["ticker"], {}).get(
         "price_confirmation_score",
@@ -384,10 +378,10 @@ with st.sidebar:
     st.markdown("## EuroBank Prism")
     st.caption("Three signals. One clearer view.")
     refresh_clicked = st.button(
-        "Refresh data",
+        "Reload dashboard",
         width="stretch",
         icon=":material/refresh:",
-        help="Fetch fresh provider metrics and price history. Official-report language history is curated separately.",
+        help="Reload the latest published research artifacts. Provider collection runs outside the public dashboard.",
     )
     if data_age is None:
         st.caption("Provider snapshot unavailable")
@@ -410,22 +404,15 @@ with st.sidebar:
     )
 
 if refresh_clicked:
-    with st.status("Refreshing all 23 banks...", expanded=False) as status:
-        fundamental_result = subprocess.run([sys.executable, str(BASE_DIR / "build_full_universe.py")], cwd=BASE_DIR, capture_output=True, text=True)
-        market_result = subprocess.run([sys.executable, str(BASE_DIR / "build_market_confirmation.py")], cwd=BASE_DIR, capture_output=True, text=True)
-        if fundamental_result.returncode == 0 and market_result.returncode == 0:
-            status.update(label="Refresh complete", state="complete")
-            st.cache_data.clear()
-            st.rerun()
-        else:
-            status.update(label="Refresh failed", state="error")
-            st.code((fundamental_result.stderr or fundamental_result.stdout) + "\n" + (market_result.stderr or market_result.stdout))
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    st.rerun()
 
 st.markdown("<div id='core-signal-map'></div>", unsafe_allow_html=True)
 st.header("Signal map")
 if plotted_rows:
     st.plotly_chart(
-        build_signal_map(plotted_rows),
+        build_signal_map(plotted_rows, group_thresholds),
         width="stretch",
         height=430,
         key="front_page_signal_map",
@@ -595,27 +582,32 @@ else:
                             semantic_question[:500],
                             semantic_results,
                         )
-                    st.markdown("#### Evidence-grounded answer")
-                    st.markdown(semantic_answer)
-                    st.markdown("#### Retrieved evidence")
-                    for evidence_number, result in enumerate(semantic_results, start=1):
-                        row = result.record
-                        with st.expander(
-                            f"E{evidence_number} · {row['ticker']} · {row['period']} · page {row['page']} · similarity {result.score:.3f}",
-                            icon=":material/description:",
-                        ):
-                            st.write(row["text"])
-                            source_url = row.get("source_url") or row.get("official_page")
-                            if source_url:
-                                st.link_button(
-                                    "Open official report",
-                                    source_url,
-                                    icon=":material/open_in_new:",
-                                )
+                    st.session_state["semantic_response"] = {
+                        "answer": semantic_answer,
+                        "evidence": [
+                            {"score": result.score, "record": result.record}
+                            for result in semantic_results
+                        ],
+                    }
                 except Exception as exc:
                     st.error(
                         f"Semantic request failed ({type(exc).__name__}). Check the Gemini key, quota and model availability."
                     )
+    semantic_response = st.session_state.get("semantic_response")
+    if semantic_response:
+        st.markdown("#### Evidence-grounded answer")
+        st.markdown(semantic_response["answer"])
+        st.markdown("#### Retrieved evidence")
+        for evidence_number, result in enumerate(semantic_response["evidence"], start=1):
+            row = result["record"]
+            with st.expander(
+                f"E{evidence_number} · {row['ticker']} · {row['period']} · page {row['page']} · similarity {result['score']:.3f}",
+                icon=":material/description:",
+            ):
+                st.write(row["text"])
+                source_url = row.get("source_url") or row.get("official_page")
+                if source_url:
+                    st.link_button("Open official report", source_url, icon=":material/open_in_new:")
 
 boilerplate_pages = sum(
     document.get("excluded_boilerplate_pages", 0)
@@ -693,7 +685,13 @@ with details_section:
                 "Absolute language score": [document["features"]["absolute_language_score"] for document in continuous_language_documents[-4:]],
             }
         )
-        st.line_chart(history_frame, x="Period", y="Absolute language score")
+        periods = history_frame["Period"].tolist()
+        chart = alt.Chart(history_frame).mark_line(point=True).encode(
+            x=alt.X("Period:N", sort=periods, title=None),
+            y=alt.Y("Absolute language score:Q", title="Absolute language score"),
+            tooltip=["Period:N", alt.Tooltip("Absolute language score:Q", format=".1f")],
+        ).properties(height=260)
+        st.altair_chart(chart, width="stretch")
         signal = next((row for row in language_signals.get("signals", []) if row["ticker"] == selected), {})
         st.caption(
             f"Preliminary drift score: {signal.get('language_drift_score', 'N/A')} · "
@@ -716,7 +714,7 @@ with details_section:
                 "human review pending"
             )
             st.caption(
-                "v2.4.3 filter audit · "
+                "v2.4.4 filter audit · "
                 f"{latest_language_document.get('masked_neutral_risk_spans', 0)} neutral risk labels · "
                 f"{latest_language_document.get('deduplicated_repeats', 0)} repeats · "
                 f"{latest_language_document.get('negated_hits_dropped', 0)} negated hits · "
