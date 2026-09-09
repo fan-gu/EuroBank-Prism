@@ -349,9 +349,10 @@ group_counts = {
 st.markdown(
     """
     <style>
-    .block-container {padding-top: 1.2rem; padding-bottom: 4rem;}
+    .block-container {padding-top: 2.8rem; padding-bottom: 4rem;}
+    :root {--prism-heading-font: 'Inter', 'Segoe UI', sans-serif;}
     .prism-group {border-left:4px solid var(--group-color);padding:.15rem .5rem;min-height:8rem;}
-    .prism-group-name {font-weight:700;font-size:1rem;text-align:center;margin-bottom:.4rem;}
+    .prism-group-name {font-family:var(--prism-heading-font);font-weight:600;font-size:1rem;line-height:1.4;letter-spacing:-.015em;text-align:center;margin-bottom:.55rem;}
     .prism-signal-line {display:flex;flex-direction:column;font-size:.78rem;line-height:1.5;margin-bottom:.5rem;}
     .prism-bank-list {display:flex;gap:.35rem;flex-wrap:wrap;justify-content:center;}
     .prism-bank-token {display:inline-flex;align-items:center;gap:.25rem;font-size:.7rem;font-weight:700;}
@@ -364,12 +365,16 @@ st.markdown(
     .prism-dot {width:.62rem;height:.62rem;border-radius:50%;display:inline-block;}
     div[data-testid="stDataFrame"] {font-size:.70rem;}
     div[data-testid="stDataFrame"] * {font-size:.70rem;}
-    section[data-testid="stSidebar"] h2 {font-size:2.72rem;line-height:.98;margin-bottom:.16rem;letter-spacing:-.05em;white-space:nowrap;}
+    section[data-testid="stSidebar"] h2 {font-family:var(--prism-heading-font);font-weight:600;font-size:2.5rem;line-height:1.12;margin-top:.9rem;margin-bottom:.6rem;letter-spacing:-.045em;text-align:center;}
     section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {overflow-y:hidden !important;}
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:.32rem;}
     section[data-testid="stMain"] h2,
     section[data-testid="stMain"] h3,
-    section[data-testid="stMain"] h4 {font-family:inherit;font-size:1.5rem;font-weight:700;text-align:center;letter-spacing:-.02em;}
+    section[data-testid="stMain"] h4 {font-family:var(--prism-heading-font);font-size:1.5rem;font-weight:600;line-height:1.35;text-align:center;letter-spacing:-.025em;padding-top:1.15rem;padding-bottom:.65rem;}
+    section[data-testid="stMain"] h2 {padding-top:1.6rem;padding-bottom:.85rem;}
+    section[data-testid="stMain"] [data-testid="stExpander"] summary p {font-family:var(--prism-heading-font);font-weight:600;letter-spacing:-.015em;}
+    section[data-testid="stMain"] [data-testid="stVerticalBlockBorderWrapper"] {border-radius:12px;}
+    @media (max-width:640px) {.block-container {padding-top:1.6rem;}}
     </style>
     """,
     unsafe_allow_html=True,
@@ -449,27 +454,48 @@ else:
 
 st.markdown("<div id='research-triage'></div>", unsafe_allow_html=True)
 st.header("Research triage")
-st.caption(
-    "Full queue, sorted by absolute fundamentals-versus-language gap. "
-    "A large gap is a research prompt, not a trading signal."
-)
 opportunity_groups = {"Conviction Leaders", "Strong Signals, Weak Price", "Cautious Value"}
-left_queue, right_queue = st.columns(2, gap="large")
-for column, title, is_opportunity in (
-    (left_queue, "Research opportunities", True),
-    (right_queue, "Risk / verification queue", False),
-):
-    queue = sorted(
-        (row for row in plotted_rows if (row["Investment group"] in opportunity_groups) == is_opportunity),
-        key=lambda row: abs(row["Gap"]), reverse=True,
+opportunities = sorted(
+    (row for row in plotted_rows if row["Investment group"] in opportunity_groups),
+    key=lambda row: (row["Numeric score"] + row["Language score"], row["Price confirmation"]),
+    reverse=True,
+)
+risks = []
+for group_name in ("Story Ahead of Numbers", "Downside Risk", "Price Ahead of Fundamentals"):
+    group_queue = sorted(
+        (row for row in plotted_rows if row["Investment group"] == group_name),
+        key=lambda row: (
+            abs(row["Gap"]),
+            100 - row["Numeric score"],
+            row["Price confirmation"],
+        ),
+        reverse=True,
     )
-    with column:
-        st.subheader(title)
-        for row in queue:
+    risks.extend(group_queue[:2])
+left_queue, right_queue = st.columns(2, gap="large")
+with left_queue:
+    st.markdown("#### Research opportunities")
+    if opportunities:
+        for row in opportunities:
             with st.container(border=True):
-                st.markdown(f"**{row['Ticker']}** · {row['Investment group']} · Gap **{row['Gap']:+.1f}**")
-        if not queue:
-            st.caption("No banks currently in this queue.")
+                st.markdown(f"**{row['Ticker']} · {row['Bank']}**")
+                st.caption(
+                    f"{row['Investment group']} · Numeric {row['Numeric score']:.1f} · "
+                    f"Language {row['Language score']:.1f} · Price {row['Price confirmation']:.1f}"
+                )
+                st.write(GROUP_META[row["Investment group"]]["meaning"])
+    else:
+        st.info("No bank currently clears the opportunity gates.")
+with right_queue:
+    st.markdown("#### Risk / verification queue")
+    for row in risks:
+        with st.container(border=True):
+            st.markdown(f"**{row['Ticker']} · {row['Bank']}**")
+            st.caption(
+                f"{row['Investment group']} · Numeric {row['Numeric score']:.1f} · "
+                f"Language {row['Language score']:.1f} · Gap {row['Gap']:+.1f}"
+            )
+            st.write(GROUP_META[row["Investment group"]]["meaning"])
 
 language_warning_rows = sorted(
     (row for row in plotted_rows if row["Language alerts"]),

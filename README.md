@@ -21,7 +21,7 @@ Gemini semantic-research layer answers natural-language questions from the
 indexed official reports and cites the source bank, period and PDF page.
 
 The signal map includes six group cards immediately below the chart. Research
-triage separates opportunities and verification items into two columns, followed
+triage restores the detailed opportunity and verification cards from the 8 September layout, followed
 by semantic research and bank-level score transparency. Official-report links
 and methodology are collapsed; internal table-review material stays off the visitor interface.
 
