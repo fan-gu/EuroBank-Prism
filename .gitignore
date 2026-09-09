@@ -6,3 +6,4 @@ language_report_registry.json
 __pycache__/
 .pytest_cache/
 *.pyc
+semantic_embeddings.partial.npz

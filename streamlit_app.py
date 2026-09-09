@@ -5,6 +5,7 @@ from datetime import date, datetime
 import base64
 import importlib
 import json
+import os
 import subprocess
 import sys
 
@@ -16,6 +17,7 @@ from dotenv import load_dotenv
 from app import dashboard_visuals as dashboard_visuals_module
 from app import investment_groups as investment_groups_module
 from app import language_signals as language_signals_module
+from app import semantic_search as semantic_search_module
 
 # Streamlit Cloud can hot-rerun this entry point without restarting imported
 # modules. Reload the small deterministic helpers before binding their symbols
@@ -23,6 +25,7 @@ from app import language_signals as language_signals_module
 dashboard_visuals_module = importlib.reload(dashboard_visuals_module)
 investment_groups_module = importlib.reload(investment_groups_module)
 language_signals_module = importlib.reload(language_signals_module)
+semantic_search_module = importlib.reload(semantic_search_module)
 layout_signal_labels = dashboard_visuals_module.layout_signal_labels
 market_bubble_diameter = dashboard_visuals_module.market_bubble_diameter
 padded_domain = dashboard_visuals_module.padded_domain
@@ -34,11 +37,19 @@ investment_group = investment_groups_module.investment_group
 derive_group_thresholds = investment_groups_module.derive_group_thresholds
 comparable_history = language_signals_module.comparable_history
 period_sort_key = language_signals_module.period_sort_key
+SemanticIndex = semantic_search_module.SemanticIndex
+answer_semantic_question = semantic_search_module.answer_question
+create_gemini_client = semantic_search_module.create_client
 
 load_dotenv(Path(__file__).with_name(".env"))
 
 BASE_DIR = Path(__file__).resolve().parent
 LOGO_DIR = BASE_DIR / "assets" / "bank_logos"
+SEMANTIC_FILES = (
+    BASE_DIR / "semantic_corpus.json",
+    BASE_DIR / "semantic_embeddings.npz",
+    BASE_DIR / "semantic_index_metadata.json",
+)
 
 
 def bank_logo_uri(ticker):
@@ -112,6 +123,33 @@ def data_version():
         (name, (BASE_DIR / name).stat().st_size, (BASE_DIR / name).stat().st_mtime_ns)
         for name in names if (BASE_DIR / name).exists()
     )
+
+
+def semantic_index_version():
+    """Fingerprint the offline index so Streamlit reloads only when it changes."""
+    if not all(path.exists() for path in SEMANTIC_FILES):
+        return None
+    return tuple((path.name, path.stat().st_size, path.stat().st_mtime_ns) for path in SEMANTIC_FILES)
+
+
+@st.cache_resource(max_entries=2)
+def load_semantic_index(index_version):
+    del index_version
+    return SemanticIndex.load(*SEMANTIC_FILES)
+
+
+@st.cache_resource(max_entries=4)
+def gemini_client(api_key):
+    return create_gemini_client(api_key)
+
+
+def configured_gemini_api_key():
+    """Read cloud secrets first and fall back to the local environment."""
+    try:
+        key = st.secrets.get("GEMINI_API_KEY")
+    except (FileNotFoundError, KeyError):
+        key = None
+    return key or os.getenv("GEMINI_API_KEY", "")
 
 
 def percent(value):
@@ -423,6 +461,7 @@ with st.sidebar:
           <a href="#core-signal-map">Signal map</a>
           <a href="#investment-groups">Investment groups</a>
           <a href="#research-triage">Research triage</a>
+          <a href="#semantic-research">Semantic research</a>
           <a href="#full-peer-ranking">Peer ranking</a>
           <a href="#research-readiness">Research readiness</a>
           <a href="#bank-research">Bank research</a>
@@ -599,15 +638,92 @@ else:
                             icon=":material/open_in_new:",
                         )
 
+st.markdown("<div id='semantic-research'></div>", unsafe_allow_html=True)
+st.header("04 · Semantic research")
+st.caption(
+    "Ask across the filtered official-report archive. Gemini retrieves and explains cited evidence; it cannot change any Prism score."
+)
+semantic_version = semantic_index_version()
+if semantic_version is None:
+    st.info(
+        "The semantic index is not deployed yet. Run `python build_semantic_index.py` and redeploy the generated artifacts."
+    )
+else:
+    with st.form("semantic_research_form", border=False):
+        semantic_question = st.text_input(
+            "Research question",
+            placeholder="Which banks sound cautious about net interest income, and why?",
+            key="semantic_question",
+        )
+        semantic_scope = st.selectbox(
+            "Bank scope",
+            ["All 23 banks"] + [row["ticker"] for row in universe],
+            key="semantic_scope",
+        )
+        semantic_submitted = st.form_submit_button(
+            "Search official reports",
+            icon=":material/search:",
+        )
+
+    if semantic_submitted:
+        if not semantic_question.strip():
+            st.warning("Enter a research question first.")
+        else:
+            api_key = configured_gemini_api_key()
+            if not api_key:
+                st.warning(
+                    "Gemini is not configured. Add `GEMINI_API_KEY` to Streamlit Secrets or the local `.env` file."
+                )
+            else:
+                try:
+                    with st.spinner("Searching official reports and grounding the answer..."):
+                        semantic_index = load_semantic_index(semantic_version)
+                        semantic_results = semantic_index.search(
+                            gemini_client(api_key),
+                            semantic_question[:500],
+                            top_k=6,
+                            tickers=(
+                                None
+                                if semantic_scope == "All 23 banks"
+                                else {semantic_scope}
+                            ),
+                        )
+                        semantic_answer = answer_semantic_question(
+                            gemini_client(api_key),
+                            semantic_question[:500],
+                            semantic_results,
+                        )
+                    st.markdown("#### Evidence-grounded answer")
+                    st.markdown(semantic_answer)
+                    st.markdown("#### Retrieved evidence")
+                    for evidence_number, result in enumerate(semantic_results, start=1):
+                        row = result.record
+                        with st.expander(
+                            f"E{evidence_number} · {row['ticker']} · {row['period']} · page {row['page']} · similarity {result.score:.3f}",
+                            icon=":material/description:",
+                        ):
+                            st.write(row["text"])
+                            source_url = row.get("source_url") or row.get("official_page")
+                            if source_url:
+                                st.link_button(
+                                    "Open official report",
+                                    source_url,
+                                    icon=":material/open_in_new:",
+                                )
+                except Exception as exc:
+                    st.error(
+                        f"Semantic request failed ({type(exc).__name__}). Check the Gemini key, quota and model availability."
+                    )
+
 st.markdown("<div id='full-peer-ranking'></div>", unsafe_allow_html=True)
-st.header("04 · Relative ranking")
+st.header("05 · Relative ranking")
 st.caption(
     "Fundamental ranking only; language and price remain independent signals."
 )
 render_ranking_table(ranking_rows, key="homepage_ranking")
 
 st.markdown("<div id='research-readiness'></div>", unsafe_allow_html=True)
-st.header("05 · Research readiness")
+st.header("06 · Research readiness")
 st.caption(
     "Confidence gate: are inputs complete, period-comparable, source-linked and backtested?"
 )
@@ -646,7 +762,7 @@ methodology_section = st.container()
 
 with details_section:
     st.markdown("<div id='bank-research'></div>", unsafe_allow_html=True)
-    st.header("06 · Bank research")
+    st.header("07 · Bank research")
     selected = st.selectbox("Select a bank", [row["ticker"] for row in universe])
     bank = banks[selected]
     score = next((row for row in scores if row["ticker"] == selected), {"score": None, "components": {}})
@@ -752,7 +868,7 @@ with details_section:
 
 with evidence_section:
     st.markdown("<div id='sources-evidence'></div>", unsafe_allow_html=True)
-    st.header("07 · Sources & evidence")
+    st.header("08 · Sources & evidence")
     st.caption("Links open official issuer reporting pages where the latest publication is maintained.")
     st.dataframe(
         [
@@ -822,7 +938,7 @@ with evidence_section:
 
 with methodology_section:
     st.markdown("<div id='methodology'></div>", unsafe_allow_html=True)
-    st.header("08 · Methodology")
+    st.header("09 · Methodology")
     st.markdown("#### Data quality")
     st.write(
         f"Market-data ranking coverage: **{len(scored_tickers)}/{len(universe)} banks**. "
@@ -851,6 +967,9 @@ with methodology_section:
         "Original evidence wording is preserved; masking and negation do not change the word-count denominator."
     )
     st.markdown("**Language history gate:** four adjacent, comparable reporting checkpoints enable a preliminary drift observation; gaps reset the sequence, so four scattered PDFs do not qualify. Eight periods enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")
+    st.markdown(
+        "**Semantic research layer:** filtered, page-bound official-report chunks are embedded offline with Gemini Embeddings and ranked locally by cosine similarity. Gemini 3.6 Flash receives only the six retrieved excerpts and must cite their evidence IDs. Retrieved answers are research assistance only and never alter numeric, language, price-confirmation or investment-group outputs."
+    )
     st.markdown("**Price-confirmation bubble size:** 1-month (20%), 3-month (35%), and 6-month (35%) return plus price versus the 200-day average (10%) are peer-percentiled separately. This is backward-looking price behaviour—not analyst expectations. The result controls only bubble size and never alters either axis or the fundamental score.")
     st.markdown(
         "**Investment-value groups:** deterministic gates use each axis's own current cross-section rather than one shared raw cutoff. "

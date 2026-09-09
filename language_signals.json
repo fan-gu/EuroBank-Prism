@@ -1,15 +1,15 @@
 {
   "schema_version": "1.4",
-  "rule_version": "management-language-v2.4.2",
-  "generated_at": "2026-09-09T08:31:45.790443+00:00",
+  "rule_version": "management-language-v2.4.3",
+  "generated_at": "2026-09-09T12:46:52.551741+00:00",
   "methodology": {
     "axes_are_independent": true,
     "language_model": "deterministic_financial_lexicon",
     "language_score_calibration": {
       "method": "robust_median_mad",
       "peer_count": 23,
-      "median_raw_strength": 1.7857,
-      "mad_raw_strength": 8.0575,
+      "median_raw_strength": 4.6059,
+      "mad_raw_strength": 10.4867,
       "score_center": 50,
       "score_points_per_robust_sigma": 12,
       "score_floor": 15,
@@ -53,10 +53,10 @@
       "insufficient": "below the limited gate; excluded from peer calibration"
     },
     "research_triage_thresholds": {
-      "negative_pressure": 15.435,
-      "weak_modal_per_1000_words": 4.46,
-      "uncertainty_per_1000_words": 5.635,
-      "caution_per_1000_words": 2.935,
+      "negative_pressure": 13.505,
+      "weak_modal_per_1000_words": 3.995,
+      "uncertainty_per_1000_words": 4.975,
+      "caution_per_1000_words": 2.21,
       "negative_per_1000_words": 0.0,
       "language_drift": 6.594
     },
@@ -75,9 +75,9 @@
   },
   "diagnostics": {
     "scores_affected": false,
-    "cross_section_weak_modal_median": 2.51,
-    "cross_section_weak_modal_mad": 2.51,
-    "modal_review_gate": 7.53,
+    "cross_section_weak_modal_median": 1.91,
+    "cross_section_weak_modal_mad": 1.91,
+    "modal_review_gate": 5.73,
     "country_modal_profile": {
       "AT": {
         "banks": [
@@ -85,7 +85,7 @@
           "EBS"
         ],
         "bank_count": 2,
-        "weak_modal_per_1000_median": 3.73,
+        "weak_modal_per_1000_median": 3.01,
         "uncertainty_per_1000_median": 5.16,
         "interpretation": "insufficient_group_size_for_inference"
       },
@@ -104,8 +104,8 @@
           "DBK"
         ],
         "bank_count": 2,
-        "weak_modal_per_1000_median": 2.49,
-        "uncertainty_per_1000_median": 4.97,
+        "weak_modal_per_1000_median": 2.51,
+        "uncertainty_per_1000_median": 3.99,
         "interpretation": "insufficient_group_size_for_inference"
       },
       "ES": {
@@ -147,7 +147,7 @@
           "BIRG"
         ],
         "bank_count": 2,
-        "weak_modal_per_1000_median": 2.71,
+        "weak_modal_per_1000_median": 0.0,
         "uncertainty_per_1000_median": 0.79,
         "interpretation": "insufficient_group_size_for_inference"
       },
@@ -189,7 +189,7 @@
           "ISP"
         ],
         "bank_count": 9,
-        "weak_modal_per_1000_median": 3.86,
+        "weak_modal_per_1000_median": 1.58,
         "uncertainty_per_1000_median": 1.58,
         "interpretation": "descriptive_only"
       },
@@ -211,8 +211,8 @@
           "UCG"
         ],
         "bank_count": 14,
-        "weak_modal_per_1000_median": 2.23,
-        "uncertainty_per_1000_median": 4.42,
+        "weak_modal_per_1000_median": 1.93,
+        "uncertainty_per_1000_median": 4.11,
         "interpretation": "descriptive_only"
       }
     },
@@ -220,12 +220,22 @@
       {
         "ticker": "INGA",
         "weak_modal_per_1000": 15.53,
-        "reason": "weak-modal rate above robust cross-section review gate (7.53 per 1,000 words)"
+        "reason": "weak-modal rate above robust cross-section review gate (5.73 per 1,000 words)"
       },
       {
         "ticker": "BKT",
         "weak_modal_per_1000": 10.45,
-        "reason": "weak-modal rate above robust cross-section review gate (7.53 per 1,000 words)"
+        "reason": "weak-modal rate above robust cross-section review gate (5.73 per 1,000 words)"
+      },
+      {
+        "ticker": "BBVA",
+        "weak_modal_per_1000": 6.73,
+        "reason": "weak-modal rate above robust cross-section review gate (5.73 per 1,000 words)"
+      },
+      {
+        "ticker": "EBS",
+        "weak_modal_per_1000": 6.02,
+        "reason": "weak-modal rate above robust cross-section review gate (5.73 per 1,000 words)"
       }
     ]
   },
@@ -921,7 +931,7 @@
         "confidence": 18
       },
       "features": {
-        "language_score": 77.6,
+        "language_score": 69.0,
         "absolute_language_score": 79.2,
         "management_language_strength_raw": 29.2321,
         "positive_signal_score": 42.32,
@@ -933,7 +943,7 @@
         "uncertainty_per_1000_words": 5.24,
         "caution_per_1000_words": 5.24,
         "confidence_per_1000_words": 31.41,
-        "peer_centered_z": 2.2975
+        "peer_centered_z": 1.5839
       },
       "evidence": [
         {
@@ -1207,7 +1217,7 @@
         "confidence": 30
       },
       "features": {
-        "language_score": 63.4,
+        "language_score": 58.1,
         "absolute_language_score": 65.1,
         "management_language_strength_raw": 15.0926,
         "positive_signal_score": 25.4,
@@ -1219,7 +1229,7 @@
         "uncertainty_per_1000_words": 1.79,
         "caution_per_1000_words": 4.78,
         "confidence_per_1000_words": 17.93,
-        "peer_centered_z": 1.1139
+        "peer_centered_z": 0.6745
       },
       "evidence": [
         {
@@ -2021,7 +2031,7 @@
         "confidence": 3
       },
       "features": {
-        "language_score": 26.2,
+        "language_score": 29.5,
         "absolute_language_score": 28.1,
         "management_language_strength_raw": -21.8944,
         "positive_signal_score": 13.66,
@@ -2033,7 +2043,7 @@
         "uncertainty_per_1000_words": 6.21,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 9.32,
-        "peer_centered_z": -1.9823
+        "peer_centered_z": -1.7045
       },
       "evidence": [
         {
@@ -2902,7 +2912,7 @@
         "confidence": 9
       },
       "features": {
-        "language_score": 55.9,
+        "language_score": 52.3,
         "absolute_language_score": 57.6,
         "management_language_strength_raw": 7.6319,
         "positive_signal_score": 19.42,
@@ -2914,7 +2924,7 @@
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 10.1,
-        "peer_centered_z": 0.4894
+        "peer_centered_z": 0.1946
       },
       "evidence": [
         {
@@ -3112,11 +3122,11 @@
       "excluded_prior_period_passages": 6,
       "masked_procedural_condition_spans": 2,
       "excluded_procedural_condition_passages": 1,
-      "masked_standardized_footnote_spans": 36,
-      "excluded_standardized_footnote_passages": 31,
+      "masked_standardized_footnote_spans": 37,
+      "excluded_standardized_footnote_passages": 32,
       "pre_filter_analyzed_word_count": 2408,
-      "analyzed_word_count": 929,
-      "filter_shrink_ratio": 0.6142,
+      "analyzed_word_count": 896,
+      "filter_shrink_ratio": 0.6279,
       "filter_shrink_warning": true,
       "filter_examples": {
         "neutral_risk": [],
@@ -3195,24 +3205,24 @@
         "negative": 2,
         "uncertainty": 1,
         "strong_modal": 0,
-        "weak_modal": 4,
+        "weak_modal": 3,
         "caution_buffer": 0,
         "confidence": 6
       },
       "features": {
-        "language_score": 42.9,
-        "absolute_language_score": 44.7,
-        "management_language_strength_raw": -5.3283,
-        "positive_signal_score": 7.97,
-        "negative_pressure_score": 13.29,
-        "positive_per_1000_words": 10.76,
-        "negative_per_1000_words": 2.15,
+        "language_score": 43.7,
+        "absolute_language_score": 46.4,
+        "management_language_strength_raw": -3.5714,
+        "positive_signal_score": 8.26,
+        "negative_pressure_score": 11.83,
+        "positive_per_1000_words": 11.16,
+        "negative_per_1000_words": 2.23,
         "strong_modal_per_1000_words": 0.0,
-        "weak_modal_per_1000_words": 4.31,
-        "uncertainty_per_1000_words": 1.08,
+        "weak_modal_per_1000_words": 3.35,
+        "uncertainty_per_1000_words": 1.12,
         "caution_per_1000_words": 0.0,
-        "confidence_per_1000_words": 6.46,
-        "peer_centered_z": -0.5955
+        "confidence_per_1000_words": 6.7,
+        "peer_centered_z": -0.526
       },
       "evidence": [
         {
@@ -3379,11 +3389,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 3,
       "excluded_procedural_condition_passages": 2,
-      "masked_standardized_footnote_spans": 0,
-      "excluded_standardized_footnote_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 1623,
-      "analyzed_word_count": 1593,
-      "filter_shrink_ratio": 0.0185,
+      "analyzed_word_count": 1573,
+      "filter_shrink_ratio": 0.0308,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -3413,31 +3423,37 @@
             "masked_spans": 1
           }
         ],
-        "standardized_footnotes": []
+        "standardized_footnotes": [
+          {
+            "page": 42,
+            "sentence": "Numbers throughout the presentation may not add up precisely to the totals provided in tables and text due to rounding.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 17,
         "negative": 1,
         "uncertainty": 11,
         "strong_modal": 7,
-        "weak_modal": 4,
+        "weak_modal": 3,
         "caution_buffer": 16,
         "confidence": 6
       },
       "features": {
-        "language_score": 31.3,
-        "absolute_language_score": 33.2,
-        "management_language_strength_raw": -16.8236,
-        "positive_signal_score": 9.7,
-        "negative_pressure_score": 26.52,
-        "positive_per_1000_words": 10.67,
-        "negative_per_1000_words": 0.63,
-        "strong_modal_per_1000_words": 4.39,
-        "weak_modal_per_1000_words": 2.51,
-        "uncertainty_per_1000_words": 6.91,
-        "caution_per_1000_words": 10.04,
-        "confidence_per_1000_words": 3.77,
-        "peer_centered_z": -1.5578
+        "language_score": 34.2,
+        "absolute_language_score": 34.1,
+        "management_language_strength_raw": -15.925,
+        "positive_signal_score": 9.82,
+        "negative_pressure_score": 25.75,
+        "positive_per_1000_words": 10.81,
+        "negative_per_1000_words": 0.64,
+        "strong_modal_per_1000_words": 4.45,
+        "weak_modal_per_1000_words": 1.91,
+        "uncertainty_per_1000_words": 6.99,
+        "caution_per_1000_words": 10.17,
+        "confidence_per_1000_words": 3.81,
+        "peer_centered_z": -1.3205
       },
       "evidence": [
         {
@@ -3634,7 +3650,7 @@
         "confidence": 1
       },
       "features": {
-        "language_score": 35.8,
+        "language_score": 36.9,
         "absolute_language_score": 37.6,
         "management_language_strength_raw": -12.3967,
         "positive_signal_score": 9.92,
@@ -3646,7 +3662,7 @@
         "uncertainty_per_1000_words": 4.13,
         "caution_per_1000_words": 8.26,
         "confidence_per_1000_words": 4.13,
-        "peer_centered_z": -1.1872
+        "peer_centered_z": -1.0936
       },
       "evidence": [
         {
@@ -4215,7 +4231,7 @@
         "confidence": 4
       },
       "features": {
-        "language_score": 44.3,
+        "language_score": 43.4,
         "absolute_language_score": 46.1,
         "management_language_strength_raw": -3.8911,
         "positive_signal_score": 8.66,
@@ -4227,7 +4243,7 @@
         "uncertainty_per_1000_words": 3.89,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 7.78,
-        "peer_centered_z": -0.4752
+        "peer_centered_z": -0.5465
       },
       "evidence": [
         {
@@ -4589,7 +4605,7 @@
         "confidence": 7
       },
       "features": {
-        "language_score": 85.0,
+        "language_score": 79.1,
         "absolute_language_score": 92.3,
         "management_language_strength_raw": 42.3295,
         "positive_signal_score": 45.6,
@@ -4601,7 +4617,7 @@
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 2.84,
         "confidence_per_1000_words": 19.89,
-        "peer_centered_z": 3.3939
+        "peer_centered_z": 2.4263
       },
       "evidence": [
         {
@@ -5391,7 +5407,7 @@
         "confidence": 0
       },
       "features": {
-        "language_score": 54.8,
+        "language_score": 51.5,
         "absolute_language_score": 56.6,
         "management_language_strength_raw": 6.596,
         "positive_signal_score": 19.14,
@@ -5403,7 +5419,7 @@
         "uncertainty_per_1000_words": 4.71,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 0.0,
-        "peer_centered_z": 0.4027
+        "peer_centered_z": 0.128
       },
       "evidence": [
         {
@@ -6214,7 +6230,7 @@
         "confidence": 16
       },
       "features": {
-        "language_score": 72.3,
+        "language_score": 65.0,
         "absolute_language_score": 74.0,
         "management_language_strength_raw": 24.0126,
         "positive_signal_score": 28.91,
@@ -6226,7 +6242,7 @@
         "uncertainty_per_1000_words": 1.58,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 25.28,
-        "peer_centered_z": 1.8606
+        "peer_centered_z": 1.2482
       },
       "evidence": [
         {
@@ -7137,7 +7153,7 @@
         "confidence": 14
       },
       "features": {
-        "language_score": 50.0,
+        "language_score": 47.8,
         "absolute_language_score": 51.8,
         "management_language_strength_raw": 1.7857,
         "positive_signal_score": 14.19,
@@ -7149,7 +7165,7 @@
         "uncertainty_per_1000_words": 1.93,
         "caution_per_1000_words": 0.97,
         "confidence_per_1000_words": 13.51,
-        "peer_centered_z": 0.0
+        "peer_centered_z": -0.1814
       },
       "evidence": [
         {
@@ -7347,11 +7363,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 1,
-      "masked_standardized_footnote_spans": 0,
+      "masked_standardized_footnote_spans": 2,
       "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 1018,
-      "analyzed_word_count": 991,
-      "filter_shrink_ratio": 0.0265,
+      "analyzed_word_count": 977,
+      "filter_shrink_ratio": 0.0403,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -7371,31 +7387,42 @@
             "masked_spans": 1
           }
         ],
-        "standardized_footnotes": []
+        "standardized_footnotes": [
+          {
+            "page": 1,
+            "sentence": "Record H1 result Outlook and targets confirmed 06 August 2026 0All figures in this presentation are subject to roundingCommerzbank, Frankfurt Analyst conference – Q2/H1 2026 Updates after conference call: MREL pg.",
+            "masked_spans": 1
+          },
+          {
+            "page": 1,
+            "sentence": "Record H1 result Outlook and targets confirmed 06 August 2026 0All figures in this presentation are subject to roundingCommerzbank, Frankfurt Analyst conference – Q2/H1 2026 Updates after conference call: MREL pg. 60, bullet pg. 10",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 13,
         "negative": 0,
-        "uncertainty": 6,
+        "uncertainty": 4,
         "strong_modal": 9,
         "weak_modal": 3,
-        "caution_buffer": 3,
+        "caution_buffer": 1,
         "confidence": 7
       },
       "features": {
-        "language_score": 47.7,
-        "absolute_language_score": 49.5,
-        "management_language_strength_raw": -0.5045,
-        "positive_signal_score": 16.45,
-        "negative_pressure_score": 16.95,
-        "positive_per_1000_words": 13.12,
+        "language_score": 50.0,
+        "absolute_language_score": 54.6,
+        "management_language_strength_raw": 4.6059,
+        "positive_signal_score": 16.68,
+        "negative_pressure_score": 12.08,
+        "positive_per_1000_words": 13.31,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 9.08,
-        "weak_modal_per_1000_words": 3.03,
-        "uncertainty_per_1000_words": 6.05,
-        "caution_per_1000_words": 3.03,
-        "confidence_per_1000_words": 7.06,
-        "peer_centered_z": -0.1917
+        "strong_modal_per_1000_words": 9.21,
+        "weak_modal_per_1000_words": 3.07,
+        "uncertainty_per_1000_words": 4.09,
+        "caution_per_1000_words": 1.02,
+        "confidence_per_1000_words": 7.16,
+        "peer_centered_z": 0.0
       },
       "evidence": [
         {
@@ -7410,38 +7437,6 @@
             "weak_modal": 0,
             "caution_buffer": 0,
             "confidence": 1
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
-          "page": 1,
-          "sentence": "Record H1 result Outlook and targets confirmed 06 August 2026 0All figures in this presentation are subject to roundingCommerzbank, Frankfurt Analyst conference – Q2/H1 2026 Updates after conference call: MREL pg.",
-          "is_guidance": true,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 1,
-            "strong_modal": 1,
-            "weak_modal": 0,
-            "caution_buffer": 1,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
-          "page": 1,
-          "sentence": "Record H1 result Outlook and targets confirmed 06 August 2026 0All figures in this presentation are subject to roundingCommerzbank, Frankfurt Analyst conference – Q2/H1 2026 Updates after conference call: MREL pg. 60, bullet pg. 10",
-          "is_guidance": true,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 1,
-            "strong_modal": 1,
-            "weak_modal": 0,
-            "caution_buffer": 1,
-            "confidence": 0
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
@@ -7494,6 +7489,42 @@
             "confidence": 0
           },
           "filters_applied": [],
+          "review_status": "pending_human_review"
+        },
+        {
+          "page": 1,
+          "sentence": "Record H1 result Outlook and targets confirmed 06 August 2026 0All figures in this presentation are subject to roundingCommerzbank, Frankfurt Analyst conference – Q2/H1 2026 Updates after conference call: MREL pg.",
+          "is_guidance": true,
+          "hits": {
+            "positive": 0,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 1,
+            "weak_modal": 0,
+            "caution_buffer": 0,
+            "confidence": 0
+          },
+          "filters_applied": [
+            "standardized_footnote_masked:1"
+          ],
+          "review_status": "pending_human_review"
+        },
+        {
+          "page": 1,
+          "sentence": "Record H1 result Outlook and targets confirmed 06 August 2026 0All figures in this presentation are subject to roundingCommerzbank, Frankfurt Analyst conference – Q2/H1 2026 Updates after conference call: MREL pg. 60, bullet pg. 10",
+          "is_guidance": true,
+          "hits": {
+            "positive": 0,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 1,
+            "weak_modal": 0,
+            "caution_buffer": 0,
+            "confidence": 0
+          },
+          "filters_applied": [
+            "standardized_footnote_masked:1"
+          ],
           "review_status": "pending_human_review"
         },
         {
@@ -7562,11 +7593,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
-      "masked_standardized_footnote_spans": 0,
-      "excluded_standardized_footnote_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 332,
-      "analyzed_word_count": 332,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 262,
+      "filter_shrink_ratio": 0.2108,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [],
@@ -7574,30 +7605,36 @@
         "negation": [],
         "prior_period": [],
         "procedural_conditions": [],
-        "standardized_footnotes": []
+        "standardized_footnotes": [
+          {
+            "page": 46,
+            "sentence": "Page By investor By region 46 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
-        "positive": 1,
+        "positive": 0,
         "negative": 0,
         "uncertainty": 0,
         "strong_modal": 2,
-        "weak_modal": 3,
+        "weak_modal": 2,
         "caution_buffer": 0,
-        "confidence": 1
+        "confidence": 0
       },
       "features": {
-        "language_score": 42.0,
-        "absolute_language_score": 42.0,
-        "management_language_strength_raw": -7.9819,
-        "positive_signal_score": 7.83,
-        "negative_pressure_score": 15.81,
-        "positive_per_1000_words": 3.01,
+        "language_score": 42.7,
+        "absolute_language_score": 42.7,
+        "management_language_strength_raw": -7.2519,
+        "positive_signal_score": 6.11,
+        "negative_pressure_score": 13.36,
+        "positive_per_1000_words": 0.0,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 6.02,
-        "weak_modal_per_1000_words": 9.04,
+        "strong_modal_per_1000_words": 7.63,
+        "weak_modal_per_1000_words": 7.63,
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
-        "confidence_per_1000_words": 3.01
+        "confidence_per_1000_words": 0.0
       },
       "evidence": [
         {
@@ -7713,17 +7750,17 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 46,
-          "sentence": "Page By investor By region 46 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
+          "page": 39,
+          "sentence": "Page MREL capacity based on TREA (RWA)* Key take-aways Erste Group adopted multiple point of entry (MPE) resolution approach − In Q2 25, Erste Group Bank AG received its MREL requirement calibrated on 31 Dec 2023 balance sheet data − From 6 May 2025, Erste Group Bank AG, as the resolution entity of the Austrian resolution group, must comply with a MREL requirement of 28.52% of TREA (excl.",
           "is_guidance": false,
           "hits": {
-            "positive": 1,
+            "positive": 0,
             "negative": 0,
             "uncertainty": 0,
-            "strong_modal": 0,
+            "strong_modal": 1,
             "weak_modal": 1,
             "caution_buffer": 0,
-            "confidence": 1
+            "confidence": 0
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
@@ -7761,11 +7798,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
-      "masked_standardized_footnote_spans": 0,
-      "excluded_standardized_footnote_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 407,
-      "analyzed_word_count": 407,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 337,
+      "filter_shrink_ratio": 0.172,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [],
@@ -7773,30 +7810,36 @@
         "negation": [],
         "prior_period": [],
         "procedural_conditions": [],
-        "standardized_footnotes": []
+        "standardized_footnotes": [
+          {
+            "page": 46,
+            "sentence": "Page By investor By region 46 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
-        "positive": 2,
+        "positive": 1,
         "negative": 0,
         "uncertainty": 0,
         "strong_modal": 2,
-        "weak_modal": 3,
+        "weak_modal": 2,
         "caution_buffer": 0,
-        "confidence": 2
+        "confidence": 1
       },
       "features": {
-        "language_score": 45.9,
-        "absolute_language_score": 45.9,
-        "management_language_strength_raw": -4.0541,
-        "positive_signal_score": 8.85,
-        "negative_pressure_score": 12.9,
-        "positive_per_1000_words": 4.91,
+        "language_score": 47.3,
+        "absolute_language_score": 47.3,
+        "management_language_strength_raw": -2.6706,
+        "positive_signal_score": 7.72,
+        "negative_pressure_score": 10.39,
+        "positive_per_1000_words": 2.97,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 4.91,
-        "weak_modal_per_1000_words": 7.37,
+        "strong_modal_per_1000_words": 5.93,
+        "weak_modal_per_1000_words": 5.93,
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
-        "confidence_per_1000_words": 4.91
+        "confidence_per_1000_words": 2.97
       },
       "evidence": [
         {
@@ -7912,17 +7955,17 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 46,
-          "sentence": "Page By investor By region 46 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
+          "page": 39,
+          "sentence": "Page MREL capacity based on TREA (RWA)* Key take-aways Erste Group adopted multiple point of entry (MPE) resolution approach − In Q2 25, Erste Group Bank AG received its MREL requirement calibrated on 31 Dec 2023 balance sheet data − From 6 May 2025, Erste Group Bank AG, as the resolution entity of the Austrian resolution group, must comply with a MREL requirement of 28.52% of TREA (excl.",
           "is_guidance": false,
           "hits": {
-            "positive": 1,
+            "positive": 0,
             "negative": 0,
             "uncertainty": 0,
-            "strong_modal": 0,
+            "strong_modal": 1,
             "weak_modal": 1,
             "caution_buffer": 0,
-            "confidence": 1
+            "confidence": 0
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
@@ -7960,11 +8003,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
-      "masked_standardized_footnote_spans": 0,
-      "excluded_standardized_footnote_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 322,
-      "analyzed_word_count": 322,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 252,
+      "filter_shrink_ratio": 0.2174,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [],
@@ -7972,30 +8015,36 @@
         "negation": [],
         "prior_period": [],
         "procedural_conditions": [],
-        "standardized_footnotes": []
+        "standardized_footnotes": [
+          {
+            "page": 47,
+            "sentence": "Page By investor By region 47 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
-        "positive": 1,
+        "positive": 0,
         "negative": 0,
         "uncertainty": 0,
         "strong_modal": 1,
-        "weak_modal": 2,
+        "weak_modal": 1,
         "caution_buffer": 1,
-        "confidence": 1
+        "confidence": 0
       },
       "features": {
-        "language_score": 41.1,
-        "absolute_language_score": 41.1,
-        "management_language_strength_raw": -8.8509,
-        "positive_signal_score": 5.59,
-        "negative_pressure_score": 14.44,
-        "positive_per_1000_words": 3.11,
+        "language_score": 41.7,
+        "absolute_language_score": 41.7,
+        "management_language_strength_raw": -8.3333,
+        "positive_signal_score": 3.17,
+        "negative_pressure_score": 11.51,
+        "positive_per_1000_words": 0.0,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 3.11,
-        "weak_modal_per_1000_words": 6.21,
+        "strong_modal_per_1000_words": 3.97,
+        "weak_modal_per_1000_words": 3.97,
         "uncertainty_per_1000_words": 0.0,
-        "caution_per_1000_words": 3.11,
-        "confidence_per_1000_words": 3.11
+        "caution_per_1000_words": 3.97,
+        "confidence_per_1000_words": 0.0
       },
       "evidence": [
         {
@@ -8095,22 +8144,6 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 47,
-          "sentence": "Page By investor By region 47 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 1,
-            "negative": 0,
-            "uncertainty": 0,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 1
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
           "page": 40,
           "sentence": "Page MREL capacity based on TREA (RWA)* Key take-aways Erste Group adopted multiple point of entry (MPE) resolution approach − In Q2 25, Erste Group Bank AG received its MREL requirement calibrated on 31 Dec 2023 balance sheet data − From 6 May 2025, Erste Group Bank AG, as the resolution entity of the Austrian resolution group, must comply with a MREL requirement of 28.52% of TREA (excl.",
           "is_guidance": false,
@@ -8121,6 +8154,22 @@
             "strong_modal": 1,
             "weak_modal": 1,
             "caution_buffer": 0,
+            "confidence": 0
+          },
+          "filters_applied": [],
+          "review_status": "pending_human_review"
+        },
+        {
+          "page": 5,
+          "sentence": "2) Includes one-off EBP ECL provision of EUR 302m (47bps) 3) Based on reported net profit adjusted for AT1 dividend.",
+          "is_guidance": false,
+          "hits": {
+            "positive": 0,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 0,
+            "caution_buffer": 1,
             "confidence": 0
           },
           "filters_applied": [],
@@ -8159,11 +8208,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
-      "masked_standardized_footnote_spans": 0,
-      "excluded_standardized_footnote_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 402,
-      "analyzed_word_count": 402,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 332,
+      "filter_shrink_ratio": 0.1741,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [],
@@ -8171,31 +8220,37 @@
         "negation": [],
         "prior_period": [],
         "procedural_conditions": [],
-        "standardized_footnotes": []
+        "standardized_footnotes": [
+          {
+            "page": 48,
+            "sentence": "Page By investor By region 48 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
-        "positive": 2,
+        "positive": 1,
         "negative": 0,
         "uncertainty": 0,
         "strong_modal": 1,
-        "weak_modal": 3,
+        "weak_modal": 2,
         "caution_buffer": 0,
-        "confidence": 1
+        "confidence": 0
       },
       "features": {
-        "language_score": 40.5,
-        "absolute_language_score": 42.3,
-        "management_language_strength_raw": -7.7114,
-        "positive_signal_score": 5.35,
-        "negative_pressure_score": 13.06,
-        "positive_per_1000_words": 4.98,
+        "language_score": 41.0,
+        "absolute_language_score": 42.9,
+        "management_language_strength_raw": -7.0783,
+        "positive_signal_score": 3.46,
+        "negative_pressure_score": 10.54,
+        "positive_per_1000_words": 3.01,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 2.49,
-        "weak_modal_per_1000_words": 7.46,
+        "strong_modal_per_1000_words": 3.01,
+        "weak_modal_per_1000_words": 6.02,
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
-        "confidence_per_1000_words": 2.49,
-        "peer_centered_z": -0.795
+        "confidence_per_1000_words": 0.0,
+        "peer_centered_z": -0.7515
       },
       "evidence": [
         {
@@ -8311,17 +8366,17 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 48,
-          "sentence": "Page By investor By region 48 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
+          "page": 41,
+          "sentence": "Page MREL capacity based on TREA (RWA)* Key take-aways Erste Group adopted multiple point of entry (MPE) resolution approach − In Q2 25, Erste Group Bank AG received its MREL requirement calibrated on 31 Dec 2023 balance sheet data − From 6 May 2025, Erste Group Bank AG, as the resolution entity of the Austrian resolution group, must comply with a MREL requirement of 28.52% of TREA (excl.",
           "is_guidance": false,
           "hits": {
-            "positive": 1,
+            "positive": 0,
             "negative": 0,
             "uncertainty": 0,
-            "strong_modal": 0,
+            "strong_modal": 1,
             "weak_modal": 1,
             "caution_buffer": 0,
-            "confidence": 1
+            "confidence": 0
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
@@ -9027,7 +9082,7 @@
         "confidence": 9
       },
       "features": {
-        "language_score": 66.8,
+        "language_score": 60.7,
         "absolute_language_score": 68.5,
         "management_language_strength_raw": 18.5331,
         "positive_signal_score": 22.48,
@@ -9039,7 +9094,7 @@
         "uncertainty_per_1000_words": 1.58,
         "caution_per_1000_words": 1.58,
         "confidence_per_1000_words": 14.2,
-        "peer_centered_z": 1.4019
+        "peer_centered_z": 0.8958
       },
       "evidence": [
         {
@@ -9766,7 +9821,7 @@
         "confidence": 0
       },
       "features": {
-        "language_score": 49.1,
+        "language_score": 47.1,
         "absolute_language_score": 50.9,
         "management_language_strength_raw": 0.8503,
         "positive_signal_score": 5.44,
@@ -9778,7 +9833,7 @@
         "uncertainty_per_1000_words": 3.4,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 0.0,
-        "peer_centered_z": -0.0783
+        "peer_centered_z": -0.2416
       },
       "evidence": [
         {
@@ -10252,7 +10307,7 @@
         "confidence": 4
       },
       "features": {
-        "language_score": 55.8,
+        "language_score": 52.3,
         "absolute_language_score": 57.6,
         "management_language_strength_raw": 7.6037,
         "positive_signal_score": 34.33,
@@ -10264,7 +10319,7 @@
         "uncertainty_per_1000_words": 13.82,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 18.43,
-        "peer_centered_z": 0.487
+        "peer_centered_z": 0.1928
       },
       "evidence": [
         {
@@ -11307,7 +11362,7 @@
         "confidence": 2
       },
       "features": {
-        "language_score": 46.4,
+        "language_score": 45.1,
         "absolute_language_score": 48.2,
         "management_language_strength_raw": -1.7956,
         "positive_signal_score": 10.98,
@@ -11319,7 +11374,7 @@
         "uncertainty_per_1000_words": 4.14,
         "caution_per_1000_words": 4.14,
         "confidence_per_1000_words": 2.76,
-        "peer_centered_z": -0.2998
+        "peer_centered_z": -0.4117
       },
       "evidence": [
         {
@@ -11522,7 +11577,7 @@
         "confidence": 0
       },
       "features": {
-        "language_score": 48.8,
+        "language_score": 46.9,
         "absolute_language_score": 50.6,
         "management_language_strength_raw": 0.5703,
         "positive_signal_score": 5.7,
@@ -11534,7 +11589,7 @@
         "uncertainty_per_1000_words": 3.8,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 0.0,
-        "peer_centered_z": -0.1017
+        "peer_centered_z": -0.2596
       },
       "evidence": [
         {
@@ -11635,11 +11690,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
-      "masked_standardized_footnote_spans": 0,
-      "excluded_standardized_footnote_passages": 0,
+      "masked_standardized_footnote_spans": 3,
+      "excluded_standardized_footnote_passages": 2,
       "pre_filter_analyzed_word_count": 555,
-      "analyzed_word_count": 555,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 463,
+      "filter_shrink_ratio": 0.1658,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [],
@@ -11647,31 +11702,47 @@
         "negation": [],
         "prior_period": [],
         "procedural_conditions": [],
-        "standardized_footnotes": []
+        "standardized_footnotes": [
+          {
+            "page": 24,
+            "sentence": "AIB Group plc | Half-Year Financial Results | 2026 24 37.5 37.7 Dec 25 Jun 26 2027e Gross loans €74.5bn increased €2.2bn (€bn) 74.5 7.5 (5.6) (1.2) Dec 25 New lending Redemptions FX/Other movements Jun 26 ECL Net loans 0.3 73.372.3 Loan book increased 3% to €74.5bn Note rounding may apply Not drawn to scale 42.6 42.9 17.2 18.1 6.1 6.3 6.3 7.2 Dec 25 Jun 26 2026e Retail Banking Capital Markets AIB UK C&IC + c.",
+            "masked_spans": 1
+          },
+          {
+            "page": 27,
+            "sentence": "AIB Group plc | Half-Year Financial Results | 2026 27 CET1 (FL) 16.1% well ahead of regulatory requirements Note rounding may apply Dec 25 Jun 26 Interim dividend +1.7% 16.2% DTA +0.2% H1 profit Exclusion of remaining H1 profit (0.7%) (1.0%) (0.1%) Other equity RWA (0.2%) 16.1% CET1 16.1% decreased by c.",
+            "masked_spans": 1
+          },
+          {
+            "page": 32,
+            "sentence": "AIB Group plc | Half-Year Financial Results | 2026 32 Customer loan movements €bn Performing Loans Non-performing Loans Customer Loans Gross loans (1 Jan 2026) 70.7 1.6 72.3 New lending 7.5 - 7.5 Redemptions (5.5) (0.1) (5.6) Net flow to NPE (0.3) 0.3 - Foreign exchange / other movements 0.3 - 0.3 Gross loans (30 Jun 2026) 72.7 1.8 74.5 ECL allowance (0.7) (0.5) (1.2) Net loans (30 Jun 2026) 72.0 1.3 73.3 Note rounding may apply",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 12,
         "negative": 0,
         "uncertainty": 0,
         "strong_modal": 6,
-        "weak_modal": 3,
+        "weak_modal": 0,
         "caution_buffer": 0,
         "confidence": 7
       },
       "features": {
-        "language_score": 63.2,
-        "absolute_language_score": 65.0,
-        "management_language_strength_raw": 14.955,
-        "positive_signal_score": 24.41,
-        "negative_pressure_score": 9.46,
-        "positive_per_1000_words": 21.62,
+        "language_score": 69.0,
+        "absolute_language_score": 79.3,
+        "management_language_strength_raw": 29.2657,
+        "positive_signal_score": 29.27,
+        "negative_pressure_score": 0.0,
+        "positive_per_1000_words": 25.92,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 10.81,
-        "weak_modal_per_1000_words": 5.41,
+        "strong_modal_per_1000_words": 12.96,
+        "weak_modal_per_1000_words": 0.0,
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
-        "confidence_per_1000_words": 12.61,
-        "peer_centered_z": 1.1024
+        "confidence_per_1000_words": 15.12,
+        "peer_centered_z": 1.5861
       },
       "evidence": [
         {
@@ -12070,7 +12141,7 @@
         "confidence": 1
       },
       "features": {
-        "language_score": 41.9,
+        "language_score": 41.6,
         "absolute_language_score": 43.7,
         "management_language_strength_raw": -6.2718,
         "positive_signal_score": 12.02,
@@ -12082,7 +12153,7 @@
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 3.48,
-        "peer_centered_z": -0.6745
+        "peer_centered_z": -0.6996
       },
       "evidence": [
         {
@@ -12716,7 +12787,7 @@
         "confidence": 0
       },
       "features": {
-        "language_score": 79.3,
+        "language_score": 70.3,
         "absolute_language_score": 80.9,
         "management_language_strength_raw": 30.9278,
         "positive_signal_score": 44.85,
@@ -12728,7 +12799,7 @@
         "uncertainty_per_1000_words": 10.31,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 0.0,
-        "peer_centered_z": 2.4395
+        "peer_centered_z": 1.693
       },
       "evidence": [
         {
@@ -13100,7 +13171,7 @@
         "confidence": 11
       },
       "features": {
-        "language_score": 57.6,
+        "language_score": 53.7,
         "absolute_language_score": 59.4,
         "management_language_strength_raw": 9.3514,
         "positive_signal_score": 19.23,
@@ -13112,7 +13183,7 @@
         "uncertainty_per_1000_words": 6.03,
         "caution_per_1000_words": 1.51,
         "confidence_per_1000_words": 16.59,
-        "peer_centered_z": 0.6333
+        "peer_centered_z": 0.3052
       },
       "evidence": [
         {
@@ -13267,13 +13338,13 @@
       "ticker": "BNP",
       "bank_name": "BNP Paribas S.A.",
       "numeric_score": 67.1,
-      "language_score": 77.6,
+      "language_score": 69.0,
       "absolute_language_score": 79.2,
       "negative_pressure_score": 13.09,
       "language_drift_score": 6.48,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -10.5,
+      "divergence": -1.9,
       "quadrant": "Confirmed strength",
       "status": "provisional_four_period_trend",
       "alerts": [],
@@ -13335,23 +13406,16 @@
       "ticker": "SAN",
       "bank_name": "Banco Santander S.A.",
       "numeric_score": 38.8,
-      "language_score": 63.4,
+      "language_score": 58.1,
       "absolute_language_score": 65.1,
       "negative_pressure_score": 10.31,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -24.6,
+      "divergence": -19.3,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
-      "alerts": [
-        {
-          "type": "numeric_language_divergence",
-          "severity": "research_review",
-          "message": "Numeric-language gap reached -24.6 points.",
-          "review_status": "pending_human_review"
-        }
-      ],
+      "alerts": [],
       "warning_evidence": [
         {
           "page": 38,
@@ -13410,26 +13474,26 @@
       "ticker": "INGA",
       "bank_name": "ING Groep N.V.",
       "numeric_score": 53.2,
-      "language_score": 26.2,
+      "language_score": 29.5,
       "absolute_language_score": 28.1,
       "negative_pressure_score": 35.56,
       "language_drift_score": 9.51,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": 27.0,
+      "divergence": 23.7,
       "quadrant": "Early warning",
       "status": "provisional_four_period_trend",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached +27.0 points.",
+          "message": "Numeric-language gap reached +23.7 points.",
           "review_status": "pending_human_review"
         },
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (35.6 versus 15.4 gate). Main drivers: weak commitment, uncertainty, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (35.6 versus 13.5 gate). Main drivers: weak commitment, uncertainty, negative wording.",
           "review_status": "pending_human_review"
         },
         {
@@ -13495,13 +13559,13 @@
       "ticker": "BBVA",
       "bank_name": "Banco Bilbao Vizcaya Argentaria S.A.",
       "numeric_score": 55.8,
-      "language_score": 55.9,
+      "language_score": 52.3,
       "absolute_language_score": 57.6,
       "negative_pressure_score": 11.78,
       "language_drift_score": 6.67,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -0.1,
+      "divergence": 3.5,
       "quadrant": "Confirmed strength",
       "status": "provisional_four_period_trend",
       "alerts": [
@@ -13568,13 +13632,13 @@
       "ticker": "ISP",
       "bank_name": "Intesa Sanpaolo S.p.A.",
       "numeric_score": 55.1,
-      "language_score": 42.9,
-      "absolute_language_score": 44.7,
-      "negative_pressure_score": 13.29,
+      "language_score": 43.7,
+      "absolute_language_score": 46.4,
+      "negative_pressure_score": 11.83,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": 12.2,
+      "divergence": 11.4,
       "quadrant": "Early warning",
       "status": "provisional_single_period",
       "alerts": [],
@@ -13634,20 +13698,20 @@
       "ticker": "UCG",
       "bank_name": "UniCredit S.p.A.",
       "numeric_score": 49.6,
-      "language_score": 31.3,
-      "absolute_language_score": 33.2,
-      "negative_pressure_score": 26.52,
+      "language_score": 34.2,
+      "absolute_language_score": 34.1,
+      "negative_pressure_score": 25.75,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": 18.3,
+      "divergence": 15.4,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (26.5 versus 15.4 gate). Main drivers: uncertainty, cautious/euphemistic wording, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (25.8 versus 13.5 gate). Main drivers: uncertainty, cautious/euphemistic wording, negative wording.",
           "review_status": "pending_human_review"
         }
       ],
@@ -13691,20 +13755,20 @@
       "ticker": "NDA-FI",
       "bank_name": "Nordea Bank Abp",
       "numeric_score": 45.8,
-      "language_score": 35.8,
+      "language_score": 36.9,
       "absolute_language_score": 37.6,
       "negative_pressure_score": 22.31,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": 10.0,
+      "divergence": 8.9,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (22.3 versus 15.4 gate). Main drivers: cautious/euphemistic wording, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (22.3 versus 13.5 gate). Main drivers: weak commitment, cautious/euphemistic wording, negative wording.",
           "review_status": "pending_human_review"
         }
       ],
@@ -13750,13 +13814,13 @@
       "ticker": "DBK",
       "bank_name": "Deutsche Bank AG",
       "numeric_score": 52.0,
-      "language_score": 44.3,
+      "language_score": 43.4,
       "absolute_language_score": 46.1,
       "negative_pressure_score": 12.55,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": 7.7,
+      "divergence": 8.6,
       "quadrant": "Early warning",
       "status": "provisional_single_period",
       "alerts": [],
@@ -13784,20 +13848,20 @@
       "ticker": "GLE",
       "bank_name": "Société Générale S.A.",
       "numeric_score": 54.8,
-      "language_score": 85.0,
+      "language_score": 79.1,
       "absolute_language_score": 92.3,
       "negative_pressure_score": 3.27,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": -30.2,
+      "divergence": -24.3,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached -30.2 points.",
+          "message": "Numeric-language gap reached -24.3 points.",
           "review_status": "pending_human_review"
         }
       ],
@@ -13825,13 +13889,13 @@
       "ticker": "KBC",
       "bank_name": "KBC Group N.V.",
       "numeric_score": 38.8,
-      "language_score": 54.8,
+      "language_score": 51.5,
       "absolute_language_score": 56.6,
       "negative_pressure_score": 12.54,
       "language_drift_score": 4.03,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -16.0,
+      "divergence": -12.7,
       "quadrant": "Potential turnaround",
       "status": "provisional_four_period_trend",
       "alerts": [],
@@ -13891,20 +13955,20 @@
       "ticker": "CABK",
       "bank_name": "CaixaBank S.A.",
       "numeric_score": 41.1,
-      "language_score": 72.3,
+      "language_score": 65.0,
       "absolute_language_score": 74.0,
       "negative_pressure_score": 4.9,
       "language_drift_score": 3.64,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -31.2,
+      "divergence": -23.9,
       "quadrant": "Potential turnaround",
       "status": "provisional_four_period_trend",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached -31.2 points.",
+          "message": "Numeric-language gap reached -23.9 points.",
           "review_status": "pending_human_review"
         }
       ],
@@ -13948,14 +14012,14 @@
       "ticker": "ACA",
       "bank_name": "Crédit Agricole S.A.",
       "numeric_score": 50.1,
-      "language_score": 50.0,
+      "language_score": 47.8,
       "absolute_language_score": 51.8,
       "negative_pressure_score": 12.4,
       "language_drift_score": 5.92,
       "directional_reversal": true,
       "history_periods": 4,
-      "divergence": 0.1,
-      "quadrant": "Confirmed strength",
+      "divergence": 2.3,
+      "quadrant": "Early warning",
       "status": "provisional_four_period_trend",
       "alerts": [
         {
@@ -14021,56 +14085,17 @@
       "ticker": "CBK",
       "bank_name": "Commerzbank AG",
       "numeric_score": 43.9,
-      "language_score": 47.7,
-      "absolute_language_score": 49.5,
-      "negative_pressure_score": 16.95,
+      "language_score": 50.0,
+      "absolute_language_score": 54.6,
+      "negative_pressure_score": 12.08,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -3.8,
-      "quadrant": "High-risk screen",
+      "divergence": -6.1,
+      "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
-      "alerts": [
-        {
-          "type": "elevated_negative_language_pressure",
-          "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (16.9 versus 15.4 gate). Main drivers: uncertainty, cautious/euphemistic wording, negative wording.",
-          "review_status": "pending_human_review"
-        }
-      ],
+      "alerts": [],
       "warning_evidence": [
-        {
-          "page": 1,
-          "sentence": "Record H1 result Outlook and targets confirmed 06 August 2026 0All figures in this presentation are subject to roundingCommerzbank, Frankfurt Analyst conference – Q2/H1 2026 Updates after conference call: MREL pg.",
-          "is_guidance": true,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 1,
-            "strong_modal": 1,
-            "weak_modal": 0,
-            "caution_buffer": 1,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
-          "page": 1,
-          "sentence": "Record H1 result Outlook and targets confirmed 06 August 2026 0All figures in this presentation are subject to roundingCommerzbank, Frankfurt Analyst conference – Q2/H1 2026 Updates after conference call: MREL pg. 60, bullet pg. 10",
-          "is_guidance": true,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 1,
-            "strong_modal": 1,
-            "weak_modal": 0,
-            "caution_buffer": 1,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
         {
           "page": 14,
           "sentence": "Key Take Aways 06 August 2026 13 We achieved an excellent H1 result and confirm our guidance and targets We continue to focus on the implementation of our Momentum 2030 strategy that is delivering reliable shareholder value with low execution risk We are open to find a solution with UniCredit and will work in the best interest of all our stakeholders Commerzbank, Bettina Orlopp, Frankfurt Shareholders continue to benefit from our delivery and the optionality of the current situation",
@@ -14086,6 +14111,24 @@
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
+        },
+        {
+          "page": 25,
+          "sentence": "For details on outstanding overlays (€153m) see appendix Resilient portfolio with cost of risk on loans at 22bp and NPE ratio at low 1.1% Cost of risk on loans (bp) Non-performing exposure ratio Commerzbank, Carsten Schmitt, Frankfurt 17 20 23 24 18 22 1.0% 1.1% 1.0% 1.1% 1.1% 1.1% H1 26: -344H1 25: -300 H2 25: -422Risk result (€m) Risk result in line with FY outlook",
+          "is_guidance": true,
+          "hits": {
+            "positive": 1,
+            "negative": 0,
+            "uncertainty": 1,
+            "strong_modal": 0,
+            "weak_modal": 0,
+            "caution_buffer": 0,
+            "confidence": 0
+          },
+          "filters_applied": [
+            "risk_masked:2"
+          ],
+          "review_status": "pending_human_review"
         }
       ],
       "publication_eligible": false
@@ -14094,29 +14137,29 @@
       "ticker": "EBS",
       "bank_name": "Erste Group Bank AG",
       "numeric_score": 45.2,
-      "language_score": 40.5,
-      "absolute_language_score": 42.3,
-      "negative_pressure_score": 13.06,
+      "language_score": 41.0,
+      "absolute_language_score": 42.9,
+      "negative_pressure_score": 10.54,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": 4.7,
+      "divergence": 4.2,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [],
       "warning_evidence": [
         {
-          "page": 48,
-          "sentence": "Page By investor By region 48 Notes to shareholder structure − Foundations include Erste Employees Private Foundation, Syndicated Savings Banks Foundations, own holdings of Savings Banks − Identified Trading includes market makers, prime brokerage, proprietary trading, collateral and stock lending positions which are visible throug h custodian bank lists − Unidentified include unidentified institutional and retail investors − The shareholder structure may contain rounding differences Erste Group benefits from strong and well-diversified shareholder base APPENDIX.",
+          "page": 41,
+          "sentence": "Page MREL capacity based on TREA (RWA)* Key take-aways Erste Group adopted multiple point of entry (MPE) resolution approach − In Q2 25, Erste Group Bank AG received its MREL requirement calibrated on 31 Dec 2023 balance sheet data − From 6 May 2025, Erste Group Bank AG, as the resolution entity of the Austrian resolution group, must comply with a MREL requirement of 28.52% of TREA (excl.",
           "is_guidance": false,
           "hits": {
-            "positive": 1,
+            "positive": 0,
             "negative": 0,
             "uncertainty": 0,
-            "strong_modal": 0,
+            "strong_modal": 1,
             "weak_modal": 1,
             "caution_buffer": 0,
-            "confidence": 1
+            "confidence": 0
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
@@ -14128,13 +14171,13 @@
       "ticker": "BIRG",
       "bank_name": "Bank of Ireland Group plc",
       "numeric_score": 55.1,
-      "language_score": 66.8,
+      "language_score": 60.7,
       "absolute_language_score": 68.5,
       "negative_pressure_score": 3.94,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -11.7,
+      "divergence": -5.6,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14145,13 +14188,13 @@
       "ticker": "FBK",
       "bank_name": "FinecoBank S.p.A.",
       "numeric_score": 46.7,
-      "language_score": 49.1,
+      "language_score": 47.1,
       "absolute_language_score": 50.9,
       "negative_pressure_score": 4.59,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": -2.4,
+      "divergence": -0.4,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14179,20 +14222,20 @@
       "ticker": "ABN",
       "bank_name": "ABN AMRO Bank N.V.",
       "numeric_score": 46.5,
-      "language_score": 55.8,
+      "language_score": 52.3,
       "absolute_language_score": 57.6,
       "negative_pressure_score": 26.73,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -9.3,
+      "divergence": -5.8,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (26.7 versus 15.4 gate). Main drivers: weak commitment, uncertainty, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (26.7 versus 13.5 gate). Main drivers: weak commitment, uncertainty, negative wording.",
           "review_status": "pending_human_review"
         }
       ],
@@ -14252,13 +14295,13 @@
       "ticker": "BAMI",
       "bank_name": "Banco BPM S.p.A.",
       "numeric_score": 49.4,
-      "language_score": 46.4,
+      "language_score": 45.1,
       "absolute_language_score": 48.2,
       "negative_pressure_score": 12.78,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": 3.0,
+      "divergence": 4.3,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14302,13 +14345,13 @@
       "ticker": "SAB",
       "bank_name": "Banco de Sabadell S.A.",
       "numeric_score": 36.4,
-      "language_score": 48.8,
+      "language_score": 46.9,
       "absolute_language_score": 50.6,
       "negative_pressure_score": 5.13,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -12.4,
+      "divergence": -10.5,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14336,13 +14379,13 @@
       "ticker": "AIBG",
       "bank_name": "AIB Group plc",
       "numeric_score": 58.9,
-      "language_score": 63.2,
-      "absolute_language_score": 65.0,
-      "negative_pressure_score": 9.46,
+      "language_score": 69.0,
+      "absolute_language_score": 79.3,
+      "negative_pressure_score": 0.0,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -4.3,
+      "divergence": -10.1,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14353,20 +14396,20 @@
       "ticker": "BKT",
       "bank_name": "Bankinter S.A.",
       "numeric_score": 49.3,
-      "language_score": 41.9,
+      "language_score": 41.6,
       "absolute_language_score": 43.7,
       "negative_pressure_score": 18.29,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": 7.4,
+      "divergence": 7.7,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (18.3 versus 15.4 gate). Main drivers: weak commitment, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (18.3 versus 13.5 gate). Main drivers: weak commitment, negative wording.",
           "review_status": "pending_human_review"
         }
       ],
@@ -14426,20 +14469,26 @@
       "ticker": "BG",
       "bank_name": "BAWAG Group AG",
       "numeric_score": 45.0,
-      "language_score": 79.3,
+      "language_score": 70.3,
       "absolute_language_score": 80.9,
       "negative_pressure_score": 13.92,
       "language_drift_score": 10.22,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -34.3,
+      "divergence": -25.3,
       "quadrant": "Potential turnaround",
       "status": "provisional_four_period_trend",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached -34.3 points.",
+          "message": "Numeric-language gap reached -25.3 points.",
+          "review_status": "pending_human_review"
+        },
+        {
+          "type": "elevated_negative_language_pressure",
+          "severity": "research_review",
+          "message": "Negative-language pressure is in the peer top quartile (13.9 versus 13.5 gate). Main drivers: uncertainty, negative wording.",
           "review_status": "pending_human_review"
         },
         {
@@ -14473,13 +14522,13 @@
       "ticker": "BPE",
       "bank_name": "BPER Banca S.p.A.",
       "numeric_score": 68.7,
-      "language_score": 57.6,
+      "language_score": 53.7,
       "absolute_language_score": 59.4,
       "negative_pressure_score": 9.88,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": 11.1,
+      "divergence": 15.0,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
       "alerts": [],

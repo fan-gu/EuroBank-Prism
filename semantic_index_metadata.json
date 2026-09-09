@@ -1,0 +1,11 @@
+{
+  "version": "semantic-research-v1",
+  "generated_at": "2026-09-09T12:37:15.375075+00:00",
+  "embedding_model": "gemini-embedding-2",
+  "embedding_dimension": 768,
+  "chunk_count": 3179,
+  "bank_count": 23,
+  "document_count": 66,
+  "corpus_sha256": "1416b14edff06d24d4b2cf8440a7f7c26cb8c9ce911bed05facc94e7f4c34cf3",
+  "pollution_filter": "management-language-v2.4.3"
+}

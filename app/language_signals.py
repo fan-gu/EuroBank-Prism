@@ -22,7 +22,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_REPORTS_DIR = BASE_DIR / "reports"
 DEFAULT_OUTPUT = BASE_DIR / "language_signals.json"
-RULE_VERSION = "management-language-v2.4.2"
+RULE_VERSION = "management-language-v2.4.3"
 
 LEXICONS = {
     "positive": {
@@ -169,11 +169,24 @@ STANDARDIZED_CALCULATION_FOOTNOTE = re.compile(
     r"(?:the\s+)?sum\s+of\s+values\s+(?:contained\s+)?in\s+(?:the\s+)?"
     r"tables?\s+and\s+analyses\s+may\s+differ\s+slightly\s+from\s+"
     r"(?:the\s+)?total\s+reported\s+due\s+to\s+rounding(?:\s+rules?)?|"
-    r"(?:figures?|numbers?|totals?)\s+may\s+not\s+add\s+up(?:\s+exactly)?"
-    r"\s+due\s+to\s+rounding(?:\s+rules?)?|"
+    r"(?:figures?|numbers?)(?:\s+throughout\s+(?:this|the)\s+"
+    r"(?:presentation|document))?\s+may\s+not\s+add\s+up"
+    r"(?:\s+exact\s*ly|\s+exactly|\s+precisely)?(?:\s+to\s+(?:the\s+)?"
+    r"totals?(?:\s+provided\s+in\s+tables?\s+and\s+text)?)?\s+due\s+to"
+    r"\s+rounding(?:\s+rules?)?|"
     r"(?:figures?|numbers?|totals?)\s+may\s+differ(?:\s+slightly)?\s+"
     r"(?:from\s+(?:the\s+)?reported\s+total\s+)?due\s+to\s+rounding"
-    r"(?:\s+rules?)?)",
+    r"(?:\s+rules?)?|"
+    r"(?:throughout\s+(?:this|the)\s+(?:presentation|document)\s+)?"
+    r"totals?\s+may\s+not\s+sum\s+due\s+to\s+rounding\s+differences?"
+    r"(?:\s+and\s+percentages?\s+may\s+not\s+precisely\s+reflect\s+"
+    r"the\s+absolute\s+figures?)?|"
+    r"all\s+figures(?:\s+in\s+(?:this|the)\s+(?:presentation|document))?"
+    r"\s+(?:are\s+)?subject\s+to\s+rounding|"
+    r"small\s+differences\s+are\s+possible\s+in\s+(?:the\s+)?tables?\s+"
+    r"due\s+to\s+rounding|"
+    r"may\s+contain\s+rounding\s+differences?|"
+    r"(?:note\s*)?rounding\s+may\s+apply)",
     flags=re.IGNORECASE,
 )
 NEGATOR_TOKENS = {

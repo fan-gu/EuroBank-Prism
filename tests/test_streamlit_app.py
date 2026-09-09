@@ -16,6 +16,7 @@ class StreamlitAppTests(unittest.TestCase):
         for section_name in (
             "Investment groups",
             "Research triage",
+            "Semantic research",
             "Relative ranking",
             "Research readiness",
             "Bank research",

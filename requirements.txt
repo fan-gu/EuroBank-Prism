@@ -1,6 +1,8 @@
 python-dotenv
 altair
 beautifulsoup4
+google-genai
+numpy
 pandas
 plotly
 pypdf

@@ -203,6 +203,24 @@ class LanguageSignalTests(unittest.TestCase):
         self.assertEqual(count, 1)
         self.assertFalse(filtered.strip(". "))
 
+        variants = (
+            "Numbers throughout the presentation may not add up precisely to "
+            "the totals provided in tables and text due to rounding.",
+            "Notes: throughout this presentation totals may not sum due to "
+            "rounding differences and percentages may not precisely reflect "
+            "the absolute figures.",
+            "All figures in this presentation are subject to rounding.",
+            "All figures in this presentation subject to rounding.",
+            "The shareholder structure may contain rounding differences.",
+            "Small differences are possible in the tables due to rounding.",
+            "Note rounding may apply",
+        )
+        for variant in variants:
+            with self.subTest(variant=variant):
+                filtered, count = mask_standardized_calculation_footnotes(variant)
+                self.assertEqual(count, 1)
+                self.assertEqual(category_hits(filtered)["weak_modal"], 0)
+
     def test_rounding_note_is_removed_without_losing_attached_narrative(self):
         sentence = (
             "Note: figures may not add up exactly due to rounding. "
@@ -473,7 +491,7 @@ class LanguageCoverageTests(unittest.TestCase):
 
     def test_signal_archive_has_auditable_provisional_coverage(self):
         self.assertEqual(self.archive["schema_version"], "1.4")
-        self.assertEqual(self.archive["rule_version"], "management-language-v2.4.2")
+        self.assertEqual(self.archive["rule_version"], "management-language-v2.4.3")
         self.assertEqual(self.archive["coverage"]["provisional_banks"], 23)
         self.assertEqual(self.archive["coverage"]["insufficient_banks"], 0)
         # DBK Q1 2026 now has only one substantive cited passage after routine
