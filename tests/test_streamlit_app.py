@@ -14,14 +14,9 @@ class StreamlitAppTests(unittest.TestCase):
         headings = [item.value for item in app.header] + [item.value for item in app.subheader]
         self.assertIn("Signal map", headings)
         for section_name in (
-            "Investment groups",
             "Research triage",
             "Semantic research",
-            "Relative ranking",
-            "Research readiness",
             "Bank research",
-            "Sources & evidence",
-            "Methodology",
         ):
             self.assertTrue(any(heading.endswith(section_name) for heading in headings))
         self.assertEqual(len(app.tabs), 0)

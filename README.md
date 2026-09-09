@@ -20,6 +20,10 @@ Bubble colour identifies the bank's deterministic research group. A separate
 Gemini semantic-research layer answers natural-language questions from the
 indexed official reports and cites the source bank, period and PDF page.
 
+The homepage prioritises the signal map, full cross-signal triage, semantic
+research and bank-level score transparency. Official-report directories,
+extracted-table review material and methodology are collapsed by default.
+
 ## Research workflow
 
 ```text
