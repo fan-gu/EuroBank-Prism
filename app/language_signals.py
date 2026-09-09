@@ -22,7 +22,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_REPORTS_DIR = BASE_DIR / "reports"
 DEFAULT_OUTPUT = BASE_DIR / "language_signals.json"
-RULE_VERSION = "management-language-v2.3"
+RULE_VERSION = "management-language-v2.4"
 
 LEXICONS = {
     "positive": {
@@ -120,6 +120,65 @@ ANNUAL_MANAGEMENT_SECTION = re.compile(
 )
 WORD_RE = re.compile(r"\b[A-Za-z][A-Za-z'-]*\b")
 
+# Banking disclosures use "risk" extensively as a neutral taxonomy or metric
+# label. Only the risk token inside these compounds is masked for lexicon hit
+# counting; the original sentence and its word-count denominator are retained.
+NEUTRAL_RISK_COMPOUNDS = re.compile(
+    r"\b(?:cost of risks?|risk[- ]weighted(?: assets?)?|credit risks?|"
+    r"counterparty (?:credit )?risks?|operational risks?|market risks?|"
+    r"liquidity risks?|interest(?:[- ]rate)? risks?|insurance risks?|"
+    r"model risks?|risk appetite|risk management|risk profile|"
+    r"risk parameters?|risk architecture|risk framework|risk function|"
+    r"risk committee|chief risk officer|risk models?|risk taxonom(?:y|ies)|"
+    r"risk governance|risk data|risk reporting|risk weights?|risk culture)\b",
+    flags=re.IGNORECASE,
+)
+NEGATOR_TOKENS = {
+    "no", "not", "without", "lower", "reduced", "limited", "immaterial",
+    "absent", "negligible", "contained", "declining",
+}
+NEGATION_WINDOW = 4
+POST_HIT_RELIEF = re.compile(
+    r"^\W*(?:is|are|was|were|remain|remains|remained|became|becomes)\s+"
+    r"(?:(?:materially|largely|well|very)\s+)?"
+    r"(?:lower|reduced|limited|immaterial|absent|negligible|contained|declining)\b",
+    flags=re.IGNORECASE,
+)
+STRONG_PRIOR_TECHNICAL_MARKERS = re.compile(
+    r"\b(?:as a reminder|restatement|restated to reflect|restated for|"
+    r"previously reported figures? (?:were|have been) restated)\b",
+    flags=re.IGNORECASE,
+)
+WEAK_PRIOR_PERIOD_MARKERS = re.compile(
+    r"\b(?:prior (?:year|period|quarter)|comparative period|last year|"
+    r"historical (?:basis|scope))\b",
+    flags=re.IGNORECASE,
+)
+TECHNICAL_RESTATEMENT_CONTEXT = re.compile(
+    r"\b(?:accounting|classification|methodology|perimeter|presentation|"
+    r"reported|published|series|figures?|tables?|data|basis|scope|note)\b",
+    flags=re.IGNORECASE,
+)
+CURRENT_NARRATIVE_ANCHOR = re.compile(
+    r"\b(?:current(?:ly)?|now|today|going forward|outlook|guidance|"
+    r"we (?:expect|will|aim|target|confirm|now expect))\b",
+    flags=re.IGNORECASE,
+)
+CURRENT_DIRECTIONAL_LANGUAGE = re.compile(
+    r"\b(?:increase[ds]?|decrease[ds]?|improve[ds]?|decline[ds]?|grew|grown|"
+    r"rose|risen|fell|fallen|strong|robust|resilient|solid|stronger|weaker|"
+    r"higher|lower|stable|stabilised|"
+    r"stabilized|accelerat(?:e|ed|ing)|slow(?:ed|ing))\b",
+    flags=re.IGNORECASE,
+)
+COUNTRY_CODES = {
+    "Austria": "AT", "Belgium": "BE", "Finland": "FI", "France": "FR",
+    "Germany": "DE", "Ireland": "IE", "Italy": "IT",
+    "Netherlands": "NL", "Spain": "ES",
+}
+FILTER_EXAMPLE_LIMIT = 5
+NEAR_DUPLICATE_MIN_CHARS = 120
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -164,6 +223,144 @@ def category_hits(text: str) -> dict[str, int]:
         category: sum(phrase_count(text, phrase) for phrase in phrases)
         for category, phrases in LEXICONS.items()
     }
+
+
+def mask_neutral_risk_terms(text: str) -> tuple[str, int]:
+    """Mask only risk tokens that occur inside neutral banking compounds."""
+    count = 0
+
+    def _mask_compound(match: re.Match) -> str:
+        nonlocal count
+        compound = match.group(0)
+        masked, risk_tokens = re.subn(
+            r"\brisks?\b",
+            lambda risk_match: " " * len(risk_match.group(0)),
+            compound,
+            flags=re.IGNORECASE,
+        )
+        count += risk_tokens
+        return masked
+
+    return NEUTRAL_RISK_COMPOUNDS.sub(_mask_compound, text), count
+
+
+def _phrase_matches(text: str, phrase: str):
+    return re.finditer(rf"\b{re.escape(phrase)}\b", text, flags=re.IGNORECASE)
+
+
+def _hit_is_reassuring(text: str, match: re.Match) -> bool:
+    # A negator cannot govern a hit across a sentence, bullet, or clause break.
+    preceding_text = text[:match.start()]
+    boundary = max(
+        (preceding_text.rfind(character) for character in ".;:!?•▪|"),
+        default=-1,
+    )
+    preceding = [
+        token.group(0).lower()
+        for token in WORD_RE.finditer(preceding_text[boundary + 1:])
+    ][-NEGATION_WINDOW:]
+    negators = sum(token in NEGATOR_TOKENS for token in preceding)
+    if negators == 1:
+        negator_index = next(
+            index for index, token in enumerate(preceding)
+            if token in NEGATOR_TOKENS
+        )
+        scope_breakers = {
+            "although", "but", "despite", "due", "from", "however",
+            "whereas", "while",
+        }
+        if any(token in scope_breakers for token in preceding[negator_index + 1:]):
+            return False
+        return True
+    if negators > 1:
+        return False
+    return bool(POST_HIT_RELIEF.match(text[match.end():match.end() + 80]))
+
+
+def negation_dropped_categories(text: str) -> dict[str, int]:
+    """Count negative/uncertainty occurrences neutralised by relief wording."""
+    dropped = {"negative": 0, "uncertainty": 0}
+    for category in dropped:
+        for phrase in LEXICONS[category]:
+            dropped[category] += sum(
+                _hit_is_reassuring(text, match)
+                for match in _phrase_matches(text, phrase)
+            )
+    return dropped
+
+
+def normalized_sentence_key(sentence: str, collapse_numbers: bool = False) -> str:
+    """Create a Unicode-safe deterministic sentence key."""
+    text = sentence.casefold()
+    if collapse_numbers:
+        text = re.sub(r"\d[\d.,]*", "#", text)
+    text = "".join(character if character.isalnum() or character == "#" else " " for character in text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def register_sentence(
+    sentence: str,
+    seen_exact: set[str],
+    seen_templates: set[str],
+) -> tuple[bool, str]:
+    """Register a sentence and report safe exact/template duplication."""
+    exact_key = normalized_sentence_key(sentence)
+    if not exact_key:
+        return False, exact_key
+    if exact_key in seen_exact:
+        return True, exact_key
+    seen_exact.add(exact_key)
+
+    template_key = normalized_sentence_key(sentence, collapse_numbers=True)
+    template_eligible = (
+        len(template_key) >= NEAR_DUPLICATE_MIN_CHARS
+        and not GUIDANCE_TERMS.search(sentence)
+        and not CURRENT_DIRECTIONAL_LANGUAGE.search(sentence)
+    )
+    if template_eligible and template_key in seen_templates:
+        return True, template_key
+    if template_eligible:
+        seen_templates.add(template_key)
+    return False, exact_key
+
+
+def is_prior_period_technical(sentence: str, period: str | None = None) -> bool:
+    """Exclude administrative historical notes, not useful comparisons."""
+    current_narrative = bool(
+        CURRENT_NARRATIVE_ANCHOR.search(sentence)
+        or CURRENT_DIRECTIONAL_LANGUAGE.search(sentence)
+        or GUIDANCE_TERMS.search(sentence)
+    )
+    if STRONG_PRIOR_TECHNICAL_MARKERS.search(sentence):
+        return not current_narrative
+    if not (
+        WEAK_PRIOR_PERIOD_MARKERS.search(sentence)
+        and TECHNICAL_RESTATEMENT_CONTEXT.search(sentence)
+    ):
+        return False
+
+    # Period metadata replaces brittle hard-coded calendar years. A technical
+    # comparative that also discusses the document's current year is retained.
+    current_year_match = re.search(r"20\d{2}", period or "")
+    current_year = current_year_match.group(0) if current_year_match else None
+    current_year_present = bool(
+        current_year and re.search(rf"\b{re.escape(current_year)}\b", sentence)
+    )
+    return not current_narrative and not current_year_present
+
+
+def add_filter_example(
+    examples: dict[str, list[dict]],
+    category: str,
+    page: int,
+    sentence: str,
+    **details,
+) -> None:
+    if len(examples[category]) >= FILTER_EXAMPLE_LIMIT:
+        return
+    examples[category].append(
+        {"page": page, "sentence": sentence, **details}
+    )
 
 
 def is_legal_boilerplate(sentence: str) -> bool:
@@ -570,10 +767,23 @@ def analyze_pdf(path: Path, source: dict) -> dict:
     evidence = []
     counts = {category: 0 for category in LEXICONS}
     word_count = 0
+    pre_filter_word_count = 0
     page_count = 0
     eligible_page_count = 0
     excluded_boilerplate_pages = 0
     excluded_boilerplate_passages = 0
+    masked_neutral_risk_spans = 0
+    deduplicated_repeats = 0
+    negated_hits_dropped = 0
+    excluded_prior_period_passages = 0
+    seen_exact: set[str] = set()
+    seen_templates: set[str] = set()
+    filter_examples = {
+        "neutral_risk": [],
+        "duplicates": [],
+        "negation": [],
+        "prior_period": [],
+    }
 
     reader = PdfReader(str(path))
     print(f"Analyzing {ticker}: {path.name} ({len(reader.pages)} pages)", flush=True)
@@ -592,10 +802,57 @@ def analyze_pdf(path: Path, source: dict) -> dict:
                 continue
             if not relevant_sentence(sentence):
                 continue
-            hits = category_hits(sentence)
             words = WORD_RE.findall(sentence)
             if not words:
                 continue
+            pre_filter_word_count += len(words)
+            if is_prior_period_technical(sentence, period):
+                excluded_prior_period_passages += 1
+                add_filter_example(
+                    filter_examples, "prior_period", page_number, sentence
+                )
+                continue
+            duplicate, duplicate_key = register_sentence(
+                sentence, seen_exact, seen_templates
+            )
+            if duplicate:
+                deduplicated_repeats += 1
+                add_filter_example(
+                    filter_examples,
+                    "duplicates",
+                    page_number,
+                    sentence,
+                    normalized_key=duplicate_key,
+                )
+                continue
+
+            filtered_sentence, masked_count = mask_neutral_risk_terms(sentence)
+            masked_neutral_risk_spans += masked_count
+            filters_applied = []
+            if masked_count:
+                filters_applied.append(f"risk_masked:{masked_count}")
+                add_filter_example(
+                    filter_examples,
+                    "neutral_risk",
+                    page_number,
+                    sentence,
+                    masked_spans=masked_count,
+                )
+            hits = category_hits(filtered_sentence)
+            dropped = negation_dropped_categories(filtered_sentence)
+            dropped_count = sum(dropped.values())
+            if dropped_count:
+                for category, value in dropped.items():
+                    hits[category] = max(0, hits[category] - value)
+                negated_hits_dropped += dropped_count
+                filters_applied.append(f"negated_drop:{dropped_count}")
+                add_filter_example(
+                    filter_examples,
+                    "negation",
+                    page_number,
+                    sentence,
+                    dropped=dropped,
+                )
             word_count += len(words)
             for category, value in hits.items():
                 counts[category] += value
@@ -603,14 +860,19 @@ def analyze_pdf(path: Path, source: dict) -> dict:
                 evidence.append(
                     {
                         "page": page_number,
-                        "sentence": sentence[:500],
+                        "sentence": sentence,
                         "is_guidance": bool(GUIDANCE_TERMS.search(sentence)),
                         "hits": hits,
+                        "filters_applied": filters_applied,
                         "review_status": "pending_human_review",
                     }
                 )
 
     features = score_features(counts, word_count)
+    filter_shrink_ratio = round(
+        (pre_filter_word_count - word_count) / max(pre_filter_word_count, 1),
+        4,
+    )
     evidence.sort(key=evidence_priority, reverse=True)
     selected_evidence = evidence[:8]
     standard_coverage = word_count >= 150 and len(selected_evidence) >= 3
@@ -631,7 +893,15 @@ def analyze_pdf(path: Path, source: dict) -> dict:
         "eligible_page_count": eligible_page_count,
         "excluded_boilerplate_pages": excluded_boilerplate_pages,
         "excluded_boilerplate_passages": excluded_boilerplate_passages,
+        "masked_neutral_risk_spans": masked_neutral_risk_spans,
+        "deduplicated_repeats": deduplicated_repeats,
+        "negated_hits_dropped": negated_hits_dropped,
+        "excluded_prior_period_passages": excluded_prior_period_passages,
+        "pre_filter_analyzed_word_count": pre_filter_word_count,
         "analyzed_word_count": word_count,
+        "filter_shrink_ratio": filter_shrink_ratio,
+        "filter_shrink_warning": filter_shrink_ratio > 0.25,
+        "filter_examples": filter_examples,
         "feature_counts": counts,
         "features": features,
         "evidence": selected_evidence,
@@ -692,6 +962,83 @@ def load_universe() -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8"))["constituents"]
 
 
+def build_modal_diagnostics(
+    latest_documents: dict[str, dict],
+    universe: list[dict],
+) -> dict:
+    """Describe modal-rate dispersion without changing any score."""
+    bank_by_ticker = {bank["ticker"]: bank for bank in universe}
+    observations = []
+    for ticker, document in latest_documents.items():
+        if document.get("status") == "insufficient":
+            continue
+        bank = bank_by_ticker.get(ticker, {})
+        country_name = bank.get("country", "Unknown")
+        observations.append(
+            {
+                "ticker": ticker,
+                "country": COUNTRY_CODES.get(country_name, country_name),
+                "genre": document.get("document_type", "unclassified"),
+                "weak_modal_per_1000": document["features"]["weak_modal_per_1000_words"],
+                "uncertainty_per_1000": document["features"]["uncertainty_per_1000_words"],
+            }
+        )
+
+    def _profiles(group_key: str) -> dict:
+        groups: dict[str, list[dict]] = {}
+        for observation in observations:
+            groups.setdefault(observation[group_key], []).append(observation)
+        return {
+            group: {
+                "banks": sorted(row["ticker"] for row in rows),
+                "bank_count": len(rows),
+                "weak_modal_per_1000_median": round(
+                    statistics.median(row["weak_modal_per_1000"] for row in rows), 2
+                ),
+                "uncertainty_per_1000_median": round(
+                    statistics.median(row["uncertainty_per_1000"] for row in rows), 2
+                ),
+                "interpretation": (
+                    "descriptive_only"
+                    if len(rows) >= 3
+                    else "insufficient_group_size_for_inference"
+                ),
+            }
+            for group, rows in sorted(groups.items())
+        }
+
+    weak_rates = [row["weak_modal_per_1000"] for row in observations]
+    median_rate = statistics.median(weak_rates) if weak_rates else 0.0
+    mad = (
+        statistics.median(abs(rate - median_rate) for rate in weak_rates)
+        if weak_rates
+        else 0.0
+    )
+    review_gate = max(2 * median_rate, median_rate + 2 * mad, 2.0)
+    flags = [
+        {
+            "ticker": row["ticker"],
+            "weak_modal_per_1000": row["weak_modal_per_1000"],
+            "reason": (
+                "weak-modal rate above robust cross-section review gate "
+                f"({review_gate:.2f} per 1,000 words)"
+            ),
+        }
+        for row in observations
+        if row["weak_modal_per_1000"] > review_gate
+    ]
+    flags.sort(key=lambda row: row["weak_modal_per_1000"], reverse=True)
+    return {
+        "scores_affected": False,
+        "cross_section_weak_modal_median": round(median_rate, 2),
+        "cross_section_weak_modal_mad": round(mad, 2),
+        "modal_review_gate": round(review_gate, 2),
+        "country_modal_profile": _profiles("country"),
+        "genre_modal_profile": _profiles("genre"),
+        "modal_review_flags": flags,
+    }
+
+
 def load_numeric_scores() -> dict[str, float]:
     path = BASE_DIR / "full_universe_scores.json"
     return {
@@ -713,6 +1060,7 @@ def quadrant(numeric_score: float, language_score: float) -> str:
 
 def build_archive(reports_dir: Path, output_path: Path) -> dict:
     manifest = load_language_manifest()
+    universe = load_universe()
     numeric_scores = load_numeric_scores()
     analyzed: dict[str, list[dict]] = {}
     for source in manifest:
@@ -765,7 +1113,7 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
         ),
     }
     signals = []
-    for bank in load_universe():
+    for bank in universe:
         ticker = bank["ticker"]
         numeric_score = numeric_scores.get(ticker)
         documents = analyzed.get(ticker, [])
@@ -829,8 +1177,9 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
             }
         )
 
+    diagnostics = build_modal_diagnostics(latest_documents, universe)
     archive = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "rule_version": RULE_VERSION,
         "generated_at": utc_now(),
         "methodology": {
@@ -849,6 +1198,30 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                     "eligible_page_count",
                     "excluded_boilerplate_pages",
                     "excluded_boilerplate_passages",
+                ],
+            },
+            "pollution_filters": {
+                "version": "v2.4",
+                "description": (
+                    "Technical prior-period/restatement passages and safe "
+                    "document-level duplicates are excluded before scoring. "
+                    "Neutral banking risk compounds are masked for hit counting, "
+                    "and negative or uncertainty hits in deterministic relief "
+                    "contexts are dropped rather than inverted. Original evidence "
+                    "text is preserved; masking and negation leave the word-count "
+                    "denominator unchanged. Every action "
+                    "is recorded in per-document audit fields; modal-rate country "
+                    "and genre diagnostics never affect scores."
+                ),
+                "audited_document_fields": [
+                    "masked_neutral_risk_spans",
+                    "deduplicated_repeats",
+                    "negated_hits_dropped",
+                    "excluded_prior_period_passages",
+                    "pre_filter_analyzed_word_count",
+                    "filter_shrink_ratio",
+                    "filter_shrink_warning",
+                    "filter_examples",
                 ],
             },
             "narrative_coverage_gate": {
@@ -874,7 +1247,13 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
             "provisional_banks": sum(s["status"].startswith("provisional") for s in signals),
             "four_period_trends": sum(s["status"] == "provisional_four_period_trend" for s in signals),
             "insufficient_banks": sum(s["status"] == "insufficient_language_data" for s in signals),
+            "filter_shrink_warnings": sum(
+                document.get("filter_shrink_warning", False)
+                for documents in analyzed.values()
+                for document in documents
+            ),
         },
+        "diagnostics": diagnostics,
         "documents": [
             document
             for documents in analyzed.values()

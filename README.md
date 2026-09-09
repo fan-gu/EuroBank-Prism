@@ -34,12 +34,17 @@ Price history ─────> momentum checks ────────> price-c
 - The universe is fixed to 23 EURO STOXX Banks constituents.
 - Standard legal disclaimers and safe-harbour boilerplate are excluded from
   management-language scoring.
+- Deterministic v2.4 filters mask neutral banking risk labels, deduplicate safe
+  document repeats, remove technical restatement notes, and drop—not invert—
+  negated negative hits. Every action is auditable.
 - Language observations retain the source document, reporting period, page,
   quotation, and document hash.
 - Four adjacent comparable periods enable a preliminary drift observation;
   eight periods, human review, and out-of-sample testing are required before a
   drift signal is treated as validated research.
 - Missing or non-comparable observations remain missing—they are never inferred.
+
+[Read the management-language v2.4 validation](docs/validation/language-v2.4-before-after.md)
 
 ## Run locally
 

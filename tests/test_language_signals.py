@@ -11,14 +11,20 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.language_signals import (
+    build_modal_diagnostics,
     build_language_alerts,
     calibrate_peer_language_scores,
     category_hits,
     comparable_history,
     is_boilerplate_page,
     is_legal_boilerplate,
+    is_prior_period_technical,
     language_drift,
+    mask_neutral_risk_terms,
+    negation_dropped_categories,
+    normalized_sentence_key,
     quadrant,
+    register_sentence,
     relevant_sentence,
     score_features,
     split_sentences,
@@ -27,6 +33,154 @@ from app.language_signals import (
 
 
 class LanguageSignalTests(unittest.TestCase):
+    def test_neutral_risk_compounds_are_masked_but_outlook_risk_survives(self):
+        sentence = "Low cost of risk was in line with guidance."
+        masked, count = mask_neutral_risk_terms(sentence)
+        self.assertEqual(count, 1)
+        self.assertEqual(len(masked), len(sentence))
+        self.assertEqual(category_hits(masked)["uncertainty"], 0)
+
+        management = (
+            "LLPs were stable, reflecting our active risk management and confidence."
+        )
+        masked, count = mask_neutral_risk_terms(management)
+        self.assertEqual(count, 1)
+        self.assertEqual(category_hits(masked)["uncertainty"], 0)
+
+        outlook = "We see downside risks to the outlook and risks remain elevated."
+        masked, count = mask_neutral_risk_terms(outlook)
+        self.assertEqual(count, 0)
+        self.assertEqual(category_hits(masked)["uncertainty"], 2)
+
+    def test_negation_is_drop_only_and_supports_post_hit_relief(self):
+        self.assertEqual(
+            negation_dropped_categories("We face no material headwinds this year.")["negative"],
+            1,
+        )
+        self.assertEqual(
+            negation_dropped_categories("We face headwinds this year.")["negative"],
+            0,
+        )
+        self.assertGreaterEqual(
+            negation_dropped_categories("The risks are limited.")["uncertainty"],
+            1,
+        )
+        self.assertEqual(
+            negation_dropped_categories("The outlook is not without pressure.")["negative"],
+            0,
+        )
+        self.assertEqual(
+            negation_dropped_categories(
+                "Costs had no effect on income. Volatility remained elevated."
+            )["uncertainty"],
+            0,
+        )
+        self.assertEqual(
+            negation_dropped_categories(
+                "Asset income was lower versus 2025 from margin pressure."
+            )["negative"],
+            0,
+        )
+
+    def test_document_dedup_is_exact_first_and_number_safe(self):
+        exact_seen, template_seen = set(), set()
+        sentence = "We remain confident that our capital position is robust."
+        first, _ = register_sentence(sentence, exact_seen, template_seen)
+        repeated, _ = register_sentence(sentence, exact_seen, template_seen)
+        self.assertFalse(first)
+        self.assertTrue(repeated)
+
+        # Short metric statements with different values are not collapsed.
+        different_number, _ = register_sentence(
+            "The CET1 ratio was 15.7%.", exact_seen, template_seen
+        )
+        another_number, _ = register_sentence(
+            "The CET1 ratio was 13.2%.", exact_seen, template_seen
+        )
+        self.assertFalse(different_number)
+        self.assertFalse(another_number)
+
+        # Long, non-directional templates may be safely collapsed across pages.
+        prefix = "This information is supplied for presentation purposes " * 3
+        first_template, _ = register_sentence(
+            f"{prefix} reference 2025.", exact_seen, template_seen
+        )
+        repeated_template, _ = register_sentence(
+            f"{prefix} reference 2026.", exact_seen, template_seen
+        )
+        self.assertFalse(first_template)
+        self.assertTrue(repeated_template)
+
+    def test_unicode_sentence_normalization_preserves_letters(self):
+        key = normalized_sentence_key("Crédit Agricole — resilient.")
+        self.assertIn("crédit agricole", key)
+
+    def test_prior_period_gate_removes_notes_not_current_comparisons(self):
+        restatement = (
+            "As a reminder, on 28 March 2025, BNP Paribas published quarterly "
+            "series for 2024, restated to reflect the new presentation."
+        )
+        self.assertTrue(is_prior_period_technical(restatement, "Q1 2026"))
+        self.assertFalse(
+            is_prior_period_technical(
+                "Revenue increased by 8% compared with last year.", "Q2 2026"
+            )
+        )
+        self.assertFalse(
+            is_prior_period_technical(
+                "Unlike last year's decline, we now expect robust growth in 2026.",
+                "Q2 2026",
+            )
+        )
+
+    def test_bpe_guidance_regression_survives_every_filter(self):
+        sentence = (
+            "Full year 2026 Guidance improved, subject to macro and market conditions"
+        )
+        self.assertTrue(relevant_sentence(sentence))
+        self.assertFalse(is_prior_period_technical(sentence, "H1 2026"))
+        masked, count = mask_neutral_risk_terms(sentence)
+        self.assertEqual(count, 0)
+        self.assertEqual(sum(negation_dropped_categories(masked).values()), 0)
+
+    def test_modal_diagnostics_use_master_country_data_without_scoring(self):
+        universe = [
+            {"ticker": "BG", "country": "Austria"},
+            {"ticker": "FBK", "country": "Italy"},
+            {"ticker": "ISP", "country": "Italy"},
+        ]
+        documents = {
+            ticker: {
+                "status": "provisional_single_period",
+                "document_type": "quarterly_results",
+                "features": {
+                    "weak_modal_per_1000_words": weak,
+                    "uncertainty_per_1000_words": 1.0,
+                    "language_score": score,
+                },
+            }
+            for ticker, weak, score in (
+                ("BG", 0.0, 55.0), ("FBK", 1.0, 50.0), ("ISP", 12.0, 45.0)
+            )
+        }
+        scores_before = {
+            ticker: document["features"]["language_score"]
+            for ticker, document in documents.items()
+        }
+        diagnostics = build_modal_diagnostics(documents, universe)
+        self.assertFalse(diagnostics["scores_affected"])
+        self.assertEqual(diagnostics["country_modal_profile"]["AT"]["banks"], ["BG"])
+        self.assertEqual(
+            diagnostics["country_modal_profile"]["IT"]["banks"], ["FBK", "ISP"]
+        )
+        self.assertEqual(
+            scores_before,
+            {
+                ticker: document["features"]["language_score"]
+                for ticker, document in documents.items()
+            },
+        )
+
     def test_financial_language_categories_are_separate(self):
         hits = category_hits(
             "We will deliver strong capital return, although the outlook may remain challenging."
@@ -248,6 +402,8 @@ class LanguageCoverageTests(unittest.TestCase):
         self.assertTrue(all(row["status"] == "downloaded" for row in self.manifest))
 
     def test_signal_archive_has_auditable_provisional_coverage(self):
+        self.assertEqual(self.archive["schema_version"], "1.2")
+        self.assertEqual(self.archive["rule_version"], "management-language-v2.4")
         self.assertEqual(self.archive["coverage"]["provisional_banks"], 23)
         self.assertEqual(self.archive["coverage"]["insufficient_banks"], 0)
         self.assertEqual(self.archive["coverage"]["four_period_trends"], 8)
@@ -283,6 +439,28 @@ class LanguageCoverageTests(unittest.TestCase):
         self.assertTrue(
             all(row["publication_eligible"] is False for row in self.archive["signals"])
         )
+        audit_fields = {
+            "masked_neutral_risk_spans",
+            "deduplicated_repeats",
+            "negated_hits_dropped",
+            "excluded_prior_period_passages",
+            "pre_filter_analyzed_word_count",
+            "filter_shrink_ratio",
+            "filter_shrink_warning",
+            "filter_examples",
+        }
+        self.assertTrue(
+            all(audit_fields <= set(document) for document in self.archive["documents"])
+        )
+        self.assertEqual(self.archive["coverage"]["filter_shrink_warnings"], 0)
+        self.assertGreater(
+            sum(row["masked_neutral_risk_spans"] for row in self.archive["documents"]),
+            0,
+        )
+        diagnostics = self.archive["diagnostics"]
+        self.assertFalse(diagnostics["scores_affected"])
+        self.assertIn("BG", diagnostics["country_modal_profile"]["AT"]["banks"])
+        self.assertIn("FBK", diagnostics["country_modal_profile"]["IT"]["banks"])
         quadrants = {row["quadrant"] for row in self.archive["signals"]}
         self.assertEqual(
             quadrants,
