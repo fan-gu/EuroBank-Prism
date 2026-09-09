@@ -1,0 +1,13 @@
+.git/
+.github/
+.env
+.streamlit/secrets.toml
+__pycache__/
+.pytest_cache/
+*.pyc
+archive/
+evidence/
+reports/
+semantic_embeddings.partial.npz
+production_pdf_archive.json
+language_report_registry.json

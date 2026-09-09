@@ -78,10 +78,29 @@ python build_semantic_index.py
 Set `GEMINI_API_KEY` in a local `.env` file or Streamlit Community Cloud Secrets.
 The committed index contains embeddings—not the API key. Never commit secrets.
 
+## Delivery and deployment
+
+GitHub Actions runs Python syntax checks, the automated test suite, and a Docker
+build on every push and pull request to `main`. Streamlit Community Cloud remains
+the live dashboard deployment.
+
+To run the same app as a container, install Docker Desktop and use:
+
+```powershell
+docker build -t eurobank-prism .
+docker run --rm -p 8501:8501 --env-file .env eurobank-prism
+```
+
+Open `http://localhost:8501`. The image contains the application and committed
+semantic index; `.env`, local PDFs and report archives are excluded. This image
+is ready to deploy later to Azure Container Apps.
+
 ## Repository structure
 
 ```text
 streamlit_app.py             Streamlit entry point
+Dockerfile                   Reproducible application container
+.github/workflows/ci.yml     Automated tests and Docker build
 app/                         Scoring, ingestion, evidence, and visual modules
 semantic_*.json / .npz       Filtered corpus metadata and local cosine index
 assets/                      Bank logos and README media
