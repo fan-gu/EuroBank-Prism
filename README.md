@@ -34,9 +34,10 @@ Price history ─────> momentum checks ────────> price-c
 - The universe is fixed to 23 EURO STOXX Banks constituents.
 - Standard legal disclaimers and safe-harbour boilerplate are excluded from
   management-language scoring.
-- Deterministic v2.4.1 filters mask neutral banking risk labels, deduplicate safe
+- Deterministic v2.4.2 filters mask neutral banking risk labels, deduplicate safe
   document repeats, remove technical restatement notes and routine procedural
-  footnotes, and drop—not invert—negated negative hits. Every action is auditable.
+  footnotes and standardized rounding notes, and drop—not invert—negated
+  negative hits. Every action is auditable.
 - Language observations retain the source document, reporting period, page,
   quotation, and document hash.
 - Four adjacent comparable periods enable a preliminary drift observation;
@@ -44,7 +45,7 @@ Price history ─────> momentum checks ────────> price-c
   drift signal is treated as validated research.
 - Missing or non-comparable observations remain missing—they are never inferred.
 
-[Read the latest management-language validation](docs/validation/language-v2.4.1-footnote-filter.md)
+[Read the latest management-language validation](docs/validation/language-v2.4.2-rounding-filter.md)
 
 ## Run locally
 

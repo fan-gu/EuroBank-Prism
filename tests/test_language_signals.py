@@ -22,6 +22,7 @@ from app.language_signals import (
     language_drift,
     mask_neutral_risk_terms,
     mask_procedural_condition_footnotes,
+    mask_standardized_calculation_footnotes,
     negation_dropped_categories,
     normalized_sentence_key,
     quadrant,
@@ -186,6 +187,31 @@ class LanguageSignalTests(unittest.TestCase):
         self.assertEqual(count, 1)
         self.assertIn("We remain confident in our capital return", filtered)
         self.assertGreater(category_hits(filtered)["confidence"], 0)
+
+    def test_standardized_rounding_footnotes_do_not_create_weak_modals(self):
+        gle = (
+            "The sum of values contained in the tables and analyses may differ "
+            "slightly from the total reported due to rounding rules."
+        )
+        filtered, count = mask_standardized_calculation_footnotes(gle)
+        self.assertEqual(count, 1)
+        self.assertFalse(filtered.strip(". "))
+        self.assertEqual(category_hits(filtered)["weak_modal"], 0)
+
+        common = "Note: figures may not add up exactly due to rounding"
+        filtered, count = mask_standardized_calculation_footnotes(common)
+        self.assertEqual(count, 1)
+        self.assertFalse(filtered.strip(". "))
+
+    def test_rounding_note_is_removed_without_losing_attached_narrative(self):
+        sentence = (
+            "Note: figures may not add up exactly due to rounding. "
+            "Revenue declined because of weaker fees."
+        )
+        filtered, count = mask_standardized_calculation_footnotes(sentence)
+        self.assertEqual(count, 1)
+        self.assertIn("Revenue declined because of weaker fees", filtered)
+        self.assertGreater(category_hits(filtered)["negative"], 0)
 
     def test_modal_diagnostics_use_master_country_data_without_scoring(self):
         universe = [
@@ -446,8 +472,8 @@ class LanguageCoverageTests(unittest.TestCase):
         self.assertTrue(all(row["status"] == "downloaded" for row in self.manifest))
 
     def test_signal_archive_has_auditable_provisional_coverage(self):
-        self.assertEqual(self.archive["schema_version"], "1.3")
-        self.assertEqual(self.archive["rule_version"], "management-language-v2.4.1")
+        self.assertEqual(self.archive["schema_version"], "1.4")
+        self.assertEqual(self.archive["rule_version"], "management-language-v2.4.2")
         self.assertEqual(self.archive["coverage"]["provisional_banks"], 23)
         self.assertEqual(self.archive["coverage"]["insufficient_banks"], 0)
         # DBK Q1 2026 now has only one substantive cited passage after routine
@@ -493,6 +519,8 @@ class LanguageCoverageTests(unittest.TestCase):
             "excluded_prior_period_passages",
             "masked_procedural_condition_spans",
             "excluded_procedural_condition_passages",
+            "masked_standardized_footnote_spans",
+            "excluded_standardized_footnote_passages",
             "pre_filter_analyzed_word_count",
             "filter_shrink_ratio",
             "filter_shrink_warning",
@@ -501,7 +529,19 @@ class LanguageCoverageTests(unittest.TestCase):
         self.assertTrue(
             all(audit_fields <= set(document) for document in self.archive["documents"])
         )
-        self.assertEqual(self.archive["coverage"]["filter_shrink_warnings"], 0)
+        # ISP's deck repeats the same rounding note across many table pages.
+        # Removing passages admitted only by its weak modal intentionally
+        # triggers the >25% denominator-shrink audit gate.
+        self.assertEqual(self.archive["coverage"]["filter_shrink_warnings"], 1)
+        shrink_warning_documents = [
+            document
+            for document in self.archive["documents"]
+            if document["filter_shrink_warning"]
+        ]
+        self.assertEqual(
+            [(document["ticker"], document["period"]) for document in shrink_warning_documents],
+            [("ISP", "H1 2026")],
+        )
         self.assertGreater(
             sum(row["masked_neutral_risk_spans"] for row in self.archive["documents"]),
             0,

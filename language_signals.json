@@ -1,15 +1,15 @@
 {
-  "schema_version": "1.3",
-  "rule_version": "management-language-v2.4.1",
-  "generated_at": "2026-09-09T07:58:38.301959+00:00",
+  "schema_version": "1.4",
+  "rule_version": "management-language-v2.4.2",
+  "generated_at": "2026-09-09T08:31:45.790443+00:00",
   "methodology": {
     "axes_are_independent": true,
     "language_model": "deterministic_financial_lexicon",
     "language_score_calibration": {
       "method": "robust_median_mad",
       "peer_count": 23,
-      "median_raw_strength": 0.8503,
-      "mad_raw_strength": 8.5617,
+      "median_raw_strength": 1.7857,
+      "mad_raw_strength": 8.0575,
       "score_center": 50,
       "score_points_per_robust_sigma": 12,
       "score_floor": 15,
@@ -30,8 +30,8 @@
       ]
     },
     "pollution_filters": {
-      "version": "v2.4.1",
-      "description": "Technical prior-period/restatement passages and safe document-level duplicates are excluded before scoring. Neutral banking risk compounds are masked for hit counting, and negative or uncertainty hits in deterministic relief contexts are dropped rather than inverted. Routine distribution, approval and target-achievement footnotes are excluded or clause-masked without suppressing substantive macro or market conditions. Original evidence text is preserved; masking and negation leave the word-count denominator unchanged. Every action is recorded in per-document audit fields; modal-rate country and genre diagnostics never affect scores.",
+      "version": "v2.4.2",
+      "description": "Technical prior-period/restatement passages and safe document-level duplicates are excluded before scoring. Neutral banking risk compounds are masked for hit counting, and negative or uncertainty hits in deterministic relief contexts are dropped rather than inverted. Routine distribution, approval and target-achievement footnotes are excluded or clause-masked without suppressing substantive macro or market conditions. Standard table-rounding and summation notes are also excluded or clause-masked before modal counting. Original evidence text is preserved; neutral risk masking and negation leave the word-count denominator unchanged, while excluded footnote words leave the denominator. Every action is recorded in per-document audit fields; modal-rate country and genre diagnostics never affect scores.",
       "audited_document_fields": [
         "masked_neutral_risk_spans",
         "deduplicated_repeats",
@@ -39,6 +39,8 @@
         "excluded_prior_period_passages",
         "masked_procedural_condition_spans",
         "excluded_procedural_condition_passages",
+        "masked_standardized_footnote_spans",
+        "excluded_standardized_footnote_passages",
         "pre_filter_analyzed_word_count",
         "filter_shrink_ratio",
         "filter_shrink_warning",
@@ -51,12 +53,12 @@
       "insufficient": "below the limited gate; excluded from peer calibration"
     },
     "research_triage_thresholds": {
-      "negative_pressure": 17.62,
-      "weak_modal_per_1000_words": 5.07,
-      "uncertainty_per_1000_words": 5.59,
-      "caution_per_1000_words": 2.825,
+      "negative_pressure": 15.435,
+      "weak_modal_per_1000_words": 4.46,
+      "uncertainty_per_1000_words": 5.635,
+      "caution_per_1000_words": 2.935,
       "negative_per_1000_words": 0.0,
-      "language_drift": 6.322
+      "language_drift": 6.594
     },
     "drift_penalty": "Weak-modal and uncertainty increases, caution increases, and confidence declines are activated only for comparable history.",
     "minimum_history_for_preliminary_trend": 4,
@@ -69,13 +71,13 @@
     "provisional_banks": 23,
     "four_period_trends": 7,
     "insufficient_banks": 0,
-    "filter_shrink_warnings": 0
+    "filter_shrink_warnings": 1
   },
   "diagnostics": {
     "scores_affected": false,
-    "cross_section_weak_modal_median": 2.62,
-    "cross_section_weak_modal_mad": 2.62,
-    "modal_review_gate": 7.86,
+    "cross_section_weak_modal_median": 2.51,
+    "cross_section_weak_modal_mad": 2.51,
+    "modal_review_gate": 7.53,
     "country_modal_profile": {
       "AT": {
         "banks": [
@@ -135,8 +137,8 @@
           "GLE"
         ],
         "bank_count": 3,
-        "weak_modal_per_1000_median": 2.62,
-        "uncertainty_per_1000_median": 1.89,
+        "weak_modal_per_1000_median": 0.0,
+        "uncertainty_per_1000_median": 1.93,
         "interpretation": "descriptive_only"
       },
       "IE": {
@@ -158,7 +160,7 @@
           "UCG"
         ],
         "bank_count": 5,
-        "weak_modal_per_1000_median": 1.49,
+        "weak_modal_per_1000_median": 1.38,
         "uncertainty_per_1000_median": 4.14,
         "interpretation": "descriptive_only"
       },
@@ -187,7 +189,7 @@
           "ISP"
         ],
         "bank_count": 9,
-        "weak_modal_per_1000_median": 4.73,
+        "weak_modal_per_1000_median": 3.86,
         "uncertainty_per_1000_median": 1.58,
         "interpretation": "descriptive_only"
       },
@@ -209,26 +211,21 @@
           "UCG"
         ],
         "bank_count": 14,
-        "weak_modal_per_1000_median": 2.56,
+        "weak_modal_per_1000_median": 2.23,
         "uncertainty_per_1000_median": 4.42,
         "interpretation": "descriptive_only"
       }
     },
     "modal_review_flags": [
       {
-        "ticker": "ISP",
-        "weak_modal_per_1000": 19.71,
-        "reason": "weak-modal rate above robust cross-section review gate (7.86 per 1,000 words)"
-      },
-      {
         "ticker": "INGA",
         "weak_modal_per_1000": 15.53,
-        "reason": "weak-modal rate above robust cross-section review gate (7.86 per 1,000 words)"
+        "reason": "weak-modal rate above robust cross-section review gate (7.53 per 1,000 words)"
       },
       {
         "ticker": "BKT",
         "weak_modal_per_1000": 10.45,
-        "reason": "weak-modal rate above robust cross-section review gate (7.86 per 1,000 words)"
+        "reason": "weak-modal rate above robust cross-section review gate (7.53 per 1,000 words)"
       }
     ]
   },
@@ -255,9 +252,11 @@
       "excluded_prior_period_passages": 1,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 631,
-      "analyzed_word_count": 554,
-      "filter_shrink_ratio": 0.122,
+      "analyzed_word_count": 534,
+      "filter_shrink_ratio": 0.1537,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [],
@@ -269,30 +268,37 @@
             "sentence": "As a reminder, on 28 March 2025, BNP Paribas published quarterly series for 2024, restated to reflect, among other things, the transposition into European Union law of the finalisation of Basel 3 (Basel 4) by Regulation (EU) 2024/1623 of the European Parliament and of the Council of 31 May 2024 amending Regulation (EU) No 575/2013, the change in the allocation of normalized equity from 11% to 12% of risk-weighted assets, and the reclassification of income and business data from the non-strategic perimeter of Personal Finance to Corporate Centre."
           }
         ],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": [
+          {
+            "page": 2,
+            "sentence": "The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 9,
         "negative": 0,
         "uncertainty": 1,
         "strong_modal": 3,
-        "weak_modal": 4,
+        "weak_modal": 3,
         "caution_buffer": 2,
         "confidence": 5
       },
       "features": {
-        "language_score": 46.7,
-        "absolute_language_score": 46.7,
-        "management_language_strength_raw": -3.3394,
-        "positive_signal_score": 15.88,
-        "negative_pressure_score": 19.22,
-        "positive_per_1000_words": 16.25,
+        "language_score": 49.8,
+        "absolute_language_score": 49.8,
+        "management_language_strength_raw": -0.1873,
+        "positive_signal_score": 16.48,
+        "negative_pressure_score": 16.67,
+        "positive_per_1000_words": 16.85,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 5.42,
-        "weak_modal_per_1000_words": 7.22,
-        "uncertainty_per_1000_words": 1.81,
-        "caution_per_1000_words": 3.61,
-        "confidence_per_1000_words": 9.03
+        "strong_modal_per_1000_words": 5.62,
+        "weak_modal_per_1000_words": 5.62,
+        "uncertainty_per_1000_words": 1.87,
+        "caution_per_1000_words": 3.75,
+        "confidence_per_1000_words": 9.36
       },
       "evidence": [
         {
@@ -376,22 +382,6 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 2,
-          "sentence": "The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 0,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
           "page": 6,
           "sentence": "2025 Specialised Businesses 52.2% 13.0% • Arval: strong organic growth; last significant base- effect linked to used-car price in 3Q25 Insurance Asset Management Wealth Management 59.2% 23.7% • AXA IM: projected impact on the Group’s RoTE2 trajectory: >+0.5% by 2028 • Wealth Management: external growth and development of the European platform • BNP Paribas Cardif: external and organic growth, partnerships CIB CPBS IPS 34%38% 34% 37% 18% 19% 13% 8%",
           "is_guidance": false,
@@ -413,6 +403,22 @@
           "is_guidance": false,
           "hits": {
             "positive": 2,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 0,
+            "caution_buffer": 0,
+            "confidence": 1
+          },
+          "filters_applied": [],
+          "review_status": "pending_human_review"
+        },
+        {
+          "page": 28,
+          "sentence": "3Q24 • Fees: good momentum in all networks at +3.7% vs.",
+          "is_guidance": false,
+          "hits": {
+            "positive": 1,
             "negative": 0,
             "uncertainty": 0,
             "strong_modal": 0,
@@ -456,6 +462,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 870,
       "analyzed_word_count": 866,
       "filter_shrink_ratio": 0.0046,
@@ -477,7 +485,8 @@
             "sentence": "42025 Full-Year Results | RESULTS | A record fourth quarter with excellent operating performances and a sharp rise in net income *Consolidation of AXA IM as of 1 July 2025. **Dividend: subject to approval by the General Meeting of 12 May 2026 Chg. vs.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 12,
@@ -664,6 +673,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 741,
       "analyzed_word_count": 716,
       "filter_shrink_ratio": 0.0337,
@@ -690,7 +701,8 @@
         ],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 32,
@@ -879,6 +891,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 573,
       "analyzed_word_count": 573,
       "filter_shrink_ratio": 0.0,
@@ -894,7 +908,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 29,
@@ -906,7 +921,7 @@
         "confidence": 18
       },
       "features": {
-        "language_score": 76.8,
+        "language_score": 77.6,
         "absolute_language_score": 79.2,
         "management_language_strength_raw": 29.2321,
         "positive_signal_score": 42.32,
@@ -918,7 +933,7 @@
         "uncertainty_per_1000_words": 5.24,
         "caution_per_1000_words": 5.24,
         "confidence_per_1000_words": 31.41,
-        "peer_centered_z": 2.2359
+        "peer_centered_z": 2.2975
       },
       "evidence": [
         {
@@ -1055,7 +1070,7 @@
       "status": "provisional_single_period",
       "coverage_quality": "standard",
       "history_periods": 4,
-      "language_drift_score": 5.8,
+      "language_drift_score": 6.48,
       "directional_reversal": false,
       "drift_status": "preliminary_four_period_trend",
       "backtest_status": "not_run",
@@ -1065,12 +1080,12 @@
         {
           "from_period": "Q3 2025",
           "to_period": "FY2025",
-          "weak_modal_change": -0.29,
-          "uncertainty_change": 7.43,
-          "caution_change": 3.32,
-          "confidence_change": 2.52,
+          "weak_modal_change": 1.31,
+          "uncertainty_change": 7.37,
+          "caution_change": 3.18,
+          "confidence_change": 2.19,
           "directional_reversal": false,
-          "drift_penalty": 13.85
+          "drift_penalty": 15.9
         },
         {
           "from_period": "FY2025",
@@ -1116,6 +1131,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 3,
       "excluded_procedural_condition_passages": 2,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 1805,
       "analyzed_word_count": 1673,
       "filter_shrink_ratio": 0.0731,
@@ -1177,7 +1194,8 @@
             "sentence": "54 2026 issuances against funding plan • Continue fulfilling the 1.5% AT1 and 2.4% Tier 2 buffers subject to RWA growth • MREL & TLAC ratios above regulatory requirements • Maintain a solid liquidity position, with LCR and NFSR above minimum requirements and ample liquidity buffers Execution of 2026 funding plan € bn, Jun-26 Banco Santander, S.A.’s 2026 funding plan contemplates the following: Plan Issued Plan Issued Plan Issued Plan Issued 1 - 2.5 - - 1 - 2.5 13 - 15 3 - 5.5 1 - 3 17 - 23.5 0.5 - 2 3 - 4 - 17.1 5.1 Banco Santander, S.A.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 52,
@@ -1189,7 +1207,7 @@
         "confidence": 30
       },
       "features": {
-        "language_score": 63.5,
+        "language_score": 63.4,
         "absolute_language_score": 65.1,
         "management_language_strength_raw": 15.0926,
         "positive_signal_score": 25.4,
@@ -1201,7 +1219,7 @@
         "uncertainty_per_1000_words": 1.79,
         "caution_per_1000_words": 4.78,
         "confidence_per_1000_words": 17.93,
-        "peer_centered_z": 1.122
+        "peer_centered_z": 1.1139
       },
       "evidence": [
         {
@@ -1368,6 +1386,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 355,
       "analyzed_word_count": 355,
       "filter_shrink_ratio": 0.0,
@@ -1377,7 +1397,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 16,
@@ -1564,6 +1585,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 644,
       "analyzed_word_count": 548,
       "filter_shrink_ratio": 0.1491,
@@ -1585,7 +1608,8 @@
             "sentence": "FX impacts) increased by €1.5 bln, driven by business growth and partly offset by the completion of two SRT transactions • Operational RWA increased with €2.2 bln and market RWA increased by €0.5 bln • The final cash dividend over 2025 of €0.736 per share will be paid on 24 April 2026, subject to AGM approval 20 Expected fully-loaded CET1 MDA Management buffer 13.4% 12.9% 13.1% 11.1% +0.4% +0.2% ~13% -0.5% -0.2% -0.2% 3Q2025 Ongoing share buyback 3Q2025 pro forma Net result Dividend reserve Other capital movements RWA movements 4Q2025 Basel IV CET1 ratio target",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 14,
@@ -1774,6 +1798,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 703,
       "analyzed_word_count": 703,
       "filter_shrink_ratio": 0.0,
@@ -1783,7 +1809,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 16,
@@ -1970,6 +1997,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 322,
       "analyzed_word_count": 322,
       "filter_shrink_ratio": 0.0,
@@ -1979,7 +2008,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 7,
@@ -1991,7 +2021,7 @@
         "confidence": 3
       },
       "features": {
-        "language_score": 28.5,
+        "language_score": 26.2,
         "absolute_language_score": 28.1,
         "management_language_strength_raw": -21.8944,
         "positive_signal_score": 13.66,
@@ -2003,7 +2033,7 @@
         "uncertainty_per_1000_words": 6.21,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 9.32,
-        "peer_centered_z": -1.7918
+        "peer_centered_z": -1.9823
       },
       "evidence": [
         {
@@ -2199,6 +2229,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 791,
       "analyzed_word_count": 791,
       "filter_shrink_ratio": 0.0,
@@ -2208,7 +2240,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 39,
@@ -2395,6 +2428,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 3,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 1272,
       "analyzed_word_count": 1225,
       "filter_shrink_ratio": 0.0369,
@@ -2426,7 +2461,8 @@
             "sentence": "Note: Pending approval from the governing bodies and subject to mandatory regulatory approvals.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 37,
@@ -2617,6 +2653,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 922,
       "analyzed_word_count": 909,
       "filter_shrink_ratio": 0.0141,
@@ -2638,7 +2676,8 @@
             "sentence": "Note: Pending approval from the governing bodies and subject to mandatory regulatory approvals.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 38,
@@ -2827,6 +2866,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 904,
       "analyzed_word_count": 891,
       "filter_shrink_ratio": 0.0144,
@@ -2848,7 +2889,8 @@
             "sentence": "Note: Pending approval from the governing bodies and subject to mandatory regulatory approvals.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 19,
@@ -2860,7 +2902,7 @@
         "confidence": 9
       },
       "features": {
-        "language_score": 56.4,
+        "language_score": 55.9,
         "absolute_language_score": 57.6,
         "management_language_strength_raw": 7.6319,
         "positive_signal_score": 19.42,
@@ -2872,7 +2914,7 @@
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 10.1,
-        "peer_centered_z": 0.5343
+        "peer_centered_z": 0.4894
       },
       "evidence": [
         {
@@ -3064,24 +3106,20 @@
       "eligible_page_count": 102,
       "excluded_boilerplate_pages": 2,
       "excluded_boilerplate_passages": 0,
-      "masked_neutral_risk_spans": 3,
+      "masked_neutral_risk_spans": 0,
       "deduplicated_repeats": 1,
       "negated_hits_dropped": 0,
       "excluded_prior_period_passages": 6,
       "masked_procedural_condition_spans": 2,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 36,
+      "excluded_standardized_footnote_passages": 31,
       "pre_filter_analyzed_word_count": 2408,
-      "analyzed_word_count": 2029,
-      "filter_shrink_ratio": 0.1574,
-      "filter_shrink_warning": false,
+      "analyzed_word_count": 929,
+      "filter_shrink_ratio": 0.6142,
+      "filter_shrink_warning": true,
       "filter_examples": {
-        "neutral_risk": [
-          {
-            "page": 26,
-            "sentence": "MIL-BVA362-03032014-90141/VR 25 Lowest-ever half-yearly Cost of risk, with a strong increase in NPL coverage € m Cost of risk bps; annualised 505 428 1H25 1H26 Low Cost of risk, in line with Zero-NPL Bank status Loan loss provisions €0.9bn overlays Note: figures may not add up exactly due to rounding 24 20 1H25 1H26 NPL coverage % 31.12.25 30.6.26 48.6 50.1 +1.5pp High and strongly increased NPL coverage",
-            "masked_spans": 3
-          }
-        ],
+        "neutral_risk": [],
         "duplicates": [
           {
             "page": 47,
@@ -3123,31 +3161,58 @@
             "sentence": "Subject to shareholders ’ approval (3) According to EBA definition (4) In the 2022-1H26 period ▪ Strong increase in NPL coverage (+1.5pp vs 31.12.25) ▪ Performing Loans to customers up 5% yearly and 2% quarterly ▪ Record-high Operating income, Operating margin and Gross income ▪ +€121bn yearly growth in Customer financial assets (+€68bn in Q2)",
             "masked_spans": 1
           }
+        ],
+        "standardized_footnotes": [
+          {
+            "page": 4,
+            "sentence": "MIL-BVA362-03032014-90141/VR 3 High and sustainable value creation and distribution… ROTE(1), % Best-in-class and sustainable ROE/ROTE… Note: figures may not add up exactly due to rounding (1) Ratio of Net income to end-of-period tangible shareholders' equity (shareholders' equity after deduction of goodwill and other intangible assets net of relevant deferred tax liabilities).",
+            "masked_spans": 1
+          },
+          {
+            "page": 11,
+            "sentence": "MIL-BVA362-03032014-90141/VR 10 1H26: €5.6bn Net income with increased Revenues and Cost reduction 1H26 P&L; € m 973 905 44 (3,180) (1,358) (684) (428) (266) (2,875) (188) 7,480 5,131 14,533 9,311 8,617 5,554 Other operating income/expenses Other charges/gains(1) Taxes Profits on financial assets and liabilities at fair value Net interest income Net fees and commissions Operating income Personnel Administrative Depreciation Loan loss provisions Gross income Net income Operating margin Other(2) Insurance income Note: figures may not add up exactly due to rounding.",
+            "masked_spans": 1
+          },
+          {
+            "page": 12,
+            "sentence": "MIL-BVA362-03032014-90141/VR 11 2Q26: €2.8bn Net income, the best quarter ever 2Q26 P&L; € m 497 400 22 (1,605) (727) (321) (258) (190) (1,393) (92) 3,844 2,616 7,379 4,726 4,278 2,793 Other operating income/expenses Other charges/gains(1) Taxes Profits on financial assets and liabilities at fair value Net interest income Net fees and commissions Operating income Personnel Administrative Depreciation Loan loss provisions Gross income Net income Operating margin Other(2) Insurance income Note: figures may not add up exactly due to rounding.",
+            "masked_spans": 1
+          },
+          {
+            "page": 18,
+            "sentence": "MIL-BVA362-03032014-90141/VR 17 Best six months and quarter ever for Insurance income, driven by P&C … with growing P&C contribution(1), driven by the Non-motor business € m % As a % of Net fees and commissions + Insurance income Note: figures may not add up exactly due to rounding (1) Commissions + Insurance income (2) Individuals.",
+            "masked_spans": 1
+          },
+          {
+            "page": 22,
+            "sentence": "MIL-BVA362-03032014-90141/VR 21 Lowest-ever Cost/Income ratio with high flexibility for further Cost reduction Cost/Income ratio € m Operating costs 1H25 1H26 38.1 35.9 Operating income % Cost/Income ratio 1H25 1H26 5,260 5,222 -1% 1H25 1H26 13,795 14,533 +5% -2.2pp €6bn IT investments already deployed(1) Note: figures may not add up exactly due to rounding.",
+            "masked_spans": 1
+          }
         ]
       },
       "feature_counts": {
-        "positive": 13,
-        "negative": 3,
-        "uncertainty": 2,
+        "positive": 10,
+        "negative": 2,
+        "uncertainty": 1,
         "strong_modal": 0,
-        "weak_modal": 40,
+        "weak_modal": 4,
         "caution_buffer": 0,
-        "confidence": 8
+        "confidence": 6
       },
       "features": {
-        "language_score": 17.1,
-        "absolute_language_score": 16.0,
-        "management_language_strength_raw": -33.9823,
-        "positive_signal_score": 4.81,
-        "negative_pressure_score": 38.79,
-        "positive_per_1000_words": 6.41,
-        "negative_per_1000_words": 1.48,
+        "language_score": 42.9,
+        "absolute_language_score": 44.7,
+        "management_language_strength_raw": -5.3283,
+        "positive_signal_score": 7.97,
+        "negative_pressure_score": 13.29,
+        "positive_per_1000_words": 10.76,
+        "negative_per_1000_words": 2.15,
         "strong_modal_per_1000_words": 0.0,
-        "weak_modal_per_1000_words": 19.71,
-        "uncertainty_per_1000_words": 0.99,
+        "weak_modal_per_1000_words": 4.31,
+        "uncertainty_per_1000_words": 1.08,
         "caution_per_1000_words": 0.0,
-        "confidence_per_1000_words": 3.94,
-        "peer_centered_z": -2.7441
+        "confidence_per_1000_words": 6.46,
+        "peer_centered_z": -0.5955
       },
       "evidence": [
         {
@@ -3233,38 +3298,6 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 87,
-          "sentence": "MIL-BVA362-03032014-90141/VR 86 International Banks: 1H26 vs 1H25 € m Note: figures may not add up exactly due to rounding Decline partly due to the increase in the Hungary Windfall tax 1H25 1H26 ∆% Net interest income 1,223 1,181 (3.4) Net fee and commission income 364 378 3.8 Income from insurance business 0 0 n.m.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 1,
-            "uncertainty": 0,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
-          "page": 97,
-          "sentence": "Figures may not add up exactly due to rounding (1) Exposure to sovereign risks (central and local governments), banks and other customers.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 1,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
           "page": 28,
           "sentence": "13.0% not including any 1H26 Net income %, bps ISP 2026 fully loaded requirements SREP + combined buffer CET1 ratio evolution 31.12.25 ~(75) Buyback launched in July 31.12.25 post buyback ~180 Net income ~(175) Dividends and AT1 coupons(1) ~(35) RWA evolution ~25 DTA and others 30.6.26(2) >13.9% ~13.2% ~13.1% 10% >13.8% including additional ~75bps from DTA absorption ISP is a clear winner of the EBA stress test thanks to its well-diversified and resilient business model ~90 ~(90)>13.0% 31.3.26 ~13.1% 30.6.26(2) ~(20) x Q2 evolution ~25",
           "is_guidance": false,
@@ -3276,6 +3309,38 @@
             "weak_modal": 0,
             "caution_buffer": 0,
             "confidence": 2
+          },
+          "filters_applied": [],
+          "review_status": "pending_human_review"
+        },
+        {
+          "page": 39,
+          "sentence": "MIL-BVA362-03032014-90141/VR 38 … and Italian corporates are by far stronger than in the past Italian corporates are far better capitalised than in the past… … with liquidity buffers at historical highs Financial Debt/Financial Debt + Equity, % Deposits/Loans to non-financial companies, % Resilient and adaptive Italian corporates 45 42 37 34 31 2007- 2012 2013- 2019 2020- 2021 2022- 2023 2024- May 26 2007- 2012 2013- 2019 2020- 2021 2022- 2023 2024- 2025 20 32 56 62 70",
+          "is_guidance": false,
+          "hits": {
+            "positive": 2,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 1,
+            "caution_buffer": 0,
+            "confidence": 0
+          },
+          "filters_applied": [],
+          "review_status": "pending_human_review"
+        },
+        {
+          "page": 71,
+          "sentence": "Funding mix and size could change according to market conditions and asset growth (2) Not considering the €0.5bn covered bond issued by VUB Banka (3) Not considering the €0.75bn covered bond issued by VUB Banka 2026 - 2028 MLT maturities Main wholesale issues € bn Retail Wholesale 1H26 wholesale issues € bn Light 2026 funding plan 2026 ◼ €1.25bn AT1, €0.75bn covered bond, €0.5bn Tier 2, €1.25bn green senior non- preferred and $3.5bn 3-tranche (tranches: 2 SNP and 1 Tier 2) bond placed.",
+          "is_guidance": false,
+          "hits": {
+            "positive": 1,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 1,
+            "caution_buffer": 0,
+            "confidence": 0
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
@@ -3314,6 +3379,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 3,
       "excluded_procedural_condition_passages": 2,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 1623,
       "analyzed_word_count": 1593,
       "filter_shrink_ratio": 0.0185,
@@ -3345,7 +3412,8 @@
             "sentence": "Shareholder distribution subject to supervisory, board of directors and shareholder approvals.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 17,
@@ -3357,7 +3425,7 @@
         "confidence": 6
       },
       "features": {
-        "language_score": 33.3,
+        "language_score": 31.3,
         "absolute_language_score": 33.2,
         "management_language_strength_raw": -16.8236,
         "positive_signal_score": 9.7,
@@ -3369,7 +3437,7 @@
         "uncertainty_per_1000_words": 6.91,
         "caution_per_1000_words": 10.04,
         "confidence_per_1000_words": 3.77,
-        "peer_centered_z": -1.3923
+        "peer_centered_z": -1.5578
       },
       "evidence": [
         {
@@ -3536,6 +3604,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 242,
       "analyzed_word_count": 242,
       "filter_shrink_ratio": 0.0,
@@ -3551,7 +3621,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 5,
@@ -3563,7 +3634,7 @@
         "confidence": 1
       },
       "features": {
-        "language_score": 37.5,
+        "language_score": 35.8,
         "absolute_language_score": 37.6,
         "management_language_strength_raw": -12.3967,
         "positive_signal_score": 9.92,
@@ -3575,7 +3646,7 @@
         "uncertainty_per_1000_words": 4.13,
         "caution_per_1000_words": 8.26,
         "confidence_per_1000_words": 4.13,
-        "peer_centered_z": -1.0436
+        "peer_centered_z": -1.1872
       },
       "evidence": [
         {
@@ -3710,6 +3781,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 329,
       "analyzed_word_count": 321,
       "filter_shrink_ratio": 0.0243,
@@ -3725,7 +3798,8 @@
             "sentence": "Includes interim profit still subject to ECB approval 2.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 0,
@@ -3816,6 +3890,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 2,
       "excluded_procedural_condition_passages": 2,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 529,
       "analyzed_word_count": 498,
       "filter_shrink_ratio": 0.0586,
@@ -3842,7 +3918,8 @@
             "sentence": "Consistent with the 60% payout ratio objective, subject to meeting German corporate law requirements, AGM authorization and regulatory approvals Slide 21 – 2028 financial targets and capital objectives 1.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 1,
@@ -3981,6 +4058,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 347,
       "analyzed_word_count": 339,
       "filter_shrink_ratio": 0.0231,
@@ -4007,7 +4086,8 @@
             "sentence": "Includes interim profit still subject to ECB approval 2.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 0,
@@ -4084,6 +4164,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 3,
       "excluded_procedural_condition_passages": 3,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 582,
       "analyzed_word_count": 514,
       "filter_shrink_ratio": 0.1168,
@@ -4120,7 +4202,8 @@
             "sentence": "Distributions to shareholders are subject to corporate decisions, shareholder authorization, meeting German corporate law requirements, and in the case of share buybacks additionally require prior supervisory approval 2.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 3,
@@ -4132,7 +4215,7 @@
         "confidence": 4
       },
       "features": {
-        "language_score": 45.5,
+        "language_score": 44.3,
         "absolute_language_score": 46.1,
         "management_language_strength_raw": -3.8911,
         "positive_signal_score": 8.66,
@@ -4144,7 +4227,7 @@
         "uncertainty_per_1000_words": 3.89,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 7.78,
-        "peer_centered_z": -0.3735
+        "peer_centered_z": -0.4752
       },
       "evidence": [
         {
@@ -4247,9 +4330,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 416,
-      "analyzed_word_count": 416,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 389,
+      "filter_shrink_ratio": 0.0649,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -4267,30 +4352,37 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": [
+          {
+            "page": 65,
+            "sentence": "1ST QUARTER 2026 RESULTS I 30 APRIL 2026 65 Methodology (2/2) Note: The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding rules.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 3,
         "negative": 0,
         "uncertainty": 0,
         "strong_modal": 13,
-        "weak_modal": 1,
+        "weak_modal": 0,
         "caution_buffer": 0,
         "confidence": 2
       },
       "features": {
-        "language_score": 76.4,
-        "absolute_language_score": 76.4,
-        "management_language_strength_raw": 26.4423,
-        "positive_signal_score": 30.65,
-        "negative_pressure_score": 4.21,
-        "positive_per_1000_words": 7.21,
+        "language_score": 82.8,
+        "absolute_language_score": 82.8,
+        "management_language_strength_raw": 32.7763,
+        "positive_signal_score": 32.78,
+        "negative_pressure_score": 0.0,
+        "positive_per_1000_words": 7.71,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 31.25,
-        "weak_modal_per_1000_words": 2.4,
+        "strong_modal_per_1000_words": 33.42,
+        "weak_modal_per_1000_words": 0.0,
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
-        "confidence_per_1000_words": 4.81
+        "confidence_per_1000_words": 5.14
       },
       "evidence": [
         {
@@ -4456,9 +4548,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 381,
-      "analyzed_word_count": 381,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 352,
+      "filter_shrink_ratio": 0.0761,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -4476,31 +4570,38 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": [
+          {
+            "page": 72,
+            "sentence": "2ND QUARTER AND 1ST HALF 2026 RESULTS I 30 JULY 2026 72 Methodology (2/2) Note: The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding rules.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 10,
         "negative": 0,
         "uncertainty": 0,
         "strong_modal": 10,
-        "weak_modal": 1,
+        "weak_modal": 0,
         "caution_buffer": 1,
         "confidence": 7
       },
       "features": {
-        "language_score": 81.8,
-        "absolute_language_score": 84.5,
-        "management_language_strength_raw": 34.5144,
-        "positive_signal_score": 42.13,
-        "negative_pressure_score": 7.61,
-        "positive_per_1000_words": 26.25,
+        "language_score": 85.0,
+        "absolute_language_score": 92.3,
+        "management_language_strength_raw": 42.3295,
+        "positive_signal_score": 45.6,
+        "negative_pressure_score": 3.27,
+        "positive_per_1000_words": 28.41,
         "negative_per_1000_words": 0.0,
-        "strong_modal_per_1000_words": 26.25,
-        "weak_modal_per_1000_words": 2.62,
+        "strong_modal_per_1000_words": 28.41,
+        "weak_modal_per_1000_words": 0.0,
         "uncertainty_per_1000_words": 0.0,
-        "caution_per_1000_words": 2.62,
-        "confidence_per_1000_words": 18.37,
-        "peer_centered_z": 2.6521
+        "caution_per_1000_words": 2.84,
+        "confidence_per_1000_words": 19.89,
+        "peer_centered_z": 3.3939
       },
       "evidence": [
         {
@@ -4620,17 +4721,17 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 72,
-          "sentence": "2ND QUARTER AND 1ST HALF 2026 RESULTS I 30 JULY 2026 72 Methodology (2/2) Note: The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding rules.",
+          "page": 18,
+          "sentence": "Q2 25 Strong quarter driven by client activity and solid origination Growth supported by continued momentum in energy, infrastructure and commodities trade finance Solid rebound in DCM and ECM, driven by landmark transactions across sectors and regions H1 26 F&A revenues In EURm 1,768 1,868 1,864 Q2 24 Q2 25 Q2 26 H1 24 H1 25 H1 26",
           "is_guidance": false,
           "hits": {
-            "positive": 0,
+            "positive": 5,
             "negative": 0,
             "uncertainty": 0,
             "strong_modal": 0,
-            "weak_modal": 1,
+            "weak_modal": 0,
             "caution_buffer": 0,
-            "confidence": 0
+            "confidence": 4
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
@@ -4669,6 +4770,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 827,
       "analyzed_word_count": 827,
       "filter_shrink_ratio": 0.0,
@@ -4678,7 +4781,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 9,
@@ -4865,6 +4969,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 906,
       "analyzed_word_count": 906,
       "filter_shrink_ratio": 0.0,
@@ -4874,7 +4980,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 17,
@@ -5061,6 +5168,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 815,
       "analyzed_word_count": 815,
       "filter_shrink_ratio": 0.0,
@@ -5070,7 +5179,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 4,
@@ -5257,6 +5367,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 849,
       "analyzed_word_count": 849,
       "filter_shrink_ratio": 0.0,
@@ -5266,7 +5378,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 3,
@@ -5278,7 +5391,7 @@
         "confidence": 0
       },
       "features": {
-        "language_score": 55.4,
+        "language_score": 54.8,
         "absolute_language_score": 56.6,
         "management_language_strength_raw": 6.596,
         "positive_signal_score": 19.14,
@@ -5290,7 +5403,7 @@
         "uncertainty_per_1000_words": 4.71,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 0.0,
-        "peer_centered_z": 0.4526
+        "peer_centered_z": 0.4027
       },
       "evidence": [
         {
@@ -5486,6 +5599,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 564,
       "analyzed_word_count": 564,
       "filter_shrink_ratio": 0.0,
@@ -5501,7 +5616,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 11,
@@ -5690,6 +5806,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 653,
       "analyzed_word_count": 648,
       "filter_shrink_ratio": 0.0077,
@@ -5705,7 +5823,8 @@
             "sentence": "The Board has also agreed to maintain the same dividend policy for 2026, that is a cash payout of between 50% and 60% of consolidated net profit, payable in two instalments: an interim dividend of between 30% and 40% of first-half 2026 earnings (payable in November 2026) and a final dividend, subject to shareholder approval, payable in April 2027.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 15,
@@ -5892,6 +6011,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 425,
       "analyzed_word_count": 425,
       "filter_shrink_ratio": 0.0,
@@ -5907,7 +6028,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 5,
@@ -6062,6 +6184,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 638,
       "analyzed_word_count": 633,
       "filter_shrink_ratio": 0.0078,
@@ -6077,7 +6201,8 @@
             "sentence": "The payout will be paid in two instalments: an interim dividend of between 30% and 40% of consolidated net profit for the first half of the year (payable in November), and a final dividend, subject to final approval by the General Shareholders’ Meeting (payable in April 2027).",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 18,
@@ -6089,7 +6214,7 @@
         "confidence": 16
       },
       "features": {
-        "language_score": 71.9,
+        "language_score": 72.3,
         "absolute_language_score": 74.0,
         "management_language_strength_raw": 24.0126,
         "positive_signal_score": 28.91,
@@ -6101,7 +6226,7 @@
         "uncertainty_per_1000_words": 1.58,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 25.28,
-        "peer_centered_z": 1.8247
+        "peer_centered_z": 1.8606
       },
       "evidence": [
         {
@@ -6297,9 +6422,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 585,
-      "analyzed_word_count": 585,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 565,
+      "filter_shrink_ratio": 0.0342,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -6312,30 +6439,37 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": [
+          {
+            "page": 2,
+            "sentence": "The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 4,
         "negative": 1,
         "uncertainty": 1,
         "strong_modal": 2,
-        "weak_modal": 3,
+        "weak_modal": 2,
         "caution_buffer": 0,
         "confidence": 7
       },
       "features": {
-        "language_score": 48.2,
-        "absolute_language_score": 48.2,
-        "management_language_strength_raw": -1.7949,
-        "positive_signal_score": 12.91,
-        "negative_pressure_score": 14.7,
-        "positive_per_1000_words": 6.84,
-        "negative_per_1000_words": 1.71,
-        "strong_modal_per_1000_words": 3.42,
-        "weak_modal_per_1000_words": 5.13,
-        "uncertainty_per_1000_words": 1.71,
+        "language_score": 51.2,
+        "absolute_language_score": 51.2,
+        "management_language_strength_raw": 1.2389,
+        "positive_signal_score": 13.36,
+        "negative_pressure_score": 12.12,
+        "positive_per_1000_words": 7.08,
+        "negative_per_1000_words": 1.77,
+        "strong_modal_per_1000_words": 3.54,
+        "weak_modal_per_1000_words": 3.54,
+        "uncertainty_per_1000_words": 1.77,
         "caution_per_1000_words": 0.0,
-        "confidence_per_1000_words": 11.97
+        "confidence_per_1000_words": 12.39
       },
       "evidence": [
         {
@@ -6405,22 +6539,6 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 2,
-          "sentence": "The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 0,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
           "page": 33,
           "sentence": "Forecasts at 20 June 2025 IMF (October 2025): +0.7% in 2025 and +0.9% in 2026 European Commission (May 2025): +0.6% in 2025 and +1.3% in 2026 OECD (Sept.",
           "is_guidance": false,
@@ -6467,6 +6585,22 @@
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
+        },
+        {
+          "page": 41,
+          "sentence": "Taking into account the share buyback program covering a maximum of 15,128,677 ordinary shares of Crédit Agricole S.A.. announced on 30 September 2024, launched on 1 st October 2024 and which ended on 6 November 2024.",
+          "is_guidance": false,
+          "hits": {
+            "positive": 0,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 0,
+            "caution_buffer": 0,
+            "confidence": 2
+          },
+          "filters_applied": [],
+          "review_status": "pending_human_review"
         }
       ],
       "status": "provisional_single_period",
@@ -6501,9 +6635,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 1808,
-      "analyzed_word_count": 1791,
-      "filter_shrink_ratio": 0.0094,
+      "analyzed_word_count": 1771,
+      "filter_shrink_ratio": 0.0205,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -6527,30 +6663,37 @@
         ],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": [
+          {
+            "page": 2,
+            "sentence": "The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 10,
         "negative": 1,
         "uncertainty": 9,
         "strong_modal": 7,
-        "weak_modal": 7,
+        "weak_modal": 6,
         "caution_buffer": 4,
         "confidence": 9
       },
       "features": {
-        "language_score": 41.0,
-        "absolute_language_score": 41.0,
-        "management_language_strength_raw": -8.9615,
-        "positive_signal_score": 8.35,
-        "negative_pressure_score": 17.31,
-        "positive_per_1000_words": 5.58,
+        "language_score": 41.9,
+        "absolute_language_score": 41.9,
+        "management_language_strength_raw": -8.0745,
+        "positive_signal_score": 8.44,
+        "negative_pressure_score": 16.52,
+        "positive_per_1000_words": 5.65,
         "negative_per_1000_words": 0.56,
-        "strong_modal_per_1000_words": 3.91,
-        "weak_modal_per_1000_words": 3.91,
-        "uncertainty_per_1000_words": 5.03,
-        "caution_per_1000_words": 2.23,
-        "confidence_per_1000_words": 5.03
+        "strong_modal_per_1000_words": 3.95,
+        "weak_modal_per_1000_words": 3.39,
+        "uncertainty_per_1000_words": 5.08,
+        "caution_per_1000_words": 2.26,
+        "confidence_per_1000_words": 5.08
       },
       "evidence": [
         {
@@ -6716,9 +6859,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 972,
-      "analyzed_word_count": 972,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 952,
+      "filter_shrink_ratio": 0.0206,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -6746,30 +6891,37 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": [
+          {
+            "page": 2,
+            "sentence": "The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 11,
         "negative": 2,
         "uncertainty": 3,
         "strong_modal": 3,
-        "weak_modal": 2,
+        "weak_modal": 1,
         "caution_buffer": 3,
         "confidence": 10
       },
       "features": {
-        "language_score": 47.7,
-        "absolute_language_score": 47.7,
-        "management_language_strength_raw": -2.3148,
-        "positive_signal_score": 13.12,
-        "negative_pressure_score": 15.43,
-        "positive_per_1000_words": 11.32,
-        "negative_per_1000_words": 2.06,
-        "strong_modal_per_1000_words": 3.09,
-        "weak_modal_per_1000_words": 2.06,
-        "uncertainty_per_1000_words": 3.09,
-        "caution_per_1000_words": 3.09,
-        "confidence_per_1000_words": 10.29
+        "language_score": 49.5,
+        "absolute_language_score": 49.5,
+        "management_language_strength_raw": -0.5252,
+        "positive_signal_score": 13.39,
+        "negative_pressure_score": 13.92,
+        "positive_per_1000_words": 11.55,
+        "negative_per_1000_words": 2.1,
+        "strong_modal_per_1000_words": 3.15,
+        "weak_modal_per_1000_words": 1.05,
+        "uncertainty_per_1000_words": 3.15,
+        "caution_per_1000_words": 3.15,
+        "confidence_per_1000_words": 10.5
       },
       "evidence": [
         {
@@ -6939,9 +7091,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 1,
       "pre_filter_analyzed_word_count": 1056,
-      "analyzed_word_count": 1056,
-      "filter_shrink_ratio": 0.0,
+      "analyzed_word_count": 1036,
+      "filter_shrink_ratio": 0.0189,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -6964,31 +7118,38 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": [
+          {
+            "page": 2,
+            "sentence": "The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding.",
+            "masked_spans": 1
+          }
+        ]
       },
       "feature_counts": {
         "positive": 16,
         "negative": 1,
         "uncertainty": 2,
         "strong_modal": 0,
-        "weak_modal": 5,
+        "weak_modal": 4,
         "caution_buffer": 1,
         "confidence": 14
       },
       "features": {
-        "language_score": 49.3,
-        "absolute_language_score": 50.1,
-        "management_language_strength_raw": 0.0947,
-        "positive_signal_score": 13.92,
-        "negative_pressure_score": 13.83,
-        "positive_per_1000_words": 15.15,
-        "negative_per_1000_words": 0.95,
+        "language_score": 50.0,
+        "absolute_language_score": 51.8,
+        "management_language_strength_raw": 1.7857,
+        "positive_signal_score": 14.19,
+        "negative_pressure_score": 12.4,
+        "positive_per_1000_words": 15.44,
+        "negative_per_1000_words": 0.97,
         "strong_modal_per_1000_words": 0.0,
-        "weak_modal_per_1000_words": 4.73,
-        "uncertainty_per_1000_words": 1.89,
-        "caution_per_1000_words": 0.95,
-        "confidence_per_1000_words": 13.26,
-        "peer_centered_z": -0.0595
+        "weak_modal_per_1000_words": 3.86,
+        "uncertainty_per_1000_words": 1.93,
+        "caution_per_1000_words": 0.97,
+        "confidence_per_1000_words": 13.51,
+        "peer_centered_z": 0.0
       },
       "evidence": [
         {
@@ -7056,22 +7217,6 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 2,
-          "sentence": "The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 0,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
           "page": 26,
           "sentence": "NII recovery (+17%); fee and commission income rose (+9%; +5% excluding Milleis) driven by savings and non- life insurance Operating expenses: +3% excluding scope effect (2) and the “Energies 2030” transformation plan (3); cost/income ratio at 57.8% excluding the transformation plan Cost of risk/outstandings(4): 28bp, increased individual risk on corporates (sectors: retail/distribution/construction) 105.6 106.2 107.0 8.6 8.4 8.6 32.6 33.4 34.1 24.8 25.4 25.4 171.5 173.4 175.0 June 25 Mar.",
           "is_guidance": false,
@@ -7120,12 +7265,28 @@
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
+        },
+        {
+          "page": 20,
+          "sentence": "20 2ND QUARTER AND 1ST HALF-YEAR 2026 RESULTS AG – ASSET MANAGEMENT (AMUNDI) Strong activity • Medium-long-term net inflows (1) of +€20bn, driven by ETFs (+€12bn) and active management (+€9bn), still driven by fixed-income/credit strategies • Continued strong momentum in third-party distribution (net inflows of +€13bn; a record for the half-year at €38bn, i.e.",
+          "is_guidance": false,
+          "hits": {
+            "positive": 3,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 0,
+            "caution_buffer": 0,
+            "confidence": 3
+          },
+          "filters_applied": [],
+          "review_status": "pending_human_review"
         }
       ],
       "status": "provisional_single_period",
       "coverage_quality": "standard",
       "history_periods": 4,
-      "language_drift_score": 5.74,
+      "language_drift_score": 5.92,
       "directional_reversal": true,
       "drift_status": "preliminary_four_period_trend",
       "backtest_status": "not_run",
@@ -7135,32 +7296,32 @@
         {
           "from_period": "Q3 2025",
           "to_period": "FY2025",
-          "weak_modal_change": -1.22,
-          "uncertainty_change": 3.32,
-          "caution_change": 2.23,
-          "confidence_change": -6.94,
+          "weak_modal_change": -0.15,
+          "uncertainty_change": 3.31,
+          "caution_change": 2.26,
+          "confidence_change": -7.31,
           "directional_reversal": true,
-          "drift_penalty": 11.56
+          "drift_penalty": 11.82
         },
         {
           "from_period": "FY2025",
           "to_period": "Q1 2026",
-          "weak_modal_change": -1.85,
-          "uncertainty_change": -1.94,
-          "caution_change": 0.86,
-          "confidence_change": 5.26,
+          "weak_modal_change": -2.34,
+          "uncertainty_change": -1.93,
+          "caution_change": 0.89,
+          "confidence_change": 5.42,
           "directional_reversal": false,
-          "drift_penalty": 0.99
+          "drift_penalty": 1.02
         },
         {
           "from_period": "Q1 2026",
           "to_period": "H1 2026",
-          "weak_modal_change": 2.67,
-          "uncertainty_change": -1.2,
-          "caution_change": -2.14,
-          "confidence_change": 2.97,
+          "weak_modal_change": 2.81,
+          "uncertainty_change": -1.22,
+          "caution_change": -2.18,
+          "confidence_change": 3.01,
           "directional_reversal": false,
-          "drift_penalty": 4.67
+          "drift_penalty": 4.92
         }
       ]
     },
@@ -7186,6 +7347,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 1018,
       "analyzed_word_count": 991,
       "filter_shrink_ratio": 0.0265,
@@ -7207,7 +7370,8 @@
             "sentence": "Share buybacks will be applied for any remaining capital to be returned within the payout ratio 1) Subject to alignment with / approval by ECB and German Finance Agency",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 13,
@@ -7219,7 +7383,7 @@
         "confidence": 7
       },
       "features": {
-        "language_score": 48.7,
+        "language_score": 47.7,
         "absolute_language_score": 49.5,
         "management_language_strength_raw": -0.5045,
         "positive_signal_score": 16.45,
@@ -7231,7 +7395,7 @@
         "uncertainty_per_1000_words": 6.05,
         "caution_per_1000_words": 3.03,
         "confidence_per_1000_words": 7.06,
-        "peer_centered_z": -0.1067
+        "peer_centered_z": -0.1917
       },
       "evidence": [
         {
@@ -7398,6 +7562,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 332,
       "analyzed_word_count": 332,
       "filter_shrink_ratio": 0.0,
@@ -7407,7 +7573,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 1,
@@ -7594,6 +7761,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 407,
       "analyzed_word_count": 407,
       "filter_shrink_ratio": 0.0,
@@ -7603,7 +7772,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 2,
@@ -7790,6 +7960,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 322,
       "analyzed_word_count": 322,
       "filter_shrink_ratio": 0.0,
@@ -7799,7 +7971,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 1,
@@ -7986,6 +8159,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 402,
       "analyzed_word_count": 402,
       "filter_shrink_ratio": 0.0,
@@ -7995,7 +8170,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 2,
@@ -8007,7 +8183,7 @@
         "confidence": 1
       },
       "features": {
-        "language_score": 41.9,
+        "language_score": 40.5,
         "absolute_language_score": 42.3,
         "management_language_strength_raw": -7.7114,
         "positive_signal_score": 5.35,
@@ -8019,7 +8195,7 @@
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 2.49,
-        "peer_centered_z": -0.6745
+        "peer_centered_z": -0.795
       },
       "evidence": [
         {
@@ -8184,6 +8360,8 @@
       "excluded_prior_period_passages": 1,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 513,
       "analyzed_word_count": 502,
       "filter_shrink_ratio": 0.0214,
@@ -8204,7 +8382,8 @@
             "sentence": "Ordinary dividend subject to shareholder approval 4 Restated for impact of IFRS 17"
           }
         ],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 14,
@@ -8393,6 +8572,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 1,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 848,
       "analyzed_word_count": 842,
       "filter_shrink_ratio": 0.0071,
@@ -8419,7 +8600,8 @@
             "sentence": "Ordinary dividend subject to shareholder approval.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 54,
@@ -8608,6 +8790,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 1020,
       "analyzed_word_count": 1020,
       "filter_shrink_ratio": 0.0,
@@ -8623,7 +8807,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 35,
@@ -8812,6 +8997,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 634,
       "analyzed_word_count": 634,
       "filter_shrink_ratio": 0.0,
@@ -8827,7 +9014,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 24,
@@ -8839,7 +9027,7 @@
         "confidence": 9
       },
       "features": {
-        "language_score": 66.7,
+        "language_score": 66.8,
         "absolute_language_score": 68.5,
         "management_language_strength_raw": 18.5331,
         "positive_signal_score": 22.48,
@@ -8851,7 +9039,7 @@
         "uncertainty_per_1000_words": 1.58,
         "caution_per_1000_words": 1.58,
         "confidence_per_1000_words": 14.2,
-        "peer_centered_z": 1.3931
+        "peer_centered_z": 1.4019
       },
       "evidence": [
         {
@@ -9018,6 +9206,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 684,
       "analyzed_word_count": 684,
       "filter_shrink_ratio": 0.0,
@@ -9042,7 +9232,8 @@
           }
         ],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 5,
@@ -9169,6 +9360,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 965,
       "analyzed_word_count": 965,
       "filter_shrink_ratio": 0.0,
@@ -9184,7 +9377,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 11,
@@ -9373,6 +9567,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 333,
       "analyzed_word_count": 333,
       "filter_shrink_ratio": 0.0,
@@ -9388,7 +9584,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 8,
@@ -9545,6 +9742,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 294,
       "analyzed_word_count": 294,
       "filter_shrink_ratio": 0.0,
@@ -9554,7 +9753,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 0,
@@ -9566,7 +9766,7 @@
         "confidence": 0
       },
       "features": {
-        "language_score": 50.0,
+        "language_score": 49.1,
         "absolute_language_score": 50.9,
         "management_language_strength_raw": 0.8503,
         "positive_signal_score": 5.44,
@@ -9578,7 +9778,7 @@
         "uncertainty_per_1000_words": 3.4,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 0.0,
-        "peer_centered_z": 0.0
+        "peer_centered_z": -0.0783
       },
       "evidence": [
         {
@@ -9679,6 +9879,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 51,
       "analyzed_word_count": 51,
       "filter_shrink_ratio": 0.0,
@@ -9694,7 +9896,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 5,
@@ -9771,6 +9974,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 223,
       "analyzed_word_count": 223,
       "filter_shrink_ratio": 0.0,
@@ -9780,7 +9985,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 10,
@@ -9903,6 +10109,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 51,
       "analyzed_word_count": 51,
       "filter_shrink_ratio": 0.0,
@@ -9912,7 +10120,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 2,
@@ -10019,6 +10228,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 217,
       "analyzed_word_count": 217,
       "filter_shrink_ratio": 0.0,
@@ -10028,7 +10239,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 7,
@@ -10040,7 +10252,7 @@
         "confidence": 4
       },
       "features": {
-        "language_score": 56.4,
+        "language_score": 55.8,
         "absolute_language_score": 57.6,
         "management_language_strength_raw": 7.6037,
         "positive_signal_score": 34.33,
@@ -10052,7 +10264,7 @@
         "uncertainty_per_1000_words": 13.82,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 18.43,
-        "peer_centered_z": 0.532
+        "peer_centered_z": 0.487
       },
       "evidence": [
         {
@@ -10217,6 +10429,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 685,
       "analyzed_word_count": 685,
       "filter_shrink_ratio": 0.0,
@@ -10237,7 +10451,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 10,
@@ -10428,6 +10643,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 633,
       "analyzed_word_count": 633,
       "filter_shrink_ratio": 0.0,
@@ -10437,7 +10654,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 12,
@@ -10624,6 +10842,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 1097,
       "analyzed_word_count": 1097,
       "filter_shrink_ratio": 0.0,
@@ -10644,7 +10864,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 8,
@@ -10831,6 +11052,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 652,
       "analyzed_word_count": 652,
       "filter_shrink_ratio": 0.0,
@@ -10840,7 +11063,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 7,
@@ -11027,6 +11251,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 2,
       "excluded_procedural_condition_passages": 1,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 765,
       "analyzed_word_count": 724,
       "filter_shrink_ratio": 0.0536,
@@ -11068,7 +11294,8 @@
             "sentence": "Guidance subject to BoD resolution to be adopted in November with approval of 2026 3Q results; dividend expected to be paid in the same month.",
             "masked_spans": 1
           }
-        ]
+        ],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 3,
@@ -11080,7 +11307,7 @@
         "confidence": 2
       },
       "features": {
-        "language_score": 47.5,
+        "language_score": 46.4,
         "absolute_language_score": 48.2,
         "management_language_strength_raw": -1.7956,
         "positive_signal_score": 10.98,
@@ -11092,7 +11319,7 @@
         "uncertainty_per_1000_words": 4.14,
         "caution_per_1000_words": 4.14,
         "confidence_per_1000_words": 2.76,
-        "peer_centered_z": -0.2084
+        "peer_centered_z": -0.2998
       },
       "evidence": [
         {
@@ -11259,6 +11486,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 286,
       "analyzed_word_count": 263,
       "filter_shrink_ratio": 0.0804,
@@ -11280,7 +11509,8 @@
         ],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 2,
@@ -11292,7 +11522,7 @@
         "confidence": 0
       },
       "features": {
-        "language_score": 49.7,
+        "language_score": 48.8,
         "absolute_language_score": 50.6,
         "management_language_strength_raw": 0.5703,
         "positive_signal_score": 5.7,
@@ -11304,7 +11534,7 @@
         "uncertainty_per_1000_words": 3.8,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 0.0,
-        "peer_centered_z": -0.0221
+        "peer_centered_z": -0.1017
       },
       "evidence": [
         {
@@ -11405,6 +11635,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 555,
       "analyzed_word_count": 555,
       "filter_shrink_ratio": 0.0,
@@ -11414,7 +11646,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 12,
@@ -11426,7 +11659,7 @@
         "confidence": 7
       },
       "features": {
-        "language_score": 63.3,
+        "language_score": 63.2,
         "absolute_language_score": 65.0,
         "management_language_strength_raw": 14.955,
         "positive_signal_score": 24.41,
@@ -11438,7 +11671,7 @@
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 12.61,
-        "peer_centered_z": 1.1112
+        "peer_centered_z": 1.1024
       },
       "evidence": [
         {
@@ -11603,6 +11836,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 514,
       "analyzed_word_count": 514,
       "filter_shrink_ratio": 0.0,
@@ -11637,7 +11872,8 @@
           }
         ],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 6,
@@ -11810,6 +12046,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 287,
       "analyzed_word_count": 287,
       "filter_shrink_ratio": 0.0,
@@ -11819,7 +12057,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 8,
@@ -11831,7 +12070,7 @@
         "confidence": 1
       },
       "features": {
-        "language_score": 43.3,
+        "language_score": 41.9,
         "absolute_language_score": 43.7,
         "management_language_strength_raw": -6.2718,
         "positive_signal_score": 12.02,
@@ -11843,7 +12082,7 @@
         "uncertainty_per_1000_words": 0.0,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 3.48,
-        "peer_centered_z": -0.5611
+        "peer_centered_z": -0.6745
       },
       "evidence": [
         {
@@ -11976,6 +12215,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 398,
       "analyzed_word_count": 398,
       "filter_shrink_ratio": 0.0,
@@ -11985,7 +12226,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 1,
@@ -12172,6 +12414,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 173,
       "analyzed_word_count": 173,
       "filter_shrink_ratio": 0.0,
@@ -12187,7 +12431,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 3,
@@ -12312,6 +12557,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 169,
       "analyzed_word_count": 169,
       "filter_shrink_ratio": 0.0,
@@ -12321,7 +12568,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 0,
@@ -12444,6 +12692,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 97,
       "analyzed_word_count": 97,
       "filter_shrink_ratio": 0.0,
@@ -12453,7 +12703,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 1,
@@ -12465,7 +12716,7 @@
         "confidence": 0
       },
       "features": {
-        "language_score": 78.4,
+        "language_score": 79.3,
         "absolute_language_score": 80.9,
         "management_language_strength_raw": 30.9278,
         "positive_signal_score": 44.85,
@@ -12477,7 +12728,7 @@
         "uncertainty_per_1000_words": 10.31,
         "caution_per_1000_words": 0.0,
         "confidence_per_1000_words": 0.0,
-        "peer_centered_z": 2.3695
+        "peer_centered_z": 2.4395
       },
       "evidence": [
         {
@@ -12577,6 +12828,8 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 0,
       "excluded_procedural_condition_passages": 0,
+      "masked_standardized_footnote_spans": 0,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 1100,
       "analyzed_word_count": 1100,
       "filter_shrink_ratio": 0.0,
@@ -12592,7 +12845,8 @@
         "duplicates": [],
         "negation": [],
         "prior_period": [],
-        "procedural_conditions": []
+        "procedural_conditions": [],
+        "standardized_footnotes": []
       },
       "feature_counts": {
         "positive": 9,
@@ -12779,9 +13033,11 @@
       "excluded_prior_period_passages": 0,
       "masked_procedural_condition_spans": 4,
       "excluded_procedural_condition_passages": 4,
+      "masked_standardized_footnote_spans": 1,
+      "excluded_standardized_footnote_passages": 0,
       "pre_filter_analyzed_word_count": 715,
-      "analyzed_word_count": 673,
-      "filter_shrink_ratio": 0.0587,
+      "analyzed_word_count": 663,
+      "filter_shrink_ratio": 0.0727,
       "filter_shrink_warning": false,
       "filter_examples": {
         "neutral_risk": [
@@ -12825,6 +13081,13 @@
             "sentence": "Dividend accrued on 1 H 2026 net profit subject to Board of Directors approval",
             "masked_spans": 1
           }
+        ],
+        "standardized_footnotes": [
+          {
+            "page": 5,
+            "sentence": "Share buyback approved by ECB but not yet distributed for a maximum aggregate consideration of € 750 m Note : Numbers may not add up exactly due to rounding",
+            "masked_spans": 1
+          }
         ]
       },
       "feature_counts": {
@@ -12832,24 +13095,24 @@
         "negative": 0,
         "uncertainty": 4,
         "strong_modal": 0,
-        "weak_modal": 1,
+        "weak_modal": 0,
         "caution_buffer": 1,
         "confidence": 11
       },
       "features": {
-        "language_score": 55.4,
-        "absolute_language_score": 56.6,
-        "management_language_strength_raw": 6.6122,
-        "positive_signal_score": 18.95,
-        "negative_pressure_score": 12.33,
-        "positive_per_1000_words": 23.77,
+        "language_score": 57.6,
+        "absolute_language_score": 59.4,
+        "management_language_strength_raw": 9.3514,
+        "positive_signal_score": 19.23,
+        "negative_pressure_score": 9.88,
+        "positive_per_1000_words": 24.13,
         "negative_per_1000_words": 0.0,
         "strong_modal_per_1000_words": 0.0,
-        "weak_modal_per_1000_words": 1.49,
-        "uncertainty_per_1000_words": 5.94,
-        "caution_per_1000_words": 1.49,
-        "confidence_per_1000_words": 16.34,
-        "peer_centered_z": 0.4539
+        "weak_modal_per_1000_words": 0.0,
+        "uncertainty_per_1000_words": 6.03,
+        "caution_per_1000_words": 1.51,
+        "confidence_per_1000_words": 16.59,
+        "peer_centered_z": 0.6333
       },
       "evidence": [
         {
@@ -12953,22 +13216,6 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 5,
-          "sentence": "Share buyback approved by ECB but not yet distributed for a maximum aggregate consideration of € 750 m Note : Numbers may not add up exactly due to rounding",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 0,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 2
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
           "page": 42,
           "sentence": "Management Reg. & Models Business dynamics & Risk profile improvement 2Q26 67.3 67.8 68.2 65.1 65.2 64.3 12.4 12.4 12.4 13.4 13.4 13.4 1.8 1.9 1.8 1.7 1.6 2.5 81.5 82.1 82.4 80.1 80.2 80.2 1Q25 2Q25 3Q25 4Q25 1Q26 2Q26 Credit Risk Operational Risk Other Risks ▪ At the end of Jun - 26, RWAs flat Q/Q at €80.2 ▪ RWA evolution mainly driven by active portfolio management actions RWAs details 80.2 80.2 RWAs1 (€bn) 1 .",
           "is_guidance": false,
@@ -12984,6 +13231,22 @@
           "filters_applied": [
             "risk_masked:3"
           ],
+          "review_status": "pending_human_review"
+        },
+        {
+          "page": 28,
+          "sentence": "27 4. Acceleration beyond B:Dynamic Robust and sustainable revenue growth Overall revenue growth driven by commissions, €bn ~0.4 2025 ~0.3 2028 E Other Net Commission Income Net Interest Income ~7.4 ~8.0 ~2.6 ~4.4 ~3.0 ~4.7 2.3% p.a. Net Comm. on Total Rev. % ~35% ~38% Customer volumes growth 2025-2028E, % Commissions growth 2025-2028E, % Lending to clients1 +9.4% +55% Bancassurance commissions Deposits2 +5.5% +14% Wealth management commissions 1 . Gross loans to customers | 2 . Total direct deposits",
+          "is_guidance": false,
+          "hits": {
+            "positive": 5,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 0,
+            "caution_buffer": 0,
+            "confidence": 1
+          },
+          "filters_applied": [],
           "review_status": "pending_human_review"
         }
       ],
@@ -13004,13 +13267,13 @@
       "ticker": "BNP",
       "bank_name": "BNP Paribas S.A.",
       "numeric_score": 67.1,
-      "language_score": 76.8,
+      "language_score": 77.6,
       "absolute_language_score": 79.2,
       "negative_pressure_score": 13.09,
-      "language_drift_score": 5.8,
+      "language_drift_score": 6.48,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -9.7,
+      "divergence": -10.5,
       "quadrant": "Confirmed strength",
       "status": "provisional_four_period_trend",
       "alerts": [],
@@ -13072,20 +13335,20 @@
       "ticker": "SAN",
       "bank_name": "Banco Santander S.A.",
       "numeric_score": 38.8,
-      "language_score": 63.5,
+      "language_score": 63.4,
       "absolute_language_score": 65.1,
       "negative_pressure_score": 10.31,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -24.7,
+      "divergence": -24.6,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached -24.7 points.",
+          "message": "Numeric-language gap reached -24.6 points.",
           "review_status": "pending_human_review"
         }
       ],
@@ -13147,26 +13410,26 @@
       "ticker": "INGA",
       "bank_name": "ING Groep N.V.",
       "numeric_score": 53.2,
-      "language_score": 28.5,
+      "language_score": 26.2,
       "absolute_language_score": 28.1,
       "negative_pressure_score": 35.56,
       "language_drift_score": 9.51,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": 24.7,
+      "divergence": 27.0,
       "quadrant": "Early warning",
       "status": "provisional_four_period_trend",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached +24.7 points.",
+          "message": "Numeric-language gap reached +27.0 points.",
           "review_status": "pending_human_review"
         },
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (35.6 versus 17.6 gate). Main drivers: weak commitment, uncertainty, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (35.6 versus 15.4 gate). Main drivers: weak commitment, uncertainty, negative wording.",
           "review_status": "pending_human_review"
         },
         {
@@ -13232,13 +13495,13 @@
       "ticker": "BBVA",
       "bank_name": "Banco Bilbao Vizcaya Argentaria S.A.",
       "numeric_score": 55.8,
-      "language_score": 56.4,
+      "language_score": 55.9,
       "absolute_language_score": 57.6,
       "negative_pressure_score": 11.78,
       "language_drift_score": 6.67,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -0.6,
+      "divergence": -0.1,
       "quadrant": "Confirmed strength",
       "status": "provisional_four_period_trend",
       "alerts": [
@@ -13305,62 +13568,17 @@
       "ticker": "ISP",
       "bank_name": "Intesa Sanpaolo S.p.A.",
       "numeric_score": 55.1,
-      "language_score": 17.1,
-      "absolute_language_score": 16.0,
-      "negative_pressure_score": 38.79,
+      "language_score": 42.9,
+      "absolute_language_score": 44.7,
+      "negative_pressure_score": 13.29,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": 38.0,
+      "divergence": 12.2,
       "quadrant": "Early warning",
       "status": "provisional_single_period",
-      "alerts": [
-        {
-          "type": "numeric_language_divergence",
-          "severity": "research_review",
-          "message": "Numeric-language gap reached +38.0 points.",
-          "review_status": "pending_human_review"
-        },
-        {
-          "type": "elevated_negative_language_pressure",
-          "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (38.8 versus 17.6 gate). Main drivers: weak commitment, negative wording.",
-          "review_status": "pending_human_review"
-        }
-      ],
+      "alerts": [],
       "warning_evidence": [
-        {
-          "page": 87,
-          "sentence": "MIL-BVA362-03032014-90141/VR 86 International Banks: 1H26 vs 1H25 € m Note: figures may not add up exactly due to rounding Decline partly due to the increase in the Hungary Windfall tax 1H25 1H26 ∆% Net interest income 1,223 1,181 (3.4) Net fee and commission income 364 378 3.8 Income from insurance business 0 0 n.m.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 1,
-            "uncertainty": 0,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
-        {
-          "page": 97,
-          "sentence": "Figures may not add up exactly due to rounding (1) Exposure to sovereign risks (central and local governments), banks and other customers.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 1,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
         {
           "page": 14,
           "sentence": "MIL-BVA362-03032014-90141/VR 13 Net interest income growth despite Euribor decline… +1.90+2.35 Net interest income – Half-yearly comparison € m % Euribor 1M (average data) 1H25 2H25 1H26 7,432 7,364 7,480 +1.99 +€48m 2026 Net interest income guidance raised to well above €15bn -36bps",
@@ -13376,6 +13594,38 @@
           },
           "filters_applied": [],
           "review_status": "pending_human_review"
+        },
+        {
+          "page": 28,
+          "sentence": "13.0% not including any 1H26 Net income %, bps ISP 2026 fully loaded requirements SREP + combined buffer CET1 ratio evolution 31.12.25 ~(75) Buyback launched in July 31.12.25 post buyback ~180 Net income ~(175) Dividends and AT1 coupons(1) ~(35) RWA evolution ~25 DTA and others 30.6.26(2) >13.9% ~13.2% ~13.1% 10% >13.8% including additional ~75bps from DTA absorption ISP is a clear winner of the EBA stress test thanks to its well-diversified and resilient business model ~90 ~(90)>13.0% 31.3.26 ~13.1% 30.6.26(2) ~(20) x Q2 evolution ~25",
+          "is_guidance": false,
+          "hits": {
+            "positive": 1,
+            "negative": 1,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 0,
+            "caution_buffer": 0,
+            "confidence": 2
+          },
+          "filters_applied": [],
+          "review_status": "pending_human_review"
+        },
+        {
+          "page": 39,
+          "sentence": "MIL-BVA362-03032014-90141/VR 38 … and Italian corporates are by far stronger than in the past Italian corporates are far better capitalised than in the past… … with liquidity buffers at historical highs Financial Debt/Financial Debt + Equity, % Deposits/Loans to non-financial companies, % Resilient and adaptive Italian corporates 45 42 37 34 31 2007- 2012 2013- 2019 2020- 2021 2022- 2023 2024- May 26 2007- 2012 2013- 2019 2020- 2021 2022- 2023 2024- 2025 20 32 56 62 70",
+          "is_guidance": false,
+          "hits": {
+            "positive": 2,
+            "negative": 0,
+            "uncertainty": 0,
+            "strong_modal": 0,
+            "weak_modal": 1,
+            "caution_buffer": 0,
+            "confidence": 0
+          },
+          "filters_applied": [],
+          "review_status": "pending_human_review"
         }
       ],
       "publication_eligible": false
@@ -13384,20 +13634,20 @@
       "ticker": "UCG",
       "bank_name": "UniCredit S.p.A.",
       "numeric_score": 49.6,
-      "language_score": 33.3,
+      "language_score": 31.3,
       "absolute_language_score": 33.2,
       "negative_pressure_score": 26.52,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": 16.3,
+      "divergence": 18.3,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (26.5 versus 17.6 gate). Main drivers: uncertainty, cautious/euphemistic wording, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (26.5 versus 15.4 gate). Main drivers: uncertainty, cautious/euphemistic wording, negative wording.",
           "review_status": "pending_human_review"
         }
       ],
@@ -13441,20 +13691,20 @@
       "ticker": "NDA-FI",
       "bank_name": "Nordea Bank Abp",
       "numeric_score": 45.8,
-      "language_score": 37.5,
+      "language_score": 35.8,
       "absolute_language_score": 37.6,
       "negative_pressure_score": 22.31,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": 8.3,
+      "divergence": 10.0,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (22.3 versus 17.6 gate). Main drivers: cautious/euphemistic wording, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (22.3 versus 15.4 gate). Main drivers: cautious/euphemistic wording, negative wording.",
           "review_status": "pending_human_review"
         }
       ],
@@ -13500,13 +13750,13 @@
       "ticker": "DBK",
       "bank_name": "Deutsche Bank AG",
       "numeric_score": 52.0,
-      "language_score": 45.5,
+      "language_score": 44.3,
       "absolute_language_score": 46.1,
       "negative_pressure_score": 12.55,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": 6.5,
+      "divergence": 7.7,
       "quadrant": "Early warning",
       "status": "provisional_single_period",
       "alerts": [],
@@ -13534,40 +13784,24 @@
       "ticker": "GLE",
       "bank_name": "Société Générale S.A.",
       "numeric_score": 54.8,
-      "language_score": 81.8,
-      "absolute_language_score": 84.5,
-      "negative_pressure_score": 7.61,
+      "language_score": 85.0,
+      "absolute_language_score": 92.3,
+      "negative_pressure_score": 3.27,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": -27.0,
+      "divergence": -30.2,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached -27.0 points.",
+          "message": "Numeric-language gap reached -30.2 points.",
           "review_status": "pending_human_review"
         }
       ],
       "warning_evidence": [
-        {
-          "page": 72,
-          "sentence": "2ND QUARTER AND 1ST HALF 2026 RESULTS I 30 JULY 2026 72 Methodology (2/2) Note: The sum of values contained in the tables and analyses may differ slightly from the total reported due to rounding rules.",
-          "is_guidance": false,
-          "hits": {
-            "positive": 0,
-            "negative": 0,
-            "uncertainty": 0,
-            "strong_modal": 0,
-            "weak_modal": 1,
-            "caution_buffer": 0,
-            "confidence": 0
-          },
-          "filters_applied": [],
-          "review_status": "pending_human_review"
-        },
         {
           "page": 21,
           "sentence": "Q2 25 Lower UCS result(3) per unit at ~EUR 330 in Q2 26 (vs. ~EUR 1,230 in Q2 25), consistent with the expected normalisation and 2026 annual guidance between EUR 200 and 600 C/I ratio at 50.3%(4) and ROTE at 13.4%(4), in line with 2026 targets Consumer Finance revenues stable vs.",
@@ -13591,13 +13825,13 @@
       "ticker": "KBC",
       "bank_name": "KBC Group N.V.",
       "numeric_score": 38.8,
-      "language_score": 55.4,
+      "language_score": 54.8,
       "absolute_language_score": 56.6,
       "negative_pressure_score": 12.54,
       "language_drift_score": 4.03,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -16.6,
+      "divergence": -16.0,
       "quadrant": "Potential turnaround",
       "status": "provisional_four_period_trend",
       "alerts": [],
@@ -13657,20 +13891,20 @@
       "ticker": "CABK",
       "bank_name": "CaixaBank S.A.",
       "numeric_score": 41.1,
-      "language_score": 71.9,
+      "language_score": 72.3,
       "absolute_language_score": 74.0,
       "negative_pressure_score": 4.9,
       "language_drift_score": 3.64,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -30.8,
+      "divergence": -31.2,
       "quadrant": "Potential turnaround",
       "status": "provisional_four_period_trend",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached -30.8 points.",
+          "message": "Numeric-language gap reached -31.2 points.",
           "review_status": "pending_human_review"
         }
       ],
@@ -13714,14 +13948,14 @@
       "ticker": "ACA",
       "bank_name": "Crédit Agricole S.A.",
       "numeric_score": 50.1,
-      "language_score": 49.3,
-      "absolute_language_score": 50.1,
-      "negative_pressure_score": 13.83,
-      "language_drift_score": 5.74,
+      "language_score": 50.0,
+      "absolute_language_score": 51.8,
+      "negative_pressure_score": 12.4,
+      "language_drift_score": 5.92,
       "directional_reversal": true,
       "history_periods": 4,
-      "divergence": 0.8,
-      "quadrant": "Early warning",
+      "divergence": 0.1,
+      "quadrant": "Confirmed strength",
       "status": "provisional_four_period_trend",
       "alerts": [
         {
@@ -13787,16 +14021,23 @@
       "ticker": "CBK",
       "bank_name": "Commerzbank AG",
       "numeric_score": 43.9,
-      "language_score": 48.7,
+      "language_score": 47.7,
       "absolute_language_score": 49.5,
       "negative_pressure_score": 16.95,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -4.8,
+      "divergence": -3.8,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
-      "alerts": [],
+      "alerts": [
+        {
+          "type": "elevated_negative_language_pressure",
+          "severity": "research_review",
+          "message": "Negative-language pressure is in the peer top quartile (16.9 versus 15.4 gate). Main drivers: uncertainty, cautious/euphemistic wording, negative wording.",
+          "review_status": "pending_human_review"
+        }
+      ],
       "warning_evidence": [
         {
           "page": 1,
@@ -13853,13 +14094,13 @@
       "ticker": "EBS",
       "bank_name": "Erste Group Bank AG",
       "numeric_score": 45.2,
-      "language_score": 41.9,
+      "language_score": 40.5,
       "absolute_language_score": 42.3,
       "negative_pressure_score": 13.06,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": 3.3,
+      "divergence": 4.7,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [],
@@ -13887,13 +14128,13 @@
       "ticker": "BIRG",
       "bank_name": "Bank of Ireland Group plc",
       "numeric_score": 55.1,
-      "language_score": 66.7,
+      "language_score": 66.8,
       "absolute_language_score": 68.5,
       "negative_pressure_score": 3.94,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -11.6,
+      "divergence": -11.7,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
       "alerts": [],
@@ -13904,14 +14145,14 @@
       "ticker": "FBK",
       "bank_name": "FinecoBank S.p.A.",
       "numeric_score": 46.7,
-      "language_score": 50.0,
+      "language_score": 49.1,
       "absolute_language_score": 50.9,
       "negative_pressure_score": 4.59,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": -3.3,
-      "quadrant": "Potential turnaround",
+      "divergence": -2.4,
+      "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [],
       "warning_evidence": [
@@ -13938,20 +14179,20 @@
       "ticker": "ABN",
       "bank_name": "ABN AMRO Bank N.V.",
       "numeric_score": 46.5,
-      "language_score": 56.4,
+      "language_score": 55.8,
       "absolute_language_score": 57.6,
       "negative_pressure_score": 26.73,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -9.9,
+      "divergence": -9.3,
       "quadrant": "Potential turnaround",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (26.7 versus 17.6 gate). Main drivers: uncertainty, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (26.7 versus 15.4 gate). Main drivers: weak commitment, uncertainty, negative wording.",
           "review_status": "pending_human_review"
         }
       ],
@@ -14011,13 +14252,13 @@
       "ticker": "BAMI",
       "bank_name": "Banco BPM S.p.A.",
       "numeric_score": 49.4,
-      "language_score": 47.5,
+      "language_score": 46.4,
       "absolute_language_score": 48.2,
       "negative_pressure_score": 12.78,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": 1.9,
+      "divergence": 3.0,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14061,13 +14302,13 @@
       "ticker": "SAB",
       "bank_name": "Banco de Sabadell S.A.",
       "numeric_score": 36.4,
-      "language_score": 49.7,
+      "language_score": 48.8,
       "absolute_language_score": 50.6,
       "negative_pressure_score": 5.13,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -13.3,
+      "divergence": -12.4,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14095,13 +14336,13 @@
       "ticker": "AIBG",
       "bank_name": "AIB Group plc",
       "numeric_score": 58.9,
-      "language_score": 63.3,
+      "language_score": 63.2,
       "absolute_language_score": 65.0,
       "negative_pressure_score": 9.46,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 1,
-      "divergence": -4.4,
+      "divergence": -4.3,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14112,20 +14353,20 @@
       "ticker": "BKT",
       "bank_name": "Bankinter S.A.",
       "numeric_score": 49.3,
-      "language_score": 43.3,
+      "language_score": 41.9,
       "absolute_language_score": 43.7,
       "negative_pressure_score": 18.29,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": 6.0,
+      "divergence": 7.4,
       "quadrant": "High-risk screen",
       "status": "provisional_single_period",
       "alerts": [
         {
           "type": "elevated_negative_language_pressure",
           "severity": "research_review",
-          "message": "Negative-language pressure is in the peer top quartile (18.3 versus 17.6 gate). Main drivers: weak commitment, negative wording.",
+          "message": "Negative-language pressure is in the peer top quartile (18.3 versus 15.4 gate). Main drivers: weak commitment, negative wording.",
           "review_status": "pending_human_review"
         }
       ],
@@ -14185,20 +14426,20 @@
       "ticker": "BG",
       "bank_name": "BAWAG Group AG",
       "numeric_score": 45.0,
-      "language_score": 78.4,
+      "language_score": 79.3,
       "absolute_language_score": 80.9,
       "negative_pressure_score": 13.92,
       "language_drift_score": 10.22,
       "directional_reversal": false,
       "history_periods": 4,
-      "divergence": -33.4,
+      "divergence": -34.3,
       "quadrant": "Potential turnaround",
       "status": "provisional_four_period_trend",
       "alerts": [
         {
           "type": "numeric_language_divergence",
           "severity": "research_review",
-          "message": "Numeric-language gap reached -33.4 points.",
+          "message": "Numeric-language gap reached -34.3 points.",
           "review_status": "pending_human_review"
         },
         {
@@ -14232,13 +14473,13 @@
       "ticker": "BPE",
       "bank_name": "BPER Banca S.p.A.",
       "numeric_score": 68.7,
-      "language_score": 55.4,
-      "absolute_language_score": 56.6,
-      "negative_pressure_score": 12.33,
+      "language_score": 57.6,
+      "absolute_language_score": 59.4,
+      "negative_pressure_score": 9.88,
       "language_drift_score": null,
       "directional_reversal": null,
       "history_periods": 2,
-      "divergence": 13.3,
+      "divergence": 11.1,
       "quadrant": "Confirmed strength",
       "status": "provisional_single_period",
       "alerts": [],
@@ -14278,19 +14519,21 @@
           "review_status": "pending_human_review"
         },
         {
-          "page": 5,
-          "sentence": "Share buyback approved by ECB but not yet distributed for a maximum aggregate consideration of € 750 m Note : Numbers may not add up exactly due to rounding",
+          "page": 42,
+          "sentence": "Management Reg. & Models Business dynamics & Risk profile improvement 2Q26 67.3 67.8 68.2 65.1 65.2 64.3 12.4 12.4 12.4 13.4 13.4 13.4 1.8 1.9 1.8 1.7 1.6 2.5 81.5 82.1 82.4 80.1 80.2 80.2 1Q25 2Q25 3Q25 4Q25 1Q26 2Q26 Credit Risk Operational Risk Other Risks ▪ At the end of Jun - 26, RWAs flat Q/Q at €80.2 ▪ RWA evolution mainly driven by active portfolio management actions RWAs details 80.2 80.2 RWAs1 (€bn) 1 .",
           "is_guidance": false,
           "hits": {
             "positive": 0,
             "negative": 0,
-            "uncertainty": 0,
+            "uncertainty": 1,
             "strong_modal": 0,
-            "weak_modal": 1,
+            "weak_modal": 0,
             "caution_buffer": 0,
-            "confidence": 2
+            "confidence": 0
           },
-          "filters_applied": [],
+          "filters_applied": [
+            "risk_masked:3"
+          ],
           "review_status": "pending_human_review"
         }
       ],
