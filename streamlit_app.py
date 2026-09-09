@@ -350,6 +350,12 @@ st.markdown(
     """
     <style>
     .block-container {padding-top: 1.2rem; padding-bottom: 4rem;}
+    .prism-group {border-left:4px solid var(--group-color);padding:.15rem .5rem;min-height:8rem;}
+    .prism-group-name {font-weight:700;font-size:1rem;text-align:center;margin-bottom:.4rem;}
+    .prism-signal-line {display:flex;flex-direction:column;font-size:.78rem;line-height:1.5;margin-bottom:.5rem;}
+    .prism-bank-list {display:flex;gap:.35rem;flex-wrap:wrap;justify-content:center;}
+    .prism-bank-token {display:inline-flex;align-items:center;gap:.25rem;font-size:.7rem;font-weight:700;}
+    .prism-bank-logo {width:1.2rem;height:1.2rem;object-fit:contain;background:white;border-radius:50%;}
     .prism-nav a {display:block;color:#aeb8c7;text-decoration:none;padding:.31rem .2rem;border-left:2px solid #28364b;padding-left:.75rem;font-size:.91rem;}
     .prism-nav a:hover {color:#f4f6fb;border-left-color:#4fa3ff;}
     .prism-nav a.active {color:#ffffff;border-left-color:#4fa3ff;background:linear-gradient(90deg,#4fa3ff18,transparent);font-weight:700;}
@@ -361,8 +367,9 @@ st.markdown(
     section[data-testid="stSidebar"] h2 {font-size:2.72rem;line-height:.98;margin-bottom:.16rem;letter-spacing:-.05em;white-space:nowrap;}
     section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {overflow-y:hidden !important;}
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:.32rem;}
-    section[data-testid="stMain"] h2 {font-size:2rem;letter-spacing:-.02em;}
-    section[data-testid="stMain"] h3 {font-size:1.28rem;}
+    section[data-testid="stMain"] h2,
+    section[data-testid="stMain"] h3,
+    section[data-testid="stMain"] h4 {font-family:inherit;font-size:1.5rem;font-weight:700;text-align:center;letter-spacing:-.02em;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -383,11 +390,6 @@ with st.sidebar:
         st.caption(f"⚠ {observed} · {data_age} days old")
     else:
         st.caption(f"Data {observed} · current")
-    st.caption(
-        f"Coverage · Fundamentals {len(scored_tickers)}/{len(universe)} · "
-        f"Language {language_coverage.get('provisional_banks', 0)}/{len(universe)} · "
-        f"Price {market_coverage}/{len(universe)}"
-    )
     st.markdown(
         """
         <div class="prism-nav">
@@ -417,13 +419,6 @@ if refresh_clicked:
 st.markdown("<div id='core-signal-map'></div>", unsafe_allow_html=True)
 st.header("Signal map")
 if plotted_rows:
-    legend_chips = "".join(
-        f"<span class='prism-chip' title=\"{GROUP_META[group]['meaning']}\">"
-        f"<span class='prism-dot' style='background:{GROUP_META[group]['color']}'></span>"
-        f"{group} · {group_counts[group]}</span>"
-        for group in GROUP_ORDER
-    )
-    st.markdown(f"<div class='prism-legend'>{legend_chips}</div>", unsafe_allow_html=True)
     st.plotly_chart(
         build_signal_map(plotted_rows),
         width="stretch",
@@ -431,34 +426,50 @@ if plotted_rows:
         key="front_page_signal_map",
         config={"displaylogo": False, "scrollZoom": True},
     )
+    group_columns = st.columns(3, gap="medium")
+    for index, group_name in enumerate(GROUP_ORDER):
+        meta = GROUP_META[group_name]
+        members = sorted(row["Ticker"] for row in plotted_rows if row["Investment group"] == group_name)
+        member_tokens = "".join(
+            f"<span class='prism-bank-token'><img class='prism-bank-logo' src='{BANK_LOGOS.get(ticker, '')}' alt=''>{ticker}</span>"
+            for ticker in members
+        )
+        signal_lines = "".join(f"<span>{line}</span>" for line in meta["signals"])
+        with group_columns[index % 3].container(border=True):
+            st.markdown(
+                f"<div class='prism-group' style='--group-color:{meta['color']}'>"
+                f"<div class='prism-group-name'>{group_name} · {len(members)}</div>"
+                f"<div class='prism-signal-line'>{signal_lines}</div>"
+                f"<div class='prism-bank-list'>{member_tokens or 'No bank assigned'}</div></div>",
+                unsafe_allow_html=True,
+            )
 
 else:
     st.info("Complete three-signal coverage is not yet available.")
 
 st.markdown("<div id='research-triage'></div>", unsafe_allow_html=True)
-st.header("03 · Research triage")
+st.header("Research triage")
 st.caption(
     "Full queue, sorted by absolute fundamentals-versus-language gap. "
     "A large gap is a research prompt, not a trading signal."
 )
-st.dataframe(
-    [
-        {
-            "Ticker": row["Ticker"],
-            "Group": row["Investment group"],
-            "Numeric-language gap": row["Gap"],
-            "Review focus": GROUP_META[row["Investment group"]]["summary"],
-        }
-        for row in sorted(plotted_rows, key=lambda row: abs(row["Gap"]), reverse=True)
-    ],
-    width="stretch",
-    hide_index=True,
-    height=610,
-    row_height=24,
-    column_config={
-        "Numeric-language gap": st.column_config.NumberColumn(format="%+.1f"),
-    },
-)
+opportunity_groups = {"Conviction Leaders", "Strong Signals, Weak Price", "Cautious Value"}
+left_queue, right_queue = st.columns(2, gap="large")
+for column, title, is_opportunity in (
+    (left_queue, "Research opportunities", True),
+    (right_queue, "Risk / verification queue", False),
+):
+    queue = sorted(
+        (row for row in plotted_rows if (row["Investment group"] in opportunity_groups) == is_opportunity),
+        key=lambda row: abs(row["Gap"]), reverse=True,
+    )
+    with column:
+        st.subheader(title)
+        for row in queue:
+            with st.container(border=True):
+                st.markdown(f"**{row['Ticker']}** · {row['Investment group']} · Gap **{row['Gap']:+.1f}**")
+        if not queue:
+            st.caption("No banks currently in this queue.")
 
 language_warning_rows = sorted(
     (row for row in plotted_rows if row["Language alerts"]),
@@ -504,7 +515,7 @@ else:
                         )
 
 st.markdown("<div id='semantic-research'></div>", unsafe_allow_html=True)
-st.header("04 · Semantic research")
+st.header("Semantic research")
 st.caption(
     "Ask across the filtered official-report archive. Gemini retrieves and explains cited evidence; it cannot change any Prism score."
 )
@@ -604,7 +615,7 @@ methodology_section = st.container()
 
 with details_section:
     st.markdown("<div id='bank-research'></div>", unsafe_allow_html=True)
-    st.header("07 · Bank research")
+    st.header("Bank research")
     selected = st.selectbox("Select a bank", [row["ticker"] for row in universe])
     bank = banks[selected]
     score = next((row for row in scores if row["ticker"] == selected), {"score": None, "components": {}})
@@ -707,7 +718,7 @@ with details_section:
 with evidence_section:
     st.markdown("<div id='sources-evidence'></div>", unsafe_allow_html=True)
     with st.expander(
-        "08 · Official report directory · 23 banks",
+        "Official report directory · 23 banks",
         icon=":material/menu_book:",
     ):
         st.caption("Official issuer links for the latest annual and quarterly / interim reporting.")
@@ -731,59 +742,9 @@ with evidence_section:
             },
         )
 
-    with st.expander(
-        "Developer workspace · extracted table evidence",
-        icon=":material/developer_mode:",
-    ):
-        st.caption(
-            f"{table_evidence.get('table_count', 0)} candidates from "
-            f"{table_evidence.get('source_count', 0)} locally processed reports. "
-            "They are excluded from ranking pending definition, period, unit and scope review."
-        )
-        evidence_documents = [
-            document for document in table_evidence.get("documents", []) if document.get("tables")
-        ]
-        if not evidence_documents:
-            st.info("No structured table evidence has been generated yet.")
-        else:
-            evidence_tickers = [document["ticker"] for document in evidence_documents]
-            selected_evidence_ticker = st.pills(
-                "View extracted evidence for",
-                evidence_tickers,
-                default=evidence_tickers[0],
-                key="evidence_bank",
-            )
-            selected_document = next(
-                (document for document in evidence_documents if document["ticker"] == selected_evidence_ticker),
-                evidence_documents[0],
-            )
-            st.write(
-                f"**{selected_document.get('bank_name') or selected_document['ticker']}** · "
-                f"{selected_document['document']} · {selected_document['table_count']} retained table(s)"
-            )
-            for table in selected_document["tables"]:
-                metric_label = ", ".join(
-                    metric.replace("_", " ").upper() for metric in table["matched_metrics"]
-                )
-                with st.expander(
-                    f"Page {table['page']} · {metric_label} · review pending",
-                    icon=":material/table_view:",
-                ):
-                    image_path = BASE_DIR / table["evidence_image"] if table.get("evidence_image") else None
-                    if image_path and image_path.exists():
-                        st.image(image_path, caption=f"Source table on PDF page {table['page']}")
-                    st.dataframe(table.get("rows", []), width="stretch", hide_index=True)
-                    st.caption(table.get("page_excerpt", ""))
-                    if table.get("source_url"):
-                        st.link_button(
-                            "Open official source",
-                            table["source_url"],
-                            icon=":material/open_in_new:",
-                        )
-
 with methodology_section:
     st.markdown("<div id='methodology'></div>", unsafe_allow_html=True)
-    with st.expander("09 · Methodology and research limits", icon=":material/info:"):
+    with st.expander("Methodology and research limits", icon=":material/info:"):
         st.markdown("#### Scoring")
         st.write(
             "The numeric score peer-ranks P/B, P/E, profitability, yield and growth. "
