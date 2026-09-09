@@ -21,6 +21,7 @@ from app.language_signals import (
     is_prior_period_technical,
     language_drift,
     mask_neutral_risk_terms,
+    mask_procedural_condition_footnotes,
     negation_dropped_categories,
     normalized_sentence_key,
     quadrant,
@@ -142,6 +143,49 @@ class LanguageSignalTests(unittest.TestCase):
         masked, count = mask_neutral_risk_terms(sentence)
         self.assertEqual(count, 0)
         self.assertEqual(sum(negation_dropped_categories(masked).values()), 0)
+
+    def test_procedural_condition_footnotes_are_removed_conservatively(self):
+        bper = "Distributions subject to target's achievement ."
+        filtered, count = mask_procedural_condition_footnotes(bper)
+        self.assertEqual(count, 1)
+        self.assertFalse(filtered.strip(". "))
+
+        approval = "Ordinary dividend subject to shareholder approval."
+        filtered, count = mask_procedural_condition_footnotes(approval)
+        self.assertEqual(count, 1)
+        self.assertEqual(sum(category_hits(filtered).values()), 0)
+
+        substantive = (
+            "Full year 2026 Guidance improved, subject to macro and market conditions"
+        )
+        filtered, count = mask_procedural_condition_footnotes(substantive)
+        self.assertEqual(count, 0)
+        self.assertEqual(filtered, substantive)
+
+        mixed_substantive = (
+            "The issuance plan is subject to market conditions and regulatory "
+            "requirements."
+        )
+        filtered, count = mask_procedural_condition_footnotes(mixed_substantive)
+        self.assertEqual(count, 0)
+        self.assertEqual(filtered, mixed_substantive)
+
+        genuine_warning = (
+            "Capital distributions may be reduced if the CET1 target is missed."
+        )
+        filtered, count = mask_procedural_condition_footnotes(genuine_warning)
+        self.assertEqual(count, 0)
+        self.assertGreater(category_hits(filtered)["weak_modal"], 0)
+
+    def test_mixed_passage_retains_narrative_after_procedural_clause_mask(self):
+        sentence = (
+            "We remain confident in our capital return; dividend subject to "
+            "shareholder approval."
+        )
+        filtered, count = mask_procedural_condition_footnotes(sentence)
+        self.assertEqual(count, 1)
+        self.assertIn("We remain confident in our capital return", filtered)
+        self.assertGreater(category_hits(filtered)["confidence"], 0)
 
     def test_modal_diagnostics_use_master_country_data_without_scoring(self):
         universe = [
@@ -402,11 +446,14 @@ class LanguageCoverageTests(unittest.TestCase):
         self.assertTrue(all(row["status"] == "downloaded" for row in self.manifest))
 
     def test_signal_archive_has_auditable_provisional_coverage(self):
-        self.assertEqual(self.archive["schema_version"], "1.2")
-        self.assertEqual(self.archive["rule_version"], "management-language-v2.4")
+        self.assertEqual(self.archive["schema_version"], "1.3")
+        self.assertEqual(self.archive["rule_version"], "management-language-v2.4.1")
         self.assertEqual(self.archive["coverage"]["provisional_banks"], 23)
         self.assertEqual(self.archive["coverage"]["insufficient_banks"], 0)
-        self.assertEqual(self.archive["coverage"]["four_period_trends"], 8)
+        # DBK Q1 2026 now has only one substantive cited passage after routine
+        # approval footnotes are removed, so it correctly fails the two-piece
+        # limited-coverage gate instead of creating a pollution-backed trend.
+        self.assertEqual(self.archive["coverage"]["four_period_trends"], 7)
         self.assertEqual(len(self.archive["documents"]), 66)
         source_statuses = {
             status: sum(row.get("source_status") == status for row in self.archive["documents"])
@@ -444,6 +491,8 @@ class LanguageCoverageTests(unittest.TestCase):
             "deduplicated_repeats",
             "negated_hits_dropped",
             "excluded_prior_period_passages",
+            "masked_procedural_condition_spans",
+            "excluded_procedural_condition_passages",
             "pre_filter_analyzed_word_count",
             "filter_shrink_ratio",
             "filter_shrink_warning",

@@ -625,6 +625,8 @@ pollution_totals = {
     "duplicates": sum(document.get("deduplicated_repeats", 0) for document in language_signals.get("documents", [])),
     "negation": sum(document.get("negated_hits_dropped", 0) for document in language_signals.get("documents", [])),
     "prior": sum(document.get("excluded_prior_period_passages", 0) for document in language_signals.get("documents", [])),
+    "procedural": sum(document.get("excluded_procedural_condition_passages", 0) for document in language_signals.get("documents", [])),
+    "procedural_spans": sum(document.get("masked_procedural_condition_spans", 0) for document in language_signals.get("documents", [])),
 }
 with st.container(horizontal=True):
     st.metric("Current language coverage", f"{language_coverage.get('provisional_banks', 0)}/{len(universe)}", border=True)
@@ -721,11 +723,12 @@ with details_section:
                 "human review pending"
             )
             st.caption(
-                "v2.4 filter audit · "
+                "v2.4.1 filter audit · "
                 f"{latest_language_document.get('masked_neutral_risk_spans', 0)} neutral risk labels · "
                 f"{latest_language_document.get('deduplicated_repeats', 0)} repeats · "
                 f"{latest_language_document.get('negated_hits_dropped', 0)} negated hits · "
-                f"{latest_language_document.get('excluded_prior_period_passages', 0)} technical prior-period passages"
+                f"{latest_language_document.get('excluded_prior_period_passages', 0)} technical prior-period passages · "
+                f"{latest_language_document.get('excluded_procedural_condition_passages', 0)} routine procedural footnotes"
             )
             for item in latest_language_document.get("evidence", [])[:5]:
                 hit_labels = [
@@ -836,10 +839,11 @@ with methodology_section:
         "Positive wording is measured separately, then the net result is robustly centered against the 23-bank peer cohort. The numeric and language axes are not combined."
     )
     st.markdown(
-        "**v2.4 pollution filters:** neutral banking risk labels are masked for hit counting; safe document-level duplicates and technical restatement notes are excluded; "
+        "**v2.4.1 pollution filters:** neutral banking risk labels are masked for hit counting; safe document-level duplicates, technical restatement notes, and routine procedural footnotes are excluded; "
         "and negative or uncertainty hits in deterministic relief contexts are dropped, never inverted. "
         f"Current 66-document audit: {pollution_totals['risk']} risk labels, {pollution_totals['duplicates']} repeats, "
-        f"{pollution_totals['negation']} negated hits and {pollution_totals['prior']} technical prior-period passages. "
+        f"{pollution_totals['negation']} negated hits, {pollution_totals['prior']} technical prior-period passages, and "
+        f"{pollution_totals['procedural']} standalone procedural footnotes ({pollution_totals['procedural_spans']} total masked clauses). "
         "Original evidence wording is preserved; masking and negation do not change the word-count denominator."
     )
     st.markdown("**Language history gate:** four adjacent, comparable reporting checkpoints enable a preliminary drift observation; gaps reset the sequence, so four scattered PDFs do not qualify. Eight periods enable drift-alert research. Original sentence and PDF page, human approval, and an out-of-sample backtest are still required before a signal becomes validated research output.")

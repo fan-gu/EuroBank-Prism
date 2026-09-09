@@ -22,7 +22,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_REPORTS_DIR = BASE_DIR / "reports"
 DEFAULT_OUTPUT = BASE_DIR / "language_signals.json"
-RULE_VERSION = "management-language-v2.4"
+RULE_VERSION = "management-language-v2.4.1"
 
 LEXICONS = {
     "positive": {
@@ -131,6 +131,34 @@ NEUTRAL_RISK_COMPOUNDS = re.compile(
     r"risk parameters?|risk architecture|risk framework|risk function|"
     r"risk committee|chief risk officer|risk models?|risk taxonom(?:y|ies)|"
     r"risk governance|risk data|risk reporting|risk weights?|risk culture)\b",
+    flags=re.IGNORECASE,
+)
+# Routine distribution and governance conditions are often printed as tiny
+# footnotes on results slides. They are legally/procedurally meaningful, but
+# they are not evidence that management's operating outlook has weakened.
+# Match only the procedural clause so meaningful narrative that happens to be
+# joined to a footnote by PDF extraction can still be scored.
+PROCEDURAL_CONDITION_PATTERNS = (
+    re.compile(
+        r"\b(?:dividends?|distributions?|payouts?|share buybacks?|"
+        r"interim profits?|full[- ]year profits?|implementation|"
+        r"completion)\b.{0,100}?\b(?:subject to|pending)\b.{0,180}?\b(?:"
+        r"targets?(?:['’]s)? achievement|approval(?:s)?|authori[sz]ation|"
+        r"corporate law requirements?|customary conditions?|board resolution)\b",
+        flags=re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(?:subject to|pending)\b.{0,160}?\b(?:ECB|AGM|shareholders?|"
+        r"supervisory|regulatory|governing bod(?:y|ies)|board|BoD|corporate)\b"
+        r".{0,100}?\b(?:approval(?:s)?|authori[sz]ation|resolution|"
+        r"requirements?|conditions?)\b",
+        flags=re.IGNORECASE,
+    ),
+)
+SUBSTANTIVE_CONDITION_TERMS = re.compile(
+    r"\b(?:macro(?:economic)?|market|economic|business|funding|liquidity|"
+    r"credit|asset quality|capital ratio|CET1|earnings|revenue|cost) "
+    r"conditions?\b",
     flags=re.IGNORECASE,
 )
 NEGATOR_TOKENS = {
@@ -242,6 +270,30 @@ def mask_neutral_risk_terms(text: str) -> tuple[str, int]:
         return masked
 
     return NEUTRAL_RISK_COMPOUNDS.sub(_mask_compound, text), count
+
+
+def mask_procedural_condition_footnotes(text: str) -> tuple[str, int]:
+    """Mask routine approval/target-condition footnotes, preserving offsets.
+
+    This is deliberately narrower than a generic ``subject to`` rule. For
+    example, guidance that is subject to macro or market conditions remains
+    scoreable because it conveys substantive uncertainty.
+    """
+    masked = text
+    count = 0
+
+    def _mask(match: re.Match) -> str:
+        nonlocal count
+        # A clause that also names an operating or market condition is a real
+        # management caveat, even when a regulatory condition follows it.
+        if SUBSTANTIVE_CONDITION_TERMS.search(match.group(0)):
+            return match.group(0)
+        count += 1
+        return " " * len(match.group(0))
+
+    for pattern in PROCEDURAL_CONDITION_PATTERNS:
+        masked = pattern.sub(_mask, masked)
+    return masked, count
 
 
 def _phrase_matches(text: str, phrase: str):
@@ -776,6 +828,8 @@ def analyze_pdf(path: Path, source: dict) -> dict:
     deduplicated_repeats = 0
     negated_hits_dropped = 0
     excluded_prior_period_passages = 0
+    masked_procedural_condition_spans = 0
+    excluded_procedural_condition_passages = 0
     seen_exact: set[str] = set()
     seen_templates: set[str] = set()
     filter_examples = {
@@ -783,6 +837,7 @@ def analyze_pdf(path: Path, source: dict) -> dict:
         "duplicates": [],
         "negation": [],
         "prior_period": [],
+        "procedural_conditions": [],
     }
 
     reader = PdfReader(str(path))
@@ -826,9 +881,39 @@ def analyze_pdf(path: Path, source: dict) -> dict:
                 )
                 continue
 
-            filtered_sentence, masked_count = mask_neutral_risk_terms(sentence)
+            filtered_sentence, procedural_count = mask_procedural_condition_footnotes(
+                sentence
+            )
+            masked_procedural_condition_spans += procedural_count
+            if procedural_count:
+                add_filter_example(
+                    filter_examples,
+                    "procedural_conditions",
+                    page_number,
+                    sentence,
+                    masked_spans=procedural_count,
+                )
+                # A standalone routine footnote contributes neither lexicon
+                # hits nor denominator words. Mixed passages retain only their
+                # substantive narrative after the procedural clause is masked.
+                if not WORD_RE.search(filtered_sentence) or not relevant_sentence(
+                    filtered_sentence
+                ):
+                    excluded_procedural_condition_passages += 1
+                    continue
+
+            words = WORD_RE.findall(filtered_sentence)
+            if not words:
+                continue
+            filtered_sentence, masked_count = mask_neutral_risk_terms(
+                filtered_sentence
+            )
             masked_neutral_risk_spans += masked_count
             filters_applied = []
+            if procedural_count:
+                filters_applied.append(
+                    f"procedural_condition_masked:{procedural_count}"
+                )
             if masked_count:
                 filters_applied.append(f"risk_masked:{masked_count}")
                 add_filter_example(
@@ -897,6 +982,8 @@ def analyze_pdf(path: Path, source: dict) -> dict:
         "deduplicated_repeats": deduplicated_repeats,
         "negated_hits_dropped": negated_hits_dropped,
         "excluded_prior_period_passages": excluded_prior_period_passages,
+        "masked_procedural_condition_spans": masked_procedural_condition_spans,
+        "excluded_procedural_condition_passages": excluded_procedural_condition_passages,
         "pre_filter_analyzed_word_count": pre_filter_word_count,
         "analyzed_word_count": word_count,
         "filter_shrink_ratio": filter_shrink_ratio,
@@ -1179,7 +1266,7 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
 
     diagnostics = build_modal_diagnostics(latest_documents, universe)
     archive = {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "rule_version": RULE_VERSION,
         "generated_at": utc_now(),
         "methodology": {
@@ -1201,13 +1288,16 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                 ],
             },
             "pollution_filters": {
-                "version": "v2.4",
+                "version": "v2.4.1",
                 "description": (
                     "Technical prior-period/restatement passages and safe "
                     "document-level duplicates are excluded before scoring. "
                     "Neutral banking risk compounds are masked for hit counting, "
                     "and negative or uncertainty hits in deterministic relief "
-                    "contexts are dropped rather than inverted. Original evidence "
+                    "contexts are dropped rather than inverted. Routine "
+                    "distribution, approval and target-achievement footnotes are "
+                    "excluded or clause-masked without suppressing substantive "
+                    "macro or market conditions. Original evidence "
                     "text is preserved; masking and negation leave the word-count "
                     "denominator unchanged. Every action "
                     "is recorded in per-document audit fields; modal-rate country "
@@ -1218,6 +1308,8 @@ def build_archive(reports_dir: Path, output_path: Path) -> dict:
                     "deduplicated_repeats",
                     "negated_hits_dropped",
                     "excluded_prior_period_passages",
+                    "masked_procedural_condition_spans",
+                    "excluded_procedural_condition_passages",
                     "pre_filter_analyzed_word_count",
                     "filter_shrink_ratio",
                     "filter_shrink_warning",
