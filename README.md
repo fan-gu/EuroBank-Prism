@@ -27,13 +27,47 @@ and methodology are collapsed; internal table-review material stays off the visi
 
 ## Research workflow
 
-```text
-Official reports ──> pollution filters ──────> language evidence and drift
-                 └─> page-aware chunks ─────> Gemini embeddings ──> cited Q&A
-Market data ───────> comparable metrics ─────> peer-relative fundamentals
-Price history ─────> momentum checks ────────> price-confirmation bubble
-                               governance gates ──> Streamlit dashboard
+```mermaid
+flowchart TD
+    reports[Official bank reports] --> filters["Deterministic pollution filters v2.4.3<br/>boilerplate · negation · prior-period text<br/>procedural & standardised footnotes"]
+    filters --> language[Language signals and drift]
+    filters --> chunks[Page-aware research chunks]
+    chunks --> embedding[Gemini Embeddings 2<br/>build-time]
+    embedding --> index["Bundled semantic index (.npz)<br/>versioned retrieval artefact"]
+
+    market[Market-data providers] --> metrics[Comparable metrics and price history]
+    metrics --> scoring[Fundamentals, valuation and price-confirmation scoring]
+    language --> artefacts["Versioned data artefacts<br/>scores · language_signals.json<br/>market_confirmation.json"]
+    scoring --> artefacts
+
+    artefacts --> app[EuroBank Prism Streamlit app]
+    index --> app
+    secret["Gemini API key<br/>Streamlit Secrets / .env"] --> app
+    user[Research user] --> app
+    app --> queryembed[Gemini query embedding]
+    queryembed --> index
+    index --> retrieval[Top-six evidence retrieval]
+    retrieval --> generation[Gemini 3.6 Flash<br/>grounded answer with citations]
+    generation --> user
+
+    pr[Developer opens pull request] --> syntax[Python syntax check]
+    syntax --> tests[48 automated tests]
+    tests --> gate{CI passes?}
+    gate -->|No| revise[Block merge · revise pull request]
+    revise --> pr
+    gate -->|Yes| docker[Build Docker image]
+    docker --> merge[Merge to main]
+    merge --> deploy[Streamlit Cloud auto-deploy]
+    deploy --> app
+
+    docker -. future: publish image .-> registry[GHCR / Azure Container Registry]
+    registry -. future .-> azure[Azure Container Apps]
 ```
+
+The index is *bundled* with the deployed repository/container; it is not a
+machine-local service in production. Gemini has two distinct roles: embeddings
+are built when the index is refreshed, and Gemini 3.6 Flash generates a
+grounded answer at query time from the retrieved evidence.
 
 ## Evidence and governance
 
@@ -80,9 +114,16 @@ The committed index contains embeddings—not the API key. Never commit secrets.
 
 ## Delivery and deployment
 
-GitHub Actions runs Python syntax checks, the automated test suite, and a Docker
-build on every push and pull request to `main`. Streamlit Community Cloud remains
-the live dashboard deployment.
+GitHub Actions runs the syntax check and 48 automated tests first. The Docker
+image build has `needs: test`, so it runs only after they pass. The workflow runs
+on pull requests and direct pushes to `main`; the intended release path is PR →
+green CI → merge to `main` → Streamlit Community Cloud auto-deploy.
+
+To make that release path mandatory, enable GitHub branch protection for `main`
+and require the **Python tests** and **Docker build** checks before merging. The
+current CI verifies an image can be built; it does not publish one to a container
+registry yet, so Docker Desktop and Azure Container Apps are optional future
+deployment targets.
 
 To run the same app as a container, install Docker Desktop and use:
 
@@ -92,8 +133,7 @@ docker run --rm -p 8501:8501 --env-file .env eurobank-prism
 ```
 
 Open `http://localhost:8501`. The image contains the application and committed
-semantic index; `.env`, local PDFs and report archives are excluded. This image
-is ready to deploy later to Azure Container Apps.
+semantic index; `.env`, local PDFs and report archives are excluded.
 
 ## Repository structure
 

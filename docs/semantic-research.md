@@ -8,7 +8,7 @@ Official PDF page
   -> legal, rounding and procedural-footnote filters
   -> page-bound research chunks
   -> Gemini Embeddings 2 document vectors (offline build)
-  -> exact cosine index stored locally
+  -> bundled cosine index (.npz) stored as a versioned retrieval artefact
 
 User question
   -> Gemini query vector
@@ -17,9 +17,11 @@ User question
   -> [E#] citations with bank, period, PDF page and official link
 ```
 
-The current index contains 3,179 chunks with 768 dimensions. Document and query
-texts use the asymmetric formats recommended for Gemini Embeddings 2. Queries
-may cover the full universe or one selected bank.
+The current index contains 3,179 chunks with 768 dimensions. It is bundled with
+the repository/container at deployment time rather than running as a separate
+local service. Document and query texts use the asymmetric formats recommended
+for Gemini Embeddings 2. Queries may cover the full universe or one selected
+bank.
 
 ## Governance boundaries
 
