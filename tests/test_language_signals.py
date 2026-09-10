@@ -574,7 +574,7 @@ class LanguageCoverageTests(unittest.TestCase):
         )
         diagnostics = self.archive["diagnostics"]
         self.assertFalse(diagnostics["scores_affected"])
-        self.assertIn("BG", diagnostics["country_modal_profile"]["AT"]["banks"])
+        self.assertIn("EBS", diagnostics["country_modal_profile"]["AT"]["banks"])
         self.assertIn("FBK", diagnostics["country_modal_profile"]["IT"]["banks"])
         quadrants = {row["quadrant"] for row in self.archive["signals"]}
         self.assertEqual(
