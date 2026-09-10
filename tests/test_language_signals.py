@@ -500,7 +500,7 @@ class LanguageCoverageTests(unittest.TestCase):
 
     def test_signal_archive_has_auditable_provisional_coverage(self):
         self.assertEqual(self.archive["schema_version"], "1.4")
-        self.assertEqual(self.archive["rule_version"], "management-language-v2.4.3")
+        self.assertEqual(self.archive["rule_version"], "management-language-v2.4.4")
         self.assertEqual(self.archive["coverage"]["provisional_banks"], 23)
         self.assertEqual(self.archive["coverage"]["insufficient_banks"], 0)
         # DBK Q1 2026 now has only one substantive cited passage after routine

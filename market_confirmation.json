@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-07T09:10:17.001706+00:00",
+  "generated_at": "2026-09-10T20:42:45.113699+00:00",
   "methodology": {
-    "axis": "independent_market_confirmation",
+    "axis": "independent_price_confirmation",
     "components": "1m 20%, 3m 35%, 6m 35%, price versus 200-day average 10%",
     "interpretation": "Cross-sectional peer percentile; not included in the fundamental relative-value score.",
     "provider": "Yahoo Finance via yfinance"
@@ -12,920 +12,966 @@
       "ticker": "BNP",
       "bank_name": "BNP Paribas S.A.",
       "market_ticker": "BNP.PA",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 104.2,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": -0.0732835762562174,
-      "three_month_return": 0.13310132650747541,
-      "six_month_return": 0.21409360707720548,
-      "trend_vs_200d": 0.14381921479714688,
+      "last_price": 102.64,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": -0.08127463061083506,
+      "three_month_return": 0.061536837294505764,
+      "six_month_return": 0.23173893330833217,
+      "trend_vs_200d": 0.12256777274619535,
       "components": {
         "one_month_return": {
-          "raw_value": -0.073284,
+          "raw_value": -0.081275,
           "percentile_score": 0.0652,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.133101,
-          "percentile_score": 0.1522,
-          "weight": 0.35
-        },
-        "six_month_return": {
-          "raw_value": 0.214094,
+          "raw_value": 0.061537,
           "percentile_score": 0.1087,
           "weight": 0.35
         },
+        "six_month_return": {
+          "raw_value": 0.231739,
+          "percentile_score": 0.1522,
+          "weight": 0.35
+        },
         "trend_vs_200d": {
-          "raw_value": 0.143819,
+          "raw_value": 0.122568,
           "percentile_score": 0.1522,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
+      "price_confirmation_score": 12.0,
       "market_confirmation_score": 12.0,
-      "status": "market_confirmation_available",
+      "status": "price_confirmation_available",
+      "price_regime": "Unconfirmed",
       "market_regime": "Unconfirmed"
     },
     {
       "ticker": "SAN",
       "bank_name": "Banco Santander S.A.",
       "market_ticker": "SAN.MC",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 12.834,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": -0.0018665553131853585,
-      "three_month_return": 0.22883946129638333,
-      "six_month_return": 0.29734469662352025,
-      "trend_vs_200d": 0.19072615400367998,
+      "last_price": 12.642,
+      "history_end": "2026-09-10",
+      "history_sessions": 385,
+      "one_month_return": -0.020910742744057575,
+      "three_month_return": 0.10391203012052008,
+      "six_month_return": 0.34172566953447947,
+      "trend_vs_200d": 0.16665190166772703,
       "components": {
         "one_month_return": {
-          "raw_value": -0.001867,
-          "percentile_score": 0.413,
+          "raw_value": -0.020911,
+          "percentile_score": 0.3261,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.228839,
-          "percentile_score": 0.7174,
+          "raw_value": 0.103912,
+          "percentile_score": 0.2391,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.297345,
-          "percentile_score": 0.413,
+          "raw_value": 0.341726,
+          "percentile_score": 0.5435,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.190726,
-          "percentile_score": 0.5435,
+          "raw_value": 0.166652,
+          "percentile_score": 0.4565,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 53.3,
-      "status": "market_confirmation_available",
-      "market_regime": "Neutral"
+      "price_confirmation_score": 38.5,
+      "market_confirmation_score": 38.5,
+      "status": "price_confirmation_available",
+      "price_regime": "Unconfirmed",
+      "market_regime": "Unconfirmed"
     },
     {
       "ticker": "INGA",
       "bank_name": "ING Groep N.V.",
       "market_ticker": "INGA.AS",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 31.935,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": 0.04739257808040409,
-      "three_month_return": 0.29182568743845394,
-      "six_month_return": 0.4243958915324131,
-      "trend_vs_200d": 0.26947863900317093,
+      "last_price": 31.635,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": 0.03112776773815562,
+      "three_month_return": 0.23483209267056626,
+      "six_month_return": 0.442761410648155,
+      "trend_vs_200d": 0.2520850454074559,
       "components": {
         "one_month_return": {
-          "raw_value": 0.047393,
-          "percentile_score": 0.6739,
+          "raw_value": 0.031128,
+          "percentile_score": 0.7174,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.291826,
-          "percentile_score": 0.8043,
+          "raw_value": 0.234832,
+          "percentile_score": 0.8478,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.424396,
+          "raw_value": 0.442761,
           "percentile_score": 0.8478,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.269479,
+          "raw_value": 0.252085,
           "percentile_score": 0.9348,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 80.6,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 83.0,
+      "market_confirmation_score": 83.0,
+      "status": "price_confirmation_available",
+      "price_regime": "Confirming",
       "market_regime": "Confirming"
     },
     {
       "ticker": "BBVA",
       "bank_name": "Banco Bilbao Vizcaya Argentaria S.A.",
       "market_ticker": "BBVA.MC",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 25.22,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": 0.025203208222378315,
-      "three_month_return": 0.3108107907159705,
-      "six_month_return": 0.36444920958170957,
-      "trend_vs_200d": 0.2379059538638093,
+      "last_price": 24.95,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": 0.006048448810221929,
+      "three_month_return": 0.24191142724931858,
+      "six_month_return": 0.4170185836428586,
+      "trend_vs_200d": 0.22015642022822712,
       "components": {
         "one_month_return": {
-          "raw_value": 0.025203,
+          "raw_value": 0.006048,
           "percentile_score": 0.5,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.310811,
-          "percentile_score": 0.8478,
+          "raw_value": 0.241911,
+          "percentile_score": 0.9348,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.364449,
-          "percentile_score": 0.6739,
+          "raw_value": 0.417019,
+          "percentile_score": 0.7609,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.237906,
-          "percentile_score": 0.8478,
+          "raw_value": 0.220156,
+          "percentile_score": 0.8043,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 71.7,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 77.4,
+      "market_confirmation_score": 77.4,
+      "status": "price_confirmation_available",
+      "price_regime": "Confirming",
       "market_regime": "Confirming"
     },
     {
       "ticker": "ISP",
       "bank_name": "Intesa Sanpaolo S.p.A.",
       "market_ticker": "ISP.MI",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 6.733,
-      "history_end": "2026-09-07",
-      "history_sessions": 380,
-      "one_month_return": -0.013335299191913341,
-      "three_month_return": 0.20339589885938336,
-      "six_month_return": 0.2984722945505196,
-      "trend_vs_200d": 0.15960858974523306,
+      "last_price": 6.662,
+      "history_end": "2026-09-10",
+      "history_sessions": 381,
+      "one_month_return": -0.025595980200621704,
+      "three_month_return": 0.14075342555233084,
+      "six_month_return": 0.32124142663385014,
+      "trend_vs_200d": 0.14467886398735552,
       "components": {
         "one_month_return": {
-          "raw_value": -0.013335,
-          "percentile_score": 0.3261,
+          "raw_value": -0.025596,
+          "percentile_score": 0.2391,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.203396,
-          "percentile_score": 0.6304,
+          "raw_value": 0.140753,
+          "percentile_score": 0.587,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.298472,
-          "percentile_score": 0.4565,
+          "raw_value": 0.321241,
+          "percentile_score": 0.5,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.159609,
+          "raw_value": 0.144679,
           "percentile_score": 0.2826,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 47.4,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 45.7,
+      "market_confirmation_score": 45.7,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
       "market_regime": "Neutral"
     },
     {
       "ticker": "UCG",
       "bank_name": "UniCredit S.p.A.",
       "market_ticker": "UCG.MI",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 83.39,
-      "history_end": "2026-09-07",
-      "history_sessions": 380,
-      "one_month_return": -0.011966849738986984,
-      "three_month_return": 0.18032551434698707,
-      "six_month_return": 0.24164159738487312,
-      "trend_vs_200d": 0.15410169777822946,
+      "last_price": 83.8,
+      "history_end": "2026-09-10",
+      "history_sessions": 381,
+      "one_month_return": -0.012258290087506007,
+      "three_month_return": 0.1432469244590051,
+      "six_month_return": 0.31946251031296136,
+      "trend_vs_200d": 0.15584331968909249,
       "components": {
         "one_month_return": {
-          "raw_value": -0.011967,
-          "percentile_score": 0.3696,
+          "raw_value": -0.012258,
+          "percentile_score": 0.413,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.180326,
-          "percentile_score": 0.5,
+          "raw_value": 0.143247,
+          "percentile_score": 0.6304,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.241642,
-          "percentile_score": 0.1957,
+          "raw_value": 0.319463,
+          "percentile_score": 0.4565,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.154102,
-          "percentile_score": 0.2391,
+          "raw_value": 0.155843,
+          "percentile_score": 0.413,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 34.1,
-      "status": "market_confirmation_available",
-      "market_regime": "Unconfirmed"
+      "price_confirmation_score": 50.4,
+      "market_confirmation_score": 50.4,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
+      "market_regime": "Neutral"
     },
     {
       "ticker": "NDA-FI",
       "bank_name": "Nordea Bank Abp",
       "market_ticker": "NDA-FI.HE",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 17.88,
-      "history_end": "2026-09-07",
-      "history_sessions": 376,
-      "one_month_return": 0.022590708414456095,
-      "three_month_return": 0.13896768797409043,
-      "six_month_return": 0.24766887333835808,
-      "trend_vs_200d": 0.14766912519919573,
+      "last_price": 17.69,
+      "history_end": "2026-09-10",
+      "history_sessions": 377,
+      "one_month_return": 0.021657521711442973,
+      "three_month_return": 0.13537725980613757,
+      "six_month_return": 0.20582031789856248,
+      "trend_vs_200d": 0.13240600003395886,
       "components": {
         "one_month_return": {
-          "raw_value": 0.022591,
-          "percentile_score": 0.4565,
+          "raw_value": 0.021658,
+          "percentile_score": 0.6304,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.138968,
-          "percentile_score": 0.1957,
+          "raw_value": 0.135377,
+          "percentile_score": 0.5435,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.247669,
-          "percentile_score": 0.2826,
+          "raw_value": 0.20582,
+          "percentile_score": 0.1087,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.147669,
+          "raw_value": 0.132406,
           "percentile_score": 0.1957,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 27.8,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 37.4,
+      "market_confirmation_score": 37.4,
+      "status": "price_confirmation_available",
+      "price_regime": "Unconfirmed",
       "market_regime": "Unconfirmed"
     },
     {
       "ticker": "DBK",
       "bank_name": "Deutsche Bank AG",
       "market_ticker": "DBK.DE",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 35.535,
-      "history_end": "2026-09-07",
-      "history_sessions": 381,
-      "one_month_return": 0.0804195958299756,
-      "three_month_return": 0.3114966136905468,
-      "six_month_return": 0.34129276912843776,
-      "trend_vs_200d": 0.2026920184818204,
+      "last_price": 34.845,
+      "history_end": "2026-09-10",
+      "history_sessions": 382,
+      "one_month_return": 0.05049753223459619,
+      "three_month_return": 0.21242176402938218,
+      "six_month_return": 0.4050463583829522,
+      "trend_vs_200d": 0.17675599212880355,
       "components": {
         "one_month_return": {
-          "raw_value": 0.08042,
-          "percentile_score": 0.8478,
+          "raw_value": 0.050498,
+          "percentile_score": 0.8043,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.311497,
-          "percentile_score": 0.8913,
+          "raw_value": 0.212422,
+          "percentile_score": 0.8043,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.341293,
-          "percentile_score": 0.5435,
+          "raw_value": 0.405046,
+          "percentile_score": 0.6739,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.202692,
-          "percentile_score": 0.587,
+          "raw_value": 0.176756,
+          "percentile_score": 0.5435,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 73.0,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 73.3,
+      "market_confirmation_score": 73.3,
+      "status": "price_confirmation_available",
+      "price_regime": "Confirming",
       "market_regime": "Confirming"
     },
     {
       "ticker": "GLE",
       "bank_name": "Société Générale S.A.",
       "market_ticker": "GLE.PA",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 74.64,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": -0.11058149406312723,
-      "three_month_return": 0.08551479160469255,
-      "six_month_return": 0.10667801034890423,
-      "trend_vs_200d": 0.057157330369261405,
+      "last_price": 73.88,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": -0.11647937303568412,
+      "three_month_return": 0.006539451192924428,
+      "six_month_return": 0.14112106471334096,
+      "trend_vs_200d": 0.04391087675944094,
       "components": {
         "one_month_return": {
-          "raw_value": -0.110581,
+          "raw_value": -0.116479,
           "percentile_score": 0.0217,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.085515,
+          "raw_value": 0.006539,
           "percentile_score": 0.0217,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.106678,
+          "raw_value": 0.141121,
           "percentile_score": 0.0217,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.057157,
+          "raw_value": 0.043911,
           "percentile_score": 0.0217,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
+      "price_confirmation_score": 2.2,
       "market_confirmation_score": 2.2,
-      "status": "market_confirmation_available",
+      "status": "price_confirmation_available",
+      "price_regime": "Unconfirmed",
       "market_regime": "Unconfirmed"
     },
     {
       "ticker": "KBC",
       "bank_name": "KBC Group N.V.",
       "market_ticker": "KBC.BR",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 133.05,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": 0.040265844131650574,
-      "three_month_return": 0.20298376932518414,
-      "six_month_return": 0.2471949229768653,
-      "trend_vs_200d": 0.17002565115353585,
+      "last_price": 130.05,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": 0.021602513229177944,
+      "three_month_return": 0.1348167956662376,
+      "six_month_return": 0.2501144257229466,
+      "trend_vs_200d": 0.14071543514178986,
       "components": {
         "one_month_return": {
-          "raw_value": 0.040266,
-          "percentile_score": 0.6304,
+          "raw_value": 0.021603,
+          "percentile_score": 0.587,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.202984,
-          "percentile_score": 0.587,
+          "raw_value": 0.134817,
+          "percentile_score": 0.5,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.247195,
+          "raw_value": 0.250114,
           "percentile_score": 0.2391,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.170026,
-          "percentile_score": 0.3261,
+          "raw_value": 0.140715,
+          "percentile_score": 0.2391,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 44.8,
-      "status": "market_confirmation_available",
-      "market_regime": "Neutral"
+      "price_confirmation_score": 40.0,
+      "market_confirmation_score": 40.0,
+      "status": "price_confirmation_available",
+      "price_regime": "Unconfirmed",
+      "market_regime": "Unconfirmed"
     },
     {
       "ticker": "CABK",
       "bank_name": "CaixaBank S.A.",
       "market_ticker": "CABK.MC",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 13.455,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": 0.04953200031184113,
-      "three_month_return": 0.1875551645462774,
-      "six_month_return": 0.3573935746630976,
-      "trend_vs_200d": 0.21271762104565806,
+      "last_price": 13.23,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": 0.02201621121134978,
+      "three_month_return": 0.11269967705813388,
+      "six_month_return": 0.383887515408633,
+      "trend_vs_200d": 0.18802093067916803,
       "components": {
         "one_month_return": {
-          "raw_value": 0.049532,
-          "percentile_score": 0.7174,
+          "raw_value": 0.022016,
+          "percentile_score": 0.6739,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.187555,
-          "percentile_score": 0.5435,
+          "raw_value": 0.1127,
+          "percentile_score": 0.3261,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.357394,
+          "raw_value": 0.383888,
           "percentile_score": 0.6304,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.212718,
-          "percentile_score": 0.7174,
+          "raw_value": 0.188021,
+          "percentile_score": 0.587,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 62.6,
-      "status": "market_confirmation_available",
-      "market_regime": "Confirming"
+      "price_confirmation_score": 52.8,
+      "market_confirmation_score": 52.8,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
+      "market_regime": "Neutral"
     },
     {
       "ticker": "ACA",
       "bank_name": "Crédit Agricole S.A.",
       "market_ticker": "ACA.PA",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 18.885,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": -0.036725291005661576,
-      "three_month_return": 0.1575237272876171,
-      "six_month_return": 0.18189071999788964,
-      "trend_vs_200d": 0.11882145092593288,
+      "last_price": 18.54,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": -0.07392604937041303,
+      "three_month_return": 0.10852020882872604,
+      "six_month_return": 0.20070950847965663,
+      "trend_vs_200d": 0.09627477166982423,
       "components": {
         "one_month_return": {
-          "raw_value": -0.036725,
-          "percentile_score": 0.1957,
+          "raw_value": -0.073926,
+          "percentile_score": 0.1087,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.157524,
-          "percentile_score": 0.3261,
+          "raw_value": 0.10852,
+          "percentile_score": 0.2826,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.181891,
+          "raw_value": 0.20071,
           "percentile_score": 0.0652,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.118821,
+          "raw_value": 0.096275,
           "percentile_score": 0.1087,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 18.7,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 15.4,
+      "market_confirmation_score": 15.4,
+      "status": "price_confirmation_available",
+      "price_regime": "Unconfirmed",
       "market_regime": "Unconfirmed"
     },
     {
       "ticker": "CBK",
       "bank_name": "Commerzbank AG",
       "market_ticker": "CBK.DE",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 42.59,
-      "history_end": "2026-09-07",
-      "history_sessions": 381,
-      "one_month_return": 0.09205128596379208,
-      "three_month_return": 0.17586964983987108,
-      "six_month_return": 0.3836556141983942,
-      "trend_vs_200d": 0.21269653736219052,
+      "last_price": 42.12,
+      "history_end": "2026-09-10",
+      "history_sessions": 382,
+      "one_month_return": 0.07448974775801398,
+      "three_month_return": 0.14363282209694606,
+      "six_month_return": 0.435832466132009,
+      "trend_vs_200d": 0.19549997922181594,
       "components": {
         "one_month_return": {
-          "raw_value": 0.092051,
-          "percentile_score": 0.9348,
+          "raw_value": 0.07449,
+          "percentile_score": 0.8913,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.17587,
-          "percentile_score": 0.4565,
+          "raw_value": 0.143633,
+          "percentile_score": 0.6739,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.383656,
-          "percentile_score": 0.7609,
+          "raw_value": 0.435832,
+          "percentile_score": 0.8043,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.212697,
+          "raw_value": 0.1955,
           "percentile_score": 0.6739,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 68.0,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 76.3,
+      "market_confirmation_score": 76.3,
+      "status": "price_confirmation_available",
+      "price_regime": "Confirming",
       "market_regime": "Confirming"
     },
     {
       "ticker": "EBS",
       "bank_name": "Erste Group Bank AG",
       "market_ticker": "EBS.VI",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 123.4,
-      "history_end": "2026-09-07",
-      "history_sessions": 381,
-      "one_month_return": 0.02833334604899096,
-      "three_month_return": 0.2169625213899553,
-      "six_month_return": 0.27958179756951784,
-      "trend_vs_200d": 0.17145938895475665,
+      "last_price": 122.1,
+      "history_end": "2026-09-10",
+      "history_sessions": 382,
+      "one_month_return": 0.014962555084797824,
+      "three_month_return": 0.1201834722396431,
+      "six_month_return": 0.3113194746361523,
+      "trend_vs_200d": 0.15545670783761167,
       "components": {
         "one_month_return": {
-          "raw_value": 0.028333,
-          "percentile_score": 0.587,
+          "raw_value": 0.014963,
+          "percentile_score": 0.5435,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.216963,
-          "percentile_score": 0.6739,
+          "raw_value": 0.120183,
+          "percentile_score": 0.413,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.279582,
-          "percentile_score": 0.3696,
+          "raw_value": 0.311319,
+          "percentile_score": 0.413,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.171459,
+          "raw_value": 0.155457,
           "percentile_score": 0.3696,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 52.0,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 43.5,
+      "market_confirmation_score": 43.5,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
       "market_regime": "Neutral"
     },
     {
       "ticker": "BIRG",
       "bank_name": "Bank of Ireland Group plc",
       "market_ticker": "BIRG.IR",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 19.935,
-      "history_end": "2026-09-07",
-      "history_sessions": 381,
-      "one_month_return": 0.05003944298389085,
-      "three_month_return": 0.1712690323018784,
-      "six_month_return": 0.3448137076366571,
-      "trend_vs_200d": 0.18590565288472027,
+      "last_price": 20.12,
+      "history_end": "2026-09-10",
+      "history_sessions": 382,
+      "one_month_return": 0.06118153010411942,
+      "three_month_return": 0.14709234829184648,
+      "six_month_return": 0.28277740748888314,
+      "trend_vs_200d": 0.19331376208678686,
       "components": {
         "one_month_return": {
-          "raw_value": 0.050039,
-          "percentile_score": 0.7609,
+          "raw_value": 0.061182,
+          "percentile_score": 0.8478,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.171269,
-          "percentile_score": 0.3696,
+          "raw_value": 0.147092,
+          "percentile_score": 0.7174,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.344814,
-          "percentile_score": 0.587,
+          "raw_value": 0.282777,
+          "percentile_score": 0.2826,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.185906,
-          "percentile_score": 0.5,
+          "raw_value": 0.193314,
+          "percentile_score": 0.6304,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 53.7,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 58.3,
+      "market_confirmation_score": 58.3,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
       "market_regime": "Neutral"
     },
     {
       "ticker": "FBK",
       "bank_name": "FinecoBank S.p.A.",
       "market_ticker": "FBK.MI",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 23.33,
-      "history_end": "2026-09-07",
-      "history_sessions": 380,
-      "one_month_return": -0.045417372589855565,
-      "three_month_return": 0.10359510867015387,
-      "six_month_return": 0.23890919698447566,
-      "trend_vs_200d": 0.10024394604282394,
+      "last_price": 22.91,
+      "history_end": "2026-09-10",
+      "history_sessions": 381,
+      "one_month_return": -0.0686992076362174,
+      "three_month_return": 0.044687621003134836,
+      "six_month_return": 0.24656669589157554,
+      "trend_vs_200d": 0.0789219403572996,
       "components": {
         "one_month_return": {
-          "raw_value": -0.045417,
+          "raw_value": -0.068699,
           "percentile_score": 0.1522,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.103595,
+          "raw_value": 0.044688,
           "percentile_score": 0.0652,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.238909,
-          "percentile_score": 0.1522,
+          "raw_value": 0.246567,
+          "percentile_score": 0.1957,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.100244,
+          "raw_value": 0.078922,
           "percentile_score": 0.0652,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 11.3,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 12.8,
+      "market_confirmation_score": 12.8,
+      "status": "price_confirmation_available",
+      "price_regime": "Unconfirmed",
       "market_regime": "Unconfirmed"
     },
     {
       "ticker": "ABN",
       "bank_name": "ABN AMRO Bank N.V.",
       "market_ticker": "ABN.AS",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 43.03,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": 0.10107635536164916,
-      "three_month_return": 0.3156620272315027,
-      "six_month_return": 0.6247911944820752,
-      "trend_vs_200d": 0.3547645048618133,
+      "last_price": 42.64,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": 0.08917779491439903,
+      "three_month_return": 0.2503397717136777,
+      "six_month_return": 0.635295685620241,
+      "trend_vs_200d": 0.3355843146516788,
       "components": {
         "one_month_return": {
-          "raw_value": 0.101076,
+          "raw_value": 0.089178,
           "percentile_score": 0.9783,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.315662,
-          "percentile_score": 0.9348,
+          "raw_value": 0.25034,
+          "percentile_score": 0.9783,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.624791,
+          "raw_value": 0.635296,
           "percentile_score": 0.9783,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.354765,
+          "raw_value": 0.335584,
           "percentile_score": 0.9783,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 96.3,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 97.8,
+      "market_confirmation_score": 97.8,
+      "status": "price_confirmation_available",
+      "price_regime": "Confirming",
       "market_regime": "Confirming"
     },
     {
       "ticker": "BAMI",
       "bank_name": "Banco BPM S.p.A.",
       "market_ticker": "BAMI.MI",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 16.125,
-      "history_end": "2026-09-07",
-      "history_sessions": 380,
-      "one_month_return": -0.05174943864724835,
-      "three_month_return": 0.14973265159274152,
-      "six_month_return": 0.43388080165699106,
-      "trend_vs_200d": 0.20892466309416324,
+      "last_price": 16.1,
+      "history_end": "2026-09-10",
+      "history_sessions": 381,
+      "one_month_return": -0.05042757570531686,
+      "three_month_return": 0.11495850757097892,
+      "six_month_return": 0.46928343373218717,
+      "trend_vs_200d": 0.20299309669762855,
       "components": {
         "one_month_return": {
-          "raw_value": -0.051749,
-          "percentile_score": 0.1087,
+          "raw_value": -0.050428,
+          "percentile_score": 0.1957,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.149733,
-          "percentile_score": 0.2391,
+          "raw_value": 0.114959,
+          "percentile_score": 0.3696,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.433881,
+          "raw_value": 0.469283,
           "percentile_score": 0.8913,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.208925,
-          "percentile_score": 0.6304,
+          "raw_value": 0.202993,
+          "percentile_score": 0.7174,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 48.0,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 55.2,
+      "market_confirmation_score": 55.2,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
       "market_regime": "Neutral"
     },
     {
       "ticker": "SAB",
       "bank_name": "Banco de Sabadell S.A.",
       "market_ticker": "SAB.MC",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 3.729,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": 0.08212419739563348,
-      "three_month_return": 0.315808026107927,
-      "six_month_return": 0.3858123941240468,
-      "trend_vs_200d": 0.2651594522923335,
+      "last_price": 3.654,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": 0.04102565635242539,
+      "three_month_return": 0.2403258387138023,
+      "six_month_return": 0.40710828077407,
+      "trend_vs_200d": 0.23538331117729738,
       "components": {
         "one_month_return": {
-          "raw_value": 0.082124,
-          "percentile_score": 0.8913,
+          "raw_value": 0.041026,
+          "percentile_score": 0.7609,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.315808,
-          "percentile_score": 0.9783,
+          "raw_value": 0.240326,
+          "percentile_score": 0.8913,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.385812,
-          "percentile_score": 0.8043,
+          "raw_value": 0.407108,
+          "percentile_score": 0.7174,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.265159,
+          "raw_value": 0.235383,
           "percentile_score": 0.8913,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 89.1,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 80.4,
+      "market_confirmation_score": 80.4,
+      "status": "price_confirmation_available",
+      "price_regime": "Confirming",
       "market_regime": "Confirming"
     },
     {
       "ticker": "AIBG",
       "bank_name": "AIB Group plc",
       "market_ticker": "A5G.IR",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 11.445,
-      "history_end": "2026-09-07",
-      "history_sessions": 381,
-      "one_month_return": 0.07273418968869572,
-      "three_month_return": 0.17256111978520394,
-      "six_month_return": 0.3706587400145438,
-      "trend_vs_200d": 0.22106219261571458,
+      "last_price": 11.455,
+      "history_end": "2026-09-10",
+      "history_sessions": 382,
+      "one_month_return": 0.08768675908512669,
+      "three_month_return": 0.1265515545722622,
+      "six_month_return": 0.2972123640965534,
+      "trend_vs_200d": 0.21759673755214037,
       "components": {
         "one_month_return": {
-          "raw_value": 0.072734,
-          "percentile_score": 0.8043,
+          "raw_value": 0.087687,
+          "percentile_score": 0.9348,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.172561,
-          "percentile_score": 0.413,
+          "raw_value": 0.126552,
+          "percentile_score": 0.4565,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.370659,
-          "percentile_score": 0.7174,
+          "raw_value": 0.297212,
+          "percentile_score": 0.3696,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.221062,
+          "raw_value": 0.217597,
           "percentile_score": 0.7609,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 63.3,
-      "status": "market_confirmation_available",
-      "market_regime": "Confirming"
+      "price_confirmation_score": 55.2,
+      "market_confirmation_score": 55.2,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
+      "market_regime": "Neutral"
     },
     {
       "ticker": "BKT",
       "bank_name": "Bankinter S.A.",
       "market_ticker": "BKT.MC",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 16.915,
-      "history_end": "2026-09-07",
-      "history_sessions": 383,
-      "one_month_return": 0.028267485168480988,
-      "three_month_return": 0.24074922330159576,
-      "six_month_return": 0.2621487049548228,
-      "trend_vs_200d": 0.17672807040439364,
+      "last_price": 16.63,
+      "history_end": "2026-09-10",
+      "history_sessions": 384,
+      "one_month_return": 0.0057453470959276665,
+      "three_month_return": 0.1640891504797528,
+      "six_month_return": 0.2868933510874023,
+      "trend_vs_200d": 0.15407669464622153,
       "components": {
         "one_month_return": {
-          "raw_value": 0.028267,
-          "percentile_score": 0.5435,
+          "raw_value": 0.005745,
+          "percentile_score": 0.4565,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.240749,
+          "raw_value": 0.164089,
           "percentile_score": 0.7609,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.262149,
+          "raw_value": 0.286893,
           "percentile_score": 0.3261,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.176728,
-          "percentile_score": 0.4565,
+          "raw_value": 0.154077,
+          "percentile_score": 0.3261,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 53.5,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 50.4,
+      "market_confirmation_score": 50.4,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
       "market_regime": "Neutral"
     },
     {
       "ticker": "BG",
       "bank_name": "BAWAG Group AG",
       "market_ticker": "BG.VI",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 177.9,
-      "history_end": "2026-09-07",
-      "history_sessions": 381,
-      "one_month_return": -0.02733734372254737,
-      "three_month_return": 0.1499676626109061,
-      "six_month_return": 0.4885767634968676,
-      "trend_vs_200d": 0.22698526984027567,
+      "last_price": 178.0,
+      "history_end": "2026-09-10",
+      "history_sessions": 382,
+      "one_month_return": -0.019283746556473802,
+      "three_month_return": 0.10285010366333847,
+      "six_month_return": 0.5400906291502356,
+      "trend_vs_200d": 0.22154170822065833,
       "components": {
         "one_month_return": {
-          "raw_value": -0.027337,
-          "percentile_score": 0.2826,
+          "raw_value": -0.019284,
+          "percentile_score": 0.3696,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.149968,
-          "percentile_score": 0.2826,
+          "raw_value": 0.10285,
+          "percentile_score": 0.1957,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.488577,
+          "raw_value": 0.540091,
           "percentile_score": 0.9348,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.226985,
-          "percentile_score": 0.8043,
+          "raw_value": 0.221542,
+          "percentile_score": 0.8478,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 56.3,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 55.4,
+      "market_confirmation_score": 55.4,
+      "status": "price_confirmation_available",
+      "price_regime": "Neutral",
       "market_regime": "Neutral"
     },
     {
       "ticker": "BPE",
       "bank_name": "BPER Banca S.p.A.",
       "market_ticker": "BPE.MI",
-      "retrieved_at": "2026-09-07T09:10:17.001706+00:00",
+      "retrieved_at": "2026-09-10T20:42:45.113699+00:00",
       "provider": "Yahoo Finance via yfinance",
-      "last_price": 14.18,
-      "history_end": "2026-09-07",
-      "history_sessions": 380,
-      "one_month_return": -0.027568199127095627,
-      "three_month_return": 0.12077140581177481,
-      "six_month_return": 0.31634163317708897,
-      "trend_vs_200d": 0.17475262934843494,
+      "last_price": 14.188,
+      "history_end": "2026-09-10",
+      "history_sessions": 381,
+      "one_month_return": -0.021247279140124697,
+      "three_month_return": 0.0877031648403872,
+      "six_month_return": 0.3469095049346649,
+      "trend_vs_200d": 0.17079404304360546,
       "components": {
         "one_month_return": {
-          "raw_value": -0.027568,
-          "percentile_score": 0.2391,
+          "raw_value": -0.021247,
+          "percentile_score": 0.2826,
           "weight": 0.2
         },
         "three_month_return": {
-          "raw_value": 0.120771,
-          "percentile_score": 0.1087,
+          "raw_value": 0.087703,
+          "percentile_score": 0.1522,
           "weight": 0.35
         },
         "six_month_return": {
-          "raw_value": 0.316342,
-          "percentile_score": 0.5,
+          "raw_value": 0.34691,
+          "percentile_score": 0.587,
           "weight": 0.35
         },
         "trend_vs_200d": {
-          "raw_value": 0.174753,
-          "percentile_score": 0.413,
+          "raw_value": 0.170794,
+          "percentile_score": 0.5,
           "weight": 0.1
         }
       },
       "weight_coverage": 1.0,
-      "market_confirmation_score": 30.2,
-      "status": "market_confirmation_available",
+      "price_confirmation_score": 36.5,
+      "market_confirmation_score": 36.5,
+      "status": "price_confirmation_available",
+      "price_regime": "Unconfirmed",
       "market_regime": "Unconfirmed"
     }
   ]
