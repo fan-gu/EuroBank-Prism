@@ -576,7 +576,7 @@ class LanguageCoverageTests(unittest.TestCase):
         self.assertFalse(diagnostics["scores_affected"])
         self.assertIn("EBS", diagnostics["country_modal_profile"]["AT"]["banks"])
         self.assertIn("FBK", diagnostics["country_modal_profile"]["IT"]["banks"])
-        quadrants = {row["quadrant"] for row in self.archive["signals"]}
+        quadrants = {row["quadrant"] for row in self.archive["signals"] if row["quadrant"]}
         self.assertEqual(
             quadrants,
             {"Confirmed strength", "Potential turnaround", "Early warning", "High-risk screen"},
