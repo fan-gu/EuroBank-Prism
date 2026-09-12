@@ -1,8 +1,10 @@
 # EuroBank Prism
 
+[![Quality checks](https://github.com/fan-gu/EuroBank-Prism/actions/workflows/ci.yml/badge.svg)](https://github.com/fan-gu/EuroBank-Prism/actions/workflows/ci.yml)
+
 **Evidence-traceable research across fundamentals, management language and price momentum for the 23-bank EURO STOXX Banks universe.**
 
-[Open the live dashboard](https://eurobank-prism.streamlit.app/) · [View the source](https://github.com/fan-gu/EuroBank-Prism)
+[Open the live dashboard](https://eurobank-prism.streamlit.app/) · [Architecture](#research-workflow) · [Verification example](#verification-example-keep-the-financial-signal)
 
 ![EuroBank Prism dashboard](assets/readme/eurobank-prism-dashboard.png)
 
@@ -20,10 +22,22 @@ Bubble colour identifies the bank's deterministic research group. A separate
 Gemini semantic-research layer answers natural-language questions from the
 indexed official reports and cites the source bank, period and PDF page.
 
-The signal map includes six group cards immediately below the chart. Research
-triage restores the detailed opportunity and verification cards from the 8 September layout, followed
-by semantic research and bank-level score transparency. Official-report links
-and methodology are collapsed; internal table-review material stays off the visitor interface.
+Start with the signal map and six research groups, inspect the opportunity and
+verification cards, then use semantic research to explore the supporting reports.
+Bank-level score details, official-report links and methodology help users check
+the evidence behind each observation.
+
+## My contribution
+
+I am developing EuroBank Prism as an independent financial-research project, defining how bank fundamentals, disclosure language and market prices should be compared and traced back to evidence. I use AI coding assistants to implement and refine the application. The methodology, source provenance, filtering rules and tests document the decisions behind the output.
+
+## Verification example: keep the financial signal
+
+- **Input:** a test passage containing a routine rounding note followed by a statement that net interest income is expected to decline.
+- **Expected result:** remove the rounding boilerplate while retaining the financially meaningful statement.
+- **Check:** [test_semantic_page_filter_removes_rounding_but_keeps_warning](tests/test_semantic_search.py) asserts both behaviours. The same suite checks retrieval ranking, bank filtering and citation metadata in the generated prompt.
+- **Evidence:** [filter-validation notes](docs/validation/language-v2.4.3-expanded-rounding-filter.md) and [CI results](https://github.com/fan-gu/EuroBank-Prism/actions/workflows/ci.yml).
+- **Limit:** these checks do not establish the factual correctness of every generated answer or the predictive value of the research signals.
 
 ## Research workflow
 
@@ -92,6 +106,8 @@ grounded answer at query time from the retrieved evidence.
 ## Run locally
 
 ```powershell
+git clone https://github.com/fan-gu/EuroBank-Prism.git
+cd EuroBank-Prism
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
